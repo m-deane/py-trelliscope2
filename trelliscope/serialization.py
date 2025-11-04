@@ -92,12 +92,17 @@ def serialize_display_info(display) -> Dict[str, Any]:
                 "port": 0,
             }
 
+        # Detect panel type based on format
+        panel_type = "img"  # Default to image panels
+        if hasattr(display, '_panel_format') and display._panel_format == "html":
+            panel_type = "iframe"  # HTML panels use iframe
+
         # Build panel meta variable
         panel_meta = {
             "varname": display.panel_column,
             "type": "panel",
             "label": "Panel",
-            "paneltype": "img",  # Default to image panels
+            "paneltype": panel_type,
             "tags": [],
             "filterable": False,
             "sortable": False,
