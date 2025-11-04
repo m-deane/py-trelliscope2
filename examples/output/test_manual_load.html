@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manual Load Test</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: #0f0; font-family: monospace; font-size: 14px; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+    </style>
+</head>
+<body>
+    <h2>Manual JSONP Load Test</h2>
+    <div id="log"></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const span = document.createElement('div');
+            span.className = type;
+            span.textContent = msg;
+            logDiv.appendChild(span);
+        }
+
+        // Register callback FIRST
+        window.__loadAppConfig__trelliscope_root = function(data) {
+            log('✓✓✓ __loadAppConfig__ FIRED!', 'success');
+            log('  name: ' + data.name, 'success');
+            log('  datatype: ' + data.datatype, 'success');
+            log('  id: ' + data.id, 'success');
+        };
+
+        log('Step 1: Callback registered');
+        log('Step 2: Manually loading config.jsonp...');
+
+        // Manually load config.jsonp via script tag
+        const script = document.createElement('script');
+        script.src = './config.jsonp';
+        script.onload = function() {
+            log('Step 3: config.jsonp script loaded', 'success');
+        };
+        script.onerror = function() {
+            log('Step 3: config.jsonp script FAILED to load', 'error');
+        };
+        document.head.appendChild(script);
+
+        setTimeout(() => {
+            log('\n═══ AFTER 2 SECONDS ═══');
+            if (typeof window.__loadAppConfig__trelliscope_root === 'function') {
+                log('Callback still exists', 'success');
+            }
+            log('If callback fired above, JSONP loading works');
+            log('If not, there is an issue with the config.jsonp file');
+        }, 2000);
+    </script>
+</body>
+</html>

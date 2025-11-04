@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>REST Panel Integration - Browser Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .test-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .test-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .test-panel h2 .icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #95a5a6;
+        }
+
+        .status-item.success {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .status-item.error {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .status-item.pending {
+            border-left-color: #f39c12;
+            background: #fef5e7;
+        }
+
+        .status-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .status-item span {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .viewer-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .viewer-frame {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .log-container {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .log-entry.success {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .log-entry.error {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .log-entry.info {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .timestamp {
+            color: #95a5a6;
+            margin-right: 10px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button.secondary {
+            background: #95a5a6;
+        }
+
+        button.secondary:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 REST Panel Integration - Browser Test</h1>
+            <p>Comprehensive testing of forked viewer with Python-generated REST panel metadata</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Testing Checklist</h3>
+            <ol>
+                <li>Open browser DevTools (F12) and go to Network tab</li>
+                <li>Filter by "panels" to see REST API calls</li>
+                <li>Refresh page if needed to capture all requests</li>
+                <li>Verify all panel requests return 200 OK with image/png</li>
+                <li>Check that panels render in viewer (not "No Image")</li>
+                <li>Try filtering, sorting, and changing labels</li>
+            </ol>
+        </div>
+
+        <div class="test-panel">
+            <h2><span class="icon">🔍</span>Pre-Flight Checks</h2>
+            <div class="status-grid" id="statusGrid">
+                <div class="status-item pending">
+                    <strong>Panel Server</strong>
+                    <span>Checking connection...</span>
+                </div>
+                <div class="status-item pending">
+                    <strong>Display Metadata</strong>
+                    <span>Loading displayInfo.json...</span>
+                </div>
+                <div class="status-item pending">
+                    <strong>Panel Endpoints</strong>
+                    <span>Testing REST API...</span>
+                </div>
+                <div class="status-item pending">
+                    <strong>Viewer Assets</strong>
+                    <span>Checking viewer files...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-panel">
+            <h2><span class="icon">📊</span>Test Console</h2>
+            <div style="margin-top: 15px;">
+                <button onclick="runTests()">Run All Tests</button>
+                <button onclick="clearLogs()" class="secondary">Clear Logs</button>
+                <button onclick="testPanelLoad()" class="secondary">Test Panel Load</button>
+            </div>
+            <div class="log-container" id="logContainer"></div>
+        </div>
+
+        <div class="viewer-container">
+            <h2 style="color: #2c3e50; margin-bottom: 15px;">
+                <span style="font-size: 24px; margin-right: 10px;">👁️</span>
+                Viewer Display (POC Viewer with REST Panels)
+            </h2>
+            <iframe
+                id="viewerFrame"
+                class="viewer-frame"
+                src="http://localhost:5001/minimal_viewer.html"
+                title="Trelliscope REST Demo">
+            </iframe>
+        </div>
+    </div>
+
+    <script>
+        const logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push({ timestamp, message, type });
+
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span>${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+            logs.length = 0;
+        }
+
+        function updateStatus(index, status, message) {
+            const statusItems = document.querySelectorAll('.status-item');
+            if (statusItems[index]) {
+                statusItems[index].className = `status-item ${status}`;
+                statusItems[index].querySelector('span').textContent = message;
+            }
+        }
+
+        async function checkPanelServer() {
+            log('Checking panel server health...', 'info');
+            try {
+                const response = await fetch('http://localhost:5001/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ Panel server is running`, 'success');
+                    log(`  Output dir: ${data.output_dir}`, 'info');
+                    updateStatus(0, 'success', 'Connected ✓');
+                    return true;
+                } else {
+                    log(`✗ Server returned status ${response.status}`, 'error');
+                    updateStatus(0, 'error', `Status ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                log(`✗ Cannot connect to panel server: ${error.message}`, 'error');
+                updateStatus(0, 'error', 'Connection failed');
+                return false;
+            }
+        }
+
+        async function checkDisplayInfo() {
+            log('Loading displayInfo.json...', 'info');
+            try {
+                const response = await fetch('http://localhost:5001/rest_demo/displayInfo.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ displayInfo.json loaded`, 'success');
+                    log(`  Display name: ${data.name}`, 'info');
+                    log(`  Number of panels: ${data.n}`, 'info');
+
+                    // Find panel meta
+                    const panelMeta = data.metas.find(m => m.type === 'panel');
+                    if (panelMeta) {
+                        log(`✓ Panel metadata found:`, 'success');
+                        log(`  - varname: ${panelMeta.varname}`, 'info');
+                        log(`  - source.type: ${panelMeta.source.type}`, 'info');
+                        log(`  - source.url: ${panelMeta.source.url}`, 'info');
+
+                        if (panelMeta.source.type === 'REST') {
+                            log(`✓ REST panel source configured correctly!`, 'success');
+                            updateStatus(1, 'success', 'REST config valid ✓');
+                            return true;
+                        } else {
+                            log(`✗ Expected REST panel source, got ${panelMeta.source.type}`, 'error');
+                            updateStatus(1, 'error', `Wrong type: ${panelMeta.source.type}`);
+                            return false;
+                        }
+                    } else {
+                        log(`✗ No panel metadata found in metas array`, 'error');
+                        updateStatus(1, 'error', 'No panel meta');
+                        return false;
+                    }
+                } else {
+                    log(`✗ Failed to load displayInfo.json: ${response.status}`, 'error');
+                    updateStatus(1, 'error', `Load failed: ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                log(`✗ Error loading displayInfo.json: ${error.message}`, 'error');
+                updateStatus(1, 'error', 'Load error');
+                return false;
+            }
+        }
+
+        async function testPanelEndpoints() {
+            log('Testing panel endpoints...', 'info');
+            const baseUrl = 'http://localhost:5001/api/panels/minimal_manual';
+            const panelIds = [0, 1, 2];
+            let successCount = 0;
+
+            for (const id of panelIds) {
+                const url = `${baseUrl}/${id}`;
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    if (response.ok) {
+                        const contentType = response.headers.get('Content-Type');
+                        const contentLength = response.headers.get('Content-Length');
+                        log(`✓ Panel ${id}: ${response.status} OK (${contentType}, ${contentLength} bytes)`, 'success');
+                        successCount++;
+                    } else {
+                        log(`✗ Panel ${id}: ${response.status} ${response.statusText}`, 'error');
+                    }
+                } catch (error) {
+                    log(`✗ Panel ${id}: ${error.message}`, 'error');
+                }
+            }
+
+            if (successCount === panelIds.length) {
+                log(`✓ All ${panelIds.length} panel endpoints responding!`, 'success');
+                updateStatus(2, 'success', `${successCount}/${panelIds.length} endpoints OK ✓`);
+                return true;
+            } else {
+                log(`✗ Only ${successCount}/${panelIds.length} panels responding`, 'error');
+                updateStatus(2, 'error', `${successCount}/${panelIds.length} responding`);
+                return false;
+            }
+        }
+
+        async function checkViewerAssets() {
+            log('Checking viewer assets...', 'info');
+            try {
+                const response = await fetch('http://localhost:5001/assets/index.js', { method: 'HEAD' });
+                if (response.ok) {
+                    log(`✓ Viewer assets found`, 'success');
+                    updateStatus(3, 'success', 'Assets loaded ✓');
+                    return true;
+                } else {
+                    log(`✗ Viewer assets not found: ${response.status}`, 'error');
+                    updateStatus(3, 'error', 'Assets missing');
+                    return false;
+                }
+            } catch (error) {
+                log(`✗ Error checking viewer assets: ${error.message}`, 'error');
+                updateStatus(3, 'error', 'Check failed');
+                return false;
+            }
+        }
+
+        async function runTests() {
+            clearLogs();
+            log('='.repeat(60), 'info');
+            log('STARTING REST PANEL INTEGRATION TESTS', 'info');
+            log('='.repeat(60), 'info');
+
+            const results = {
+                server: await checkPanelServer(),
+                displayInfo: await checkDisplayInfo(),
+                panels: await testPanelEndpoints(),
+                assets: await checkViewerAssets()
+            };
+
+            log('='.repeat(60), 'info');
+            const allPassed = Object.values(results).every(r => r);
+            if (allPassed) {
+                log('✓ ALL TESTS PASSED!', 'success');
+                log('The viewer should now load panels via REST API.', 'success');
+                log('Check the Network tab in DevTools to see the requests.', 'info');
+            } else {
+                log('✗ SOME TESTS FAILED', 'error');
+                log('Please check the logs above for details.', 'error');
+            }
+            log('='.repeat(60), 'info');
+        }
+
+        async function testPanelLoad() {
+            log('Testing individual panel load...', 'info');
+            const url = 'http://localhost:5001/api/panels/minimal_manual/0';
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    log(`✓ Panel loaded successfully`, 'success');
+                    log(`  URL: ${url}`, 'info');
+                    log(`  Content-Type: ${response.headers.get('Content-Type')}`, 'info');
+                    log(`  Size: ${blob.size} bytes`, 'info');
+                } else {
+                    log(`✗ Panel load failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`✗ Error loading panel: ${error.message}`, 'error');
+            }
+        }
+
+        // Monitor iframe messages
+        window.addEventListener('message', (event) => {
+            if (event.origin === 'http://localhost:5001') {
+                log(`Viewer message: ${JSON.stringify(event.data)}`, 'info');
+            }
+        });
+
+        // Monitor network requests in iframe (if possible)
+        const iframe = document.getElementById('viewerFrame');
+        iframe.addEventListener('load', () => {
+            log('Viewer iframe loaded', 'success');
+            log('Check Network tab to see panel API requests', 'info');
+        });
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 1000);
+        });
+
+        // Log viewer initialization
+        log('Browser test page loaded', 'success');
+        log('Waiting for viewer iframe to initialize...', 'info');
+    </script>
+</body>
+</html>

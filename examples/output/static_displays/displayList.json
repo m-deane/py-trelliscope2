@@ -1,0 +1,9 @@
+[
+  {
+    "name": "simple_static",
+    "description": "Simple Static Panel Example",
+    "tags": [],
+    "thumbnailurl": "simple_static/panels/panel_0.png",
+    "order": 0
+  }
+]

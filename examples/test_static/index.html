@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple Static Panel Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope_root { width: 100vw; height: 100vh; }
+        #debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10000;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <div id="debug">
+        <div>🔍 Debug Console</div>
+        <div id="log"></div>
+    </div>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logEl.innerHTML += `<div class="${className}">${msg}</div>`;
+        }
+
+        log('Initializing...', 'info');
+    </script>
+
+    <script type="module">
+        try {
+            log('Loading viewer...', 'info');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                log('✓ Viewer loaded', 'success');
+                log('Loading config.json...', 'info');
+
+                initFunc('trelliscope_root', './config.json');
+
+                setTimeout(() => {
+                    const root = document.getElementById('trelliscope_root');
+                    const text = root.textContent;
+
+                    if (text.includes('simple_static') || text.includes('Simple Static')) {
+                        log('✓ simple_static loaded', 'success');
+
+                        // Check for data
+                        if (text.includes('0 of 0')) {
+                            log('✗ No data (0 of 0)', 'error');
+                        } else if (text.match(/\d+ of \d+/)) {
+                            const match = text.match(/(\d+) of (\d+)/);
+                            log(`✓ Data loaded: ${match[0]}`, 'success');
+                        }
+
+                        // Check for images
+                        const imgs = root.querySelectorAll('img');
+                        log(`Images found: ${imgs.length}`, imgs.length > 0 ? 'success' : 'error');
+
+                    } else {
+                        log('✗ Display not loaded', 'error');
+                    }
+                }, 3000);
+
+            } else {
+                log('✗ Viewer function not found', 'error');
+            }
+        } catch (error) {
+            log(`✗ Error: ${error.message}`, 'error');
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

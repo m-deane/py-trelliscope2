@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bare Minimum Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #app { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="app" class="trelliscope-not-spa"></div>
+
+    <script>
+        // Simplest possible metaData - just panel column
+        window.metaData = [
+          {"panel": "http://localhost:8000/displays/minimal_manual/panels/0.png"},
+          {"panel": "http://localhost:8000/displays/minimal_manual/panels/1.png"},
+          {"panel": "http://localhost:8000/displays/minimal_manual/panels/2.png"}
+        ];
+    </script>
+
+    <script type="module">
+        console.log('metaData:', window.metaData);
+
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('Initializing...');
+        initFunc('app', './config.jsonp');
+
+        setTimeout(() => {
+            console.log('After 4s - checking for images...');
+            const imgs = document.querySelectorAll('img');
+            console.log('Images found:', imgs.length);
+            if (imgs.length > 0) {
+                console.log('🎉 SUCCESS!');
+            } else {
+                console.log('❌ Still no images');
+            }
+        }, 4000);
+    </script>
+</body>
+</html>

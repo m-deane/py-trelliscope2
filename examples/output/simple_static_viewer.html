@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple Static Trelliscope</title>
+    <!-- Load viewer CSS from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        #trelliscope_root {
+            width: 100vw;
+            height: 100vh;
+        }
+        .status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="status" class="status">Loading...</div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        function setStatus(msg) {
+            statusDiv.textContent = msg;
+            console.log('[STATUS]', msg);
+        }
+
+        setStatus('Loading viewer module...');
+    </script>
+
+    <!-- Load viewer from CDN and initialize -->
+    <script type="module">
+        try {
+            setStatus('Importing viewer from CDN...');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+
+            setStatus('Module loaded, finding init function...');
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                setStatus('Initializing viewer...');
+
+                // Initialize with path to display directory
+                initFunc('trelliscope_root', './simple_static');
+
+                setTimeout(() => {
+                    setStatus('✓ Viewer initialized');
+                    // Hide status after 3 seconds
+                    setTimeout(() => {
+                        statusDiv.style.opacity = '0';
+                        statusDiv.style.transition = 'opacity 1s';
+                    }, 3000);
+                }, 1000);
+            } else {
+                setStatus('ERROR: trelliscopeApp not found');
+                console.error('Available exports:', Object.keys(module));
+            }
+        } catch (error) {
+            setStatus(`ERROR: ${error.message}`);
+            console.error('Failed to load viewer:', error);
+        }
+    </script>
+</body>
+</html>

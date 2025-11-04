@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>REST Demo - Trelliscope</title>
+    <script type="module" crossorigin src="/assets/index.js"></script>
+    <link rel="stylesheet" href="/assets/index.css">
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+        // Load the trelliscope viewer with REST demo display
+        import { createRoot } from 'react-dom/client';
+
+        // Configuration for REST demo display
+        const config = {
+            datatype: 'json',
+            id: 'rest_demo',
+            name: 'REST Panel Demo'
+        };
+
+        // Display specification
+        const displaySpec = {
+            name: 'rest_demo',
+            path: '/rest_demo'
+        };
+
+        // Initialize viewer
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Load displayInfo.json
+                const response = await fetch('/rest_demo/displayInfo.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to load displayInfo.json: ${response.status}`);
+                }
+
+                const displayInfo = await response.json();
+                console.log('Display info loaded:', displayInfo);
+
+                // Load metadata
+                const metaResponse = await fetch('/rest_demo/metadata.csv');
+                if (!metaResponse.ok) {
+                    throw new Error(`Failed to load metadata.csv: ${metaResponse.status}`);
+                }
+
+                const metadataText = await metaResponse.text();
+
+                // Parse CSV to JSON
+                const lines = metadataText.trim().split('\n');
+                const headers = lines[0].split(',');
+                const metaData = lines.slice(1).map(line => {
+                    const values = line.split(',');
+                    const obj = {};
+                    headers.forEach((header, i) => {
+                        obj[header] = values[i];
+                    });
+                    return obj;
+                });
+
+                console.log('Metadata loaded:', metaData);
+
+                // Create display specification
+                const spec = {
+                    config: config,
+                    displayList: [{
+                        name: displayInfo.name,
+                        description: displayInfo.description,
+                        tags: [],
+                        keysig: displayInfo.keysig,
+                        thumbnailurl: ''
+                    }],
+                    displays: {
+                        [displayInfo.name]: {
+                            displayInfo: displayInfo,
+                            metaData: metaData
+                        }
+                    }
+                };
+
+                console.log('Initializing viewer with spec:', spec);
+
+                // Initialize the viewer (this would normally be done by the built viewer bundle)
+                // For now, we're using the viewer's built-in initialization
+                window.trelliscopeSpec = spec;
+
+            } catch (error) {
+                console.error('Error loading display:', error);
+                document.getElementById('root').innerHTML = `
+                    <div style="padding: 40px; text-align: center;">
+                        <h1 style="color: #e74c3c;">Error Loading Display</h1>
+                        <p style="color: #7f8c8d; margin-top: 20px;">${error.message}</p>
+                        <p style="color: #95a5a6; margin-top: 10px;">Check console for details</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

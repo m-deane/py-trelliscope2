@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inspect DisplayInfo</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 250px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 9px;
+            max-height: 250px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ INSPECT DISPLAYINFO ═══<br></div>
+
+    <script>
+        window.metaData = [
+          {"id": 0, "value": 0, "category": "A", "panel": "displays/minimal_manual/panels/0.png"},
+          {"id": 1, "value": 10, "category": "B", "panel": "displays/minimal_manual/panels/1.png"},
+          {"id": 2, "value": 20, "category": "C", "panel": "displays/minimal_manual/panels/2.png"}
+        ];
+    </script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ metaData loaded');
+
+        // Wrap the displayInfo callback to see what data it receives
+        let displayInfoData = null;
+        const checkInterval = setInterval(() => {
+            if (window.__loadDisplayInfo__trelliscope_root) {
+                const original = window.__loadDisplayInfo__trelliscope_root;
+                window.__loadDisplayInfo__trelliscope_root = function(data) {
+                    displayInfoData = data;
+                    log('\n→ __loadDisplayInfo__ called with:');
+                    log('  name: ' + data.name);
+                    log('  primarypanel: ' + data.primarypanel);
+                    log('  panelInterface: ' + JSON.stringify(data.panelInterface));
+                    log('  metas count: ' + data.metas.length);
+
+                    const panelMeta = data.metas.find(m => m.type === 'panel');
+                    if (panelMeta) {
+                        log('  ✓ Panel meta found: ' + JSON.stringify(panelMeta));
+                    } else {
+                        log('  ✗ NO panel meta in metas array!');
+                    }
+
+                    return original.call(this, data);
+                };
+                clearInterval(checkInterval);
+                log('✓ Wrapped __loadDisplayInfo__ callback');
+            }
+        }, 100);
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing...');
+        initFunc('trelliscope_root', './config.jsonp');
+
+        setTimeout(() => {
+            log('\n═══ AFTER 4 SECONDS ═══');
+
+            if (displayInfoData) {
+                log('DisplayInfo was loaded successfully');
+            } else {
+                log('✗ DisplayInfo callback never fired!');
+            }
+
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Shows "1 - 3 of 3"');
+            }
+
+            if (text.includes('No Image')) {
+                log('⚠ "No Image" placeholders');
+            }
+
+            const imgs = viewerDiv ? viewerDiv.querySelectorAll('img') : [];
+            log('Images: ' + imgs.length);
+        }, 4000);
+    </script>
+</body>
+</html>

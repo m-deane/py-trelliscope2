@@ -1,0 +1,218 @@
+{
+  "search_summary": {
+    "platforms_searched": ["github", "npm", "r_source_code", "demo_sites"],
+    "repositories_analyzed": 2,
+    "docs_reviewed": 5,
+    "key_finding": "panelInterface is a TOP-LEVEL property in displayInfo.json, NOT part of metas array"
+  },
+  "critical_discovery": {
+    "problem": "Python implementation was looking for panelInterface configuration in metas array or panel source definitions",
+    "solution": "panelInterface must be added as a separate top-level property in displayInfo.json",
+    "evidence": "R trelliscope source code Display$as_list() method does NOT include panelInterface - it must be added separately during JSON generation"
+  },
+  "panel_interface_specification": {
+    "location": "Top-level property in displayInfo.json (sibling to metas, state, views, etc.)",
+    "structure": {
+      "type": "string - panel source type",
+      "panelCol": "string - name of the column containing panel data",
+      "extension": "string - file extension for panels (png, jpg, html, etc.)"
+    },
+    "valid_types": [
+      "file",
+      "REST",
+      "localWebSocket"
+    ],
+    "example_file_panels": {
+      "type": "file",
+      "panelCol": "panel",
+      "extension": "png"
+    },
+    "example_html_panels": {
+      "type": "file",
+      "panelCol": "panel",
+      "extension": "html"
+    }
+  },
+  "r_source_code_analysis": {
+    "repository": "trelliscope-main-2 (new R package)",
+    "key_files": {
+      "display_class.R": {
+        "finding": "Display$as_list() method does NOT include panelInterface",
+        "implication": "panelInterface must be added elsewhere - likely during write or infer step"
+      },
+      "meta_classes.R": {
+        "finding": "PanelMeta class has 'source' property but does NOT expose panelInterface",
+        "panel_source_types": ["FilePanelSource", "RESTPanelSource", "LocalWebSocketPanelSource"]
+      },
+      "panel_classes.R": {
+        "finding": "Panel sources have 'type' field matching panelInterface.type values",
+        "types_found": ["file", "REST", "localWebSocket"]
+      }
+    }
+  },
+  "working_configuration": {
+    "source": "/examples/output/displays/minimal_manual/displayInfo.json",
+    "panelInterface": {
+      "type": "file",
+      "panelCol": "panel",
+      "extension": "png"
+    },
+    "status": "CORRECT - This is the proper structure for static image panels",
+    "notes": [
+      "This configuration IS correct",
+      "The problem is NOT with panelInterface",
+      "Issue must be elsewhere in viewer initialization or panel path resolution"
+    ]
+  },
+  "trelliscopejs_lib_version_info": {
+    "v0_7_16": {
+      "availability": "Available on unpkg CDN",
+      "documentation": "Limited - schema still evolving",
+      "source_code": "TypeScript in github.com/trelliscope/trelliscopejs-lib",
+      "type_definitions": "Located in src/types/ directory but files were inaccessible"
+    },
+    "compatibility": {
+      "r_package": "New trelliscope R package (not trelliscopejs) uses this viewer",
+      "json_format": "Language-agnostic JSON specification",
+      "schema_stability": "Still subject to change, documentation provided as demand necessitates"
+    }
+  },
+  "panel_types_supported": {
+    "images": {
+      "extensions": ["png", "jpg", "jpeg", "svg"],
+      "panelInterface_type": "file",
+      "paneltype": "img",
+      "source": "FilePanelSource with isLocal=true"
+    },
+    "html_widgets": {
+      "extensions": ["html", "htm"],
+      "panelInterface_type": "file",
+      "paneltype": "iframe",
+      "source": "FilePanelSource with isLocal=true"
+    },
+    "url_based": {
+      "extensions": ["any"],
+      "panelInterface_type": "REST",
+      "notes": "For panels fetched from remote URLs"
+    },
+    "websocket": {
+      "extensions": ["any"],
+      "panelInterface_type": "localWebSocket",
+      "notes": "For real-time panel generation"
+    }
+  },
+  "display_info_complete_structure": {
+    "top_level_properties": [
+      "name",
+      "group",
+      "description",
+      "keysig",
+      "tags",
+      "keycols",
+      "metas",
+      "inputs",
+      "cogDistns",
+      "state",
+      "views",
+      "primarypanel",
+      "thumbnailurl",
+      "order",
+      "panelInterface"
+    ],
+    "notes": "panelInterface is a REQUIRED top-level property, not nested in metas"
+  },
+  "metadata_vs_panel_interface": {
+    "metas_array": {
+      "purpose": "Describes data columns (cognostics) for filtering/sorting",
+      "includes_panel_meta": true,
+      "panel_meta_structure": {
+        "varname": "panel column name",
+        "type": "panel",
+        "source": {
+          "type": "file|REST|localWebSocket",
+          "isLocal": true
+        },
+        "aspect": 1,
+        "paneltype": "img|iframe"
+      }
+    },
+    "panelInterface": {
+      "purpose": "Top-level specification of HOW panels are loaded/displayed",
+      "required": true,
+      "relationship": "Complements panel meta but exists separately"
+    }
+  },
+  "technical_insights": {
+    "common_patterns": [
+      "panelInterface is added AFTER meta inference in R package",
+      "Panel paths in metaData.json are relative to display directory",
+      "Viewer expects panels/[panelCol]/[filename].ext structure"
+    ],
+    "best_practices": [
+      "Always include panelInterface at top level of displayInfo",
+      "Match extension to actual file types in panels directory",
+      "Use 'file' type for static local panels",
+      "Set panelCol to match the column name in your data"
+    ],
+    "pitfalls": [
+      "CRITICAL: Don't omit panelInterface - viewer won't know how to load panels",
+      "Don't nest panelInterface inside metas array",
+      "Don't confuse PanelMeta.source with top-level panelInterface",
+      "Ensure extension matches actual files (png vs jpg vs html)"
+    ]
+  },
+  "implementation_recommendations": [
+    {
+      "scenario": "Static PNG/JPG image panels",
+      "recommended_solution": {
+        "panelInterface": {
+          "type": "file",
+          "panelCol": "panel_column_name",
+          "extension": "png"
+        }
+      },
+      "rationale": "This is the standard configuration for local file-based panels"
+    },
+    {
+      "scenario": "HTML widget panels (plotly, leaflet)",
+      "recommended_solution": {
+        "panelInterface": {
+          "type": "file",
+          "panelCol": "panel_column_name",
+          "extension": "html"
+        }
+      },
+      "rationale": "HTML panels are displayed in iframes"
+    },
+    {
+      "scenario": "Remote image URLs",
+      "recommended_solution": {
+        "panelInterface": {
+          "type": "REST",
+          "panelCol": "panel_column_name"
+        }
+      },
+      "rationale": "REST type indicates panels are fetched from URLs"
+    }
+  },
+  "next_debugging_steps": {
+    "since_panelInterface_is_correct": [
+      "Check browser console for JavaScript errors when viewer loads",
+      "Verify panel file paths in metaData.json are correctly relative",
+      "Inspect network requests to see if panel files are being requested",
+      "Check if viewer is attempting to create Image elements but failing",
+      "Verify panel files actually exist at expected paths",
+      "Check file permissions on panel directory",
+      "Examine viewer's DataClient.ts and CrossfilterClient.ts for panel loading logic"
+    ]
+  },
+  "citations": [
+    "[1] trelliscope R Package. 'R/display_class.R'. GitHub, github.com/reference/trelliscope-main-2/R/display_class.R",
+    "[2] trelliscope R Package. 'R/meta_classes.R'. GitHub, github.com/reference/trelliscope-main-2/R/meta_classes.R",
+    "[3] trelliscope R Package. 'R/panel_classes.R'. GitHub, github.com/reference/trelliscope-main-2/R/panel_classes.R",
+    "[4] trelliscopejs-lib. 'JavaScript viewer for Trelliscope displays'. GitHub, github.com/trelliscope/trelliscopejs-lib",
+    "[5] Generated displayInfo.json. 'examples/output/displays/minimal_manual/displayInfo.json'. Local file.",
+    "[6] Trelliscope Documentation. 'Creating Panel Columns'. trelliscope.org/trelliscope/articles/panels.html",
+    "[7] trelliscopejs-lib Package. 'npm package'. npmjs.com/package/trelliscopejs-lib v0.7.9"
+  ]
+}

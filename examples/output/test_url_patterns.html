@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>URL Pattern Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== URL PATTERN TEST ===');
+
+        // Intercept ALL fetch requests to see what the viewer tries to load
+        const fetchLog = [];
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0].url;
+            console.log(`[FETCH ATTEMPT] ${url}`);
+            fetchLog.push({ url, timestamp: Date.now() });
+
+            const result = await originalFetch.apply(this, args);
+            console.log(`[FETCH ${result.status}] ${url}`);
+            return result;
+        };
+
+        // Initialize viewer
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('1. Initializing with path: ./basic_viewer_demo/displayInfo.json');
+        const result = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+
+        // Wait and check what was fetched
+        setTimeout(() => {
+            console.log('\n2. Fetch log after 3 seconds:');
+            fetchLog.forEach((entry, i) => {
+                console.log(`   ${i + 1}. ${entry.url}`);
+            });
+
+            console.log('\n3. What viewer should have fetched but didnt:');
+            const expected = [
+                './basic_viewer_demo/metadata.csv',
+                './basic_viewer_demo/metadata.json',
+                './basic_viewer_demo/panels/0.png',
+                './basic_viewer_demo/data.json',
+                './basic_viewer_demo/metaData.json'
+            ];
+
+            expected.forEach(path => {
+                const fetched = fetchLog.some(entry => entry.url.includes(path));
+                console.log(`   ${fetched ? '✓' : '✗'} ${path}`);
+            });
+
+            const imgs = document.querySelectorAll('#trelliscope-root img');
+            console.log(`\n4. Images rendered: ${imgs.length}`);
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Callback Flow Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; font-family: monospace; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 400px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.98); color: #0f0;
+            padding: 15px; font-size: 11px;
+            max-height: 400px; overflow: auto; z-index: 10000;
+            border-top: 3px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ CALLBACK FLOW TEST ═══<br></div>
+
+    <!-- Load metaData.js -->
+    <script src="./displays/minimal_manual/metaData.js"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('Step 1: window.metaData loaded: ' + window.metaData.length + ' items');
+
+        // Wrap ALL callbacks to see which fire
+        log('\nStep 2: Registering callback wrappers...');
+
+        window.__loadAppConfig__trelliscope_root = function(data) {
+            log('  ✓ __loadAppConfig__ fired!');
+            log('    name: ' + data.name);
+            log('    datatype: ' + data.datatype);
+            log('    id: ' + data.id);
+        };
+
+        window.__loadDisplayList__trelliscope_root = function(data) {
+            log('  ✓ __loadDisplayList__ fired!');
+            log('    displays.length: ' + data.length);
+            if (data.length > 0) {
+                log('    displays[0].name: ' + data[0].name);
+            }
+        };
+
+        window.__loadDisplayInfo__trelliscope_root = function(data) {
+            log('  ✓ __loadDisplayInfo__ fired!');
+            log('    name: ' + data.name);
+            log('    metas.length: ' + data.metas.length);
+            log('    primarypanel: ' + data.primarypanel);
+            log('    state.layout.viewtype: ' + data.state.layout.viewtype);
+        };
+
+        log('  Wrappers registered\n');
+    </script>
+
+    <script type="module">
+        log('Step 3: Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('\nStep 4: Initializing viewer...');
+        initFunc('trelliscope_root', './config.jsonp');
+
+        setTimeout(() => {
+            log('\n═══ 5 SECOND CHECK ═══');
+
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.includes('0 of 0')) {
+                log('✗ Shows "0 of 0"');
+            } else if (text.match(/\d+\s*-\s*\d+\s+of\s+\d+/)) {
+                log('✓ Shows panel count!');
+            }
+
+            log('\nSummary:');
+            log('If NO callbacks fired -> config files not being loaded');
+            log('If only AppConfig fired -> displayList not loading');
+            log('If AppConfig + DisplayList fired but not DisplayInfo -> display selection issue');
+        }, 5000);
+    </script>
+</body>
+</html>

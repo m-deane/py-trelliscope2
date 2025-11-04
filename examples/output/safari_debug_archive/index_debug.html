@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Debug Version</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+        #debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: black;
+            color: lime;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow: auto;
+            z-index: 10000;
+            border: 2px solid lime;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug">Loading...</div>
+    <div id="trelliscope-root"></div>
+
+    <script type="module">
+        const debug = document.getElementById('debug');
+        function log(msg) {
+            console.log(msg);
+            debug.innerHTML += msg + '<br>';
+        }
+
+        log('1. Starting import...');
+
+        try {
+            const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+
+            log('2. Module imported! Keys: ' + Object.keys(module).join(', '));
+
+            const { Trelliscope, TrelliscopeApp } = module;
+
+            log('3. Trelliscope type: ' + typeof Trelliscope);
+            log('4. TrelliscopeApp type: ' + typeof TrelliscopeApp);
+
+            if (Trelliscope && typeof Trelliscope === 'object') {
+                log('5. Trelliscope is object. Keys: ' + Object.keys(Trelliscope).join(', '));
+            }
+
+            if (TrelliscopeApp && typeof TrelliscopeApp === 'object') {
+                log('6. TrelliscopeApp is object. Keys: ' + Object.keys(TrelliscopeApp).join(', '));
+            }
+
+            // Try calling Trelliscope as function
+            log('7. Attempting Trelliscope() call...');
+
+            const config = {
+                displayListPath: "./basic_viewer_demo/displayInfo.json",
+                spa: false
+            };
+
+            log('8. Config: ' + JSON.stringify(config));
+            log('9. Root element exists: ' + (document.getElementById('trelliscope-root') !== null));
+
+            const result = Trelliscope('trelliscope-root', config);
+
+            log('10. Trelliscope() returned: ' + typeof result);
+            log('11. Result: ' + JSON.stringify(result));
+
+            // Check if anything was rendered
+            setTimeout(() => {
+                const root = document.getElementById('trelliscope-root');
+                log('12. Root has children: ' + (root.children.length > 0));
+                log('13. Root innerHTML length: ' + root.innerHTML.length);
+                if (root.children.length === 0) {
+                    log('ERROR: Nothing rendered! Trying alternative methods...');
+
+                    // Try TrelliscopeApp directly
+                    if (typeof TrelliscopeApp === 'function') {
+                        log('14. Trying TrelliscopeApp as React component...');
+                        // This won't work without ReactDOM.render, but let's log it
+                        log('TrelliscopeApp signature: ' + TrelliscopeApp.toString().substring(0, 200));
+                    }
+                }
+            }, 1000);
+
+        } catch (error) {
+            log('ERROR: ' + error.message);
+            log('Stack: ' + error.stack);
+        }
+    </script>
+</body>
+</html>

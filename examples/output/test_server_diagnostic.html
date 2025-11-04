@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Server Diagnostic</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 300px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 300px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ SERVER DIAGNOSTIC ═══<br></div>
+
+    <script src="./displays/minimal_manual/metaData.js"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ metaData.js loaded: ' + (window.metaData ? window.metaData.length + ' rows' : 'MISSING'));
+        if (window.metaData) {
+            log('  First row: ' + JSON.stringify(window.metaData[0]));
+        }
+
+        // Intercept all fetch requests
+        const fetchLog = [];
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0].url;
+            log('[FETCH] ' + url);
+            fetchLog.push({url: url, time: Date.now()});
+            return originalFetch.apply(this, args).then(response => {
+                log('  ✓ ' + response.status + ' ' + response.statusText);
+                return response;
+            }).catch(err => {
+                log('  ✗ ERROR: ' + err.message);
+                throw err;
+            });
+        };
+
+        log('✓ Fetch interceptor active');
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+        log('✓ trelliscopeApp = ' + typeof initFunc);
+
+        // Check config.json manually
+        log('\n2. Manually checking config.json...');
+        const configResp = await fetch('./config.json');
+        const configData = await configResp.json();
+        log('  config.json: ' + JSON.stringify(configData));
+
+        // Check displayList
+        log('\n3. Manually checking displayList.json...');
+        const listResp = await fetch('./displays/displayList.json');
+        const listData = await listResp.json();
+        log('  displayList.json: ' + JSON.stringify(listData));
+
+        // Check displayInfo
+        log('\n4. Manually checking displayInfo.json...');
+        const infoResp = await fetch('./displays/minimal_manual/displayInfo.json');
+        const infoData = await infoResp.json();
+        log('  displayInfo: name=' + infoData.name + ', n=' + infoData.n);
+        log('  panelInterface: ' + JSON.stringify(infoData.panelInterface));
+        log('  metas: ' + infoData.metas.length + ' variables');
+
+        // Check if panel image is accessible
+        log('\n5. Testing panel image access...');
+        const testImg = new Image();
+        testImg.onload = () => log('✓ Panel image loads successfully!');
+        testImg.onerror = (e) => log('✗ Panel image failed to load: ' + e);
+        testImg.src = './displays/minimal_manual/panels/0.png';
+
+        log('\n6. Initializing viewer...');
+        initFunc('trelliscope-root', './config.json');
+
+        setTimeout(() => {
+            log('\n═══ AFTER 4 SECONDS ═══');
+            log('Total fetches: ' + fetchLog.length);
+            fetchLog.forEach((f, i) => log('  ' + (i+1) + '. ' + f.url));
+
+            const text = document.body.textContent;
+            const imgs = document.querySelectorAll('img');
+
+            if (text.includes('of 3')) {
+                log('\n✓ Viewer shows "of 3"');
+            } else if (text.includes('0 of 0')) {
+                log('\n✗ Viewer shows "0 of 0"');
+            } else {
+                log('\n⚠ Unknown state');
+            }
+
+            log('Images in DOM: ' + imgs.length);
+            if (imgs.length > 0) {
+                imgs.forEach((img, i) => {
+                    log('  img[' + i + '].src = ' + img.src);
+                    log('  img[' + i + '].complete = ' + img.complete);
+                    log('  img[' + i + '].naturalWidth = ' + img.naturalWidth);
+                });
+            }
+
+            // Check window callbacks
+            log('\nCallback functions registered:');
+            const callbacks = Object.keys(window).filter(k => k.includes('load') || k.includes('Load'));
+            callbacks.forEach(cb => log('  window.' + cb));
+        }, 4000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>REST Panel Test - FINAL TEST</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a1a; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 500px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.98); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 11px;
+            max-height: 500px; overflow: auto; z-index: 10000;
+            border-top: 3px solid #0f0;
+        }
+        .success { color: #00ff00; font-weight: bold; }
+        .error { color: #ff0000; font-weight: bold; }
+        .info { color: #00bfff; }
+        .highlight { color: #ffff00; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ REST PANEL TEST - FINAL SOLUTION ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'info' ? 'info' : type === 'highlight' ? 'highlight' : '';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span><br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept fetch to see REST API calls
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const url = args[0];
+
+            // Log panel API calls
+            if (url.includes('/api/panels/')) {
+                log(`REST API CALL: ${url}`, 'highlight');
+            } else {
+                log(`FETCH: ${url}`, 'info');
+            }
+
+            const response = await originalFetch(...args);
+
+            if (url.includes('displayInfo')) {
+                const clone = response.clone();
+                const data = await clone.json();
+                log('DisplayInfo loaded:', 'success');
+                log('  panelInterface: ' + JSON.stringify(data.panelInterface));
+                log('  First panel value: ' + data.cogData[0].panel);
+            }
+
+            return response;
+        };
+
+        // Intercept Image constructor
+        const OriginalImage = window.Image;
+        let imageCount = 0;
+        window.Image = function() {
+            imageCount++;
+            log(`IMAGE #${imageCount} CREATED`, 'success');
+            const img = new OriginalImage();
+            const originalSrcSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    const displayVal = value.length > 100 ? value.substring(0, 100) + '...' : value;
+                    log(`  → src: ${displayVal}`, 'info');
+                    originalSrcSet.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            // Log when image loads successfully
+            img.addEventListener('load', () => {
+                log(`  → IMAGE #${imageCount} LOADED SUCCESSFULLY!`, 'success');
+            });
+
+            img.addEventListener('error', () => {
+                log(`  → IMAGE #${imageCount} FAILED TO LOAD`, 'error');
+            });
+
+            return img;
+        };
+
+        log('✓ All interceptors active');
+        log('✓ REST Panel Server running at: http://localhost:5001\n');
+    </script>
+
+    <script type="module">
+        log('Loading viewer...');
+        const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+
+        log('Module loaded');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        if (typeof initFunc === 'function') {
+            log('Initializing...\n');
+            initFunc('trelliscope_root', './config.json');
+        } else {
+            log('ERROR: trelliscopeApp not found', 'error');
+        }
+
+        setTimeout(() => {
+            log('\n═══ 5 SECOND CHECK ═══');
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Shows panel count', 'success');
+            }
+
+            const imgs = viewerDiv ? viewerDiv.querySelectorAll('img') : [];
+            log(`Images in DOM: ${imgs.length}`, imgs.length > 0 ? 'success' : 'error');
+
+            if (imgs.length > 0) {
+                log('\n=== SUCCESS! PANELS ARE RENDERING! ===', 'highlight');
+                log('REST API solution works!', 'highlight');
+            } else {
+                log('\nNo images found. Check if:', 'error');
+                log('1. Flask server is running on port 5001', 'error');
+                log('2. Panel files exist in panels/ directory', 'error');
+                log('3. REST API calls were made (see log above)', 'error');
+            }
+
+            log(`\nTotal Image() creations: ${imageCount}`);
+        }, 5000);
+    </script>
+</body>
+</html>

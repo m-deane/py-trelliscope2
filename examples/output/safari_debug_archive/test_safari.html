@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Safari Test</title>
+</head>
+<body>
+    <h1>Safari Compatibility Test</h1>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function log(msg) {
+            console.log(msg);
+            output.innerHTML += '<p>' + msg + '</p>';
+        }
+
+        log('1. JavaScript is working! ✓');
+        log('2. Browser: ' + navigator.userAgent);
+
+        // Test ES modules
+        if (typeof import === 'function') {
+            log('3. ES modules supported ✓');
+
+            // Test dynamic import
+            log('4. Testing dynamic import...');
+            import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle')
+                .then(mod => {
+                    log('5. Module loaded successfully! ✓');
+                    log('6. Exports: ' + Object.keys(mod).join(', '));
+                    log('7. Trelliscope type: ' + typeof mod.Trelliscope);
+
+                    if (typeof mod.Trelliscope === 'function') {
+                        log('8. Trelliscope function exists! ✓');
+                        log('SUCCESS: Safari is compatible!');
+                    } else {
+                        log('ERROR: Trelliscope is not a function');
+                    }
+                })
+                .catch(err => {
+                    log('ERROR loading module: ' + err.message);
+                    log('Full error: ' + err);
+                });
+        } else {
+            log('ERROR: ES modules NOT supported');
+        }
+    </script>
+</body>
+</html>

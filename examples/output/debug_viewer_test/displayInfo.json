@@ -1,0 +1,125 @@
+{
+  "name": "debug_test",
+  "group": "common",
+  "description": "Debug Viewer Test",
+  "keysig": "be7f81aa92826f2c87b31deeaf73402d",
+  "n": 3,
+  "height": 500,
+  "width": 500,
+  "tags": [],
+  "keycols": [],
+  "metas": [
+    {
+      "varname": "label",
+      "label": "label",
+      "type": "factor",
+      "levels": [
+        "X",
+        "Y",
+        "Z"
+      ],
+      "tags": [],
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "varname": "value",
+      "label": "value",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false,
+      "tags": [],
+      "filterable": true,
+      "sortable": true
+    }
+  ],
+  "inputs": null,
+  "cogInterface": {
+    "name": "debug_test",
+    "group": "common",
+    "type": "JSON"
+  },
+  "cogInfo": {
+    "label": {
+      "name": "label",
+      "label": "label",
+      "type": "factor",
+      "group": null,
+      "defLabel": true,
+      "defActive": true,
+      "filterable": true,
+      "sortable": true,
+      "log": null,
+      "levels": [
+        "X",
+        "Y",
+        "Z"
+      ]
+    },
+    "value": {
+      "name": "value",
+      "label": "value",
+      "type": "number",
+      "group": null,
+      "defLabel": true,
+      "defActive": true,
+      "filterable": true,
+      "sortable": true,
+      "log": null
+    },
+    "panelKey": {
+      "name": "panelKey",
+      "label": "panelKey",
+      "type": "panelKey",
+      "group": null,
+      "defLabel": false,
+      "defActive": false,
+      "filterable": false,
+      "sortable": false,
+      "log": null
+    }
+  },
+  "cogDistns": {},
+  "cogData": [
+    {
+      "label": "X",
+      "value": 10,
+      "panelKey": "0",
+      "panel": "0.png"
+    },
+    {
+      "label": "Y",
+      "value": 30,
+      "panelKey": "1",
+      "panel": "1.png"
+    },
+    {
+      "label": "Z",
+      "value": 20,
+      "panelKey": "2",
+      "panel": "2.png"
+    }
+  ],
+  "state": {
+    "layout": {
+      "ncol": 4,
+      "nrow": null,
+      "page": 1,
+      "arrangement": "row"
+    },
+    "labels": [],
+    "sort": [],
+    "filter": []
+  },
+  "views": [],
+  "imgSrcLookup": {},
+  "primarypanel": "panel",
+  "panelInterface": {
+    "type": "panel_local",
+    "panelCol": "panel",
+    "format": "png",
+    "base": "./panels",
+    "forceSize": false
+  }
+}

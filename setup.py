@@ -1,31 +1,29 @@
-"""
-Setup file for py-tidymodels package
-"""
+"""Setup script for py-trelliscope."""
 
 from setuptools import setup, find_packages
 
+with open("requirements.txt") as f:
+    requirements = f.read().splitlines()
+
 setup(
-    name="py-tidymodels",
+    name="py-trelliscope",
     version="0.1.0",
-    description="Python port of R's tidymodels ecosystem for time series regression and forecasting",
-    author="Matthew Deane",
-    packages=find_packages(exclude=["tests", "tests.*", "examples", "reference"]),
-    python_requires=">=3.10",
-    install_requires=[
-        "pandas>=2.3.3",
-        "numpy>=2.2.6",
-        "patsy>=1.0.2",
-        "scikit-learn>=1.7.2",
-        "prophet>=1.2.1",
-        "statsmodels>=0.14.5",
-        "scipy>=1.14.1",
-    ],
+    description="Interactive visualization displays for exploring collections of plots",
+    author="py-trelliscope contributors",
+    packages=find_packages(),
+    install_requires=requirements,
     extras_require={
-        "dev": [
-            "pytest>=8.4.2",
-            "pytest-cov>=7.0.0",
-            "jupyter>=1.1.1",
-            "notebook>=7.3.2",
-        ],
+        "viz": ["matplotlib>=3.0", "plotly>=5.0"],
+        "all": ["matplotlib>=3.0", "plotly>=5.0"],
     },
+    python_requires=">=3.8",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
 )

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minimal Manual Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+        #status {
+            position: fixed; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.9); color: lime;
+            padding: 15px; font-family: monospace; font-size: 12px;
+            z-index: 10000; border: 2px solid lime; max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Testing minimal manual example...</div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <!-- Load metaData.js -->
+    <script src="./minimal_manual/metaData.js"></script>
+
+    <script type="module">
+        const status = document.getElementById('status');
+        function log(msg) {
+            console.log(msg);
+            status.innerHTML += '<br>' + msg;
+        }
+
+        log('1. metaData loaded: ' + (window.metaData ? window.metaData.length + ' rows' : 'MISSING'));
+
+        if (window.metaData) {
+            log('   First row: ' + JSON.stringify(window.metaData[0]));
+        }
+
+        // Load displayInfo
+        const response = await fetch('./minimal_manual/displayInfo.json?v=' + Date.now(), {cache: 'no-store'});
+        const displayInfo = await response.json();
+
+        log('2. displayInfo loaded:');
+        log('   n = ' + displayInfo.n);
+        log('   panelInterface.base = ' + displayInfo.panelInterface.base);
+        log('   panelInterface.panelCol = ' + displayInfo.panelInterface.panelCol);
+
+        // Load viewer
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('3. Initializing viewer...');
+        const result = initFunc('trelliscope-root', './minimal_manual/displayInfo.json?v=' + Date.now());
+
+        log('4. Waiting for render...');
+
+        setTimeout(() => {
+            const root = document.getElementById('trelliscope-root');
+            const text = root.textContent || '';
+            const imgs = root.querySelectorAll('img');
+
+            log('5. After 3s:');
+            log('   Text content: ' + (text.includes('of 3') ? 'Shows "of 3"' : text.includes('0 of 0') ? 'Shows "0 of 0"' : 'Other'));
+            log('   Images found: ' + imgs.length);
+
+            if (imgs.length > 0) {
+                log('   ✓✓✓ SUCCESS!');
+                status.style.background = 'green';
+                imgs.forEach((img, i) => {
+                    log('     ' + i + ': ' + img.src);
+                });
+            } else if (text.includes('of 3')) {
+                log('   ⚠ Found 3 panels but no images');
+                status.style.background = 'orange';
+            } else {
+                log('   ❌ FAILED');
+                status.style.background = 'red';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

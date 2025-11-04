@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Panel Load Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #222; color: white; }
+        img { border: 2px solid #0f0; margin: 10px; max-width: 400px; }
+        .error { color: red; }
+        .success { color: lime; }
+    </style>
+</head>
+<body>
+    <h1>Direct Panel Image Test</h1>
+    <p>Testing if panel images can be loaded directly:</p>
+
+    <div id="results"></div>
+
+    <h2>Images:</h2>
+    <div id="images"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        const images = document.getElementById('images');
+
+        // Test paths relative to index.html location
+        const testPaths = [
+            './basic_viewer_demo/panels/0.png',
+            './basic_viewer_demo/panels/1.png',
+            './basic_viewer_demo/panels/2.png',
+        ];
+
+        testPaths.forEach(path => {
+            results.innerHTML += `<div>Testing: ${path}</div>`;
+
+            const img = new Image();
+            const startTime = Date.now();
+
+            img.onload = () => {
+                const loadTime = Date.now() - startTime;
+                results.innerHTML += `<div class="success">✓ SUCCESS (${loadTime}ms, ${img.width}x${img.height})</div>`;
+
+                // Display the image
+                const displayImg = document.createElement('img');
+                displayImg.src = path;
+                displayImg.title = path;
+                images.appendChild(displayImg);
+            };
+
+            img.onerror = (e) => {
+                results.innerHTML += `<div class="error">✗ FAILED - ${e.type}</div>`;
+            };
+
+            img.src = path;
+        });
+    </script>
+</body>
+</html>

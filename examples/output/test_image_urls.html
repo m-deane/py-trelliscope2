@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image URL Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 300px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 9px;
+            max-height: 300px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ IMAGE URL INTERCEPTION ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept Image constructor
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log('[IMG SRC SET] ' + value);
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            img.addEventListener('load', function() {
+                log('  ✓ Loaded: ' + this.src.substring(this.src.lastIndexOf('/') + 1));
+            });
+            img.addEventListener('error', function() {
+                log('  ✗ ERROR loading: ' + this.src);
+            });
+
+            return img;
+        };
+
+        // Also watch for img elements added to DOM
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.tagName === 'IMG') {
+                        log('[IMG ADDED] src=' + (node.src || 'NOT SET YET'));
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        log('✓ Image interceptors active');
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing viewer...');
+        initFunc('trelliscope-root', './config.json');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        log('3. Loading metaData.js...');
+        const script = document.createElement('script');
+        script.onload = () => {
+            log('✓ metaData loaded: ' + window.metaData.length + ' rows');
+            window.metaData.forEach((row, i) => {
+                log('  row[' + i + '].panel = ' + row.panel);
+            });
+
+            setTimeout(() => {
+                log('\n═══ AFTER 4 SECONDS ═══');
+                const text = document.body.textContent;
+                const imgs = document.querySelectorAll('img');
+
+                log('Viewer state: ' + (text.includes('of 3') ? 'Shows "of 3"' : 'Shows "0 of 0"'));
+                log('Images in DOM: ' + imgs.length);
+
+                if (imgs.length === 0) {
+                    log('\n✗ NO IMAGES CREATED');
+                    log('This means the viewer is NOT trying to render panels at all');
+                    log('\nLet me check the computed panel URLs manually:');
+                    log('displayInfo.panelInterface.base = "./panels"');
+                    log('displayInfo.panelInterface.format = "png"');
+                    log('displayInfo.panelInterface.panelCol = "panel"');
+                    log('\nExpected URLs from display root:');
+                    window.metaData.forEach((row, i) => {
+                        const url = './displays/minimal_manual/panels/' + row.panel + '.png';
+                        log('  ' + i + ': ' + url);
+                    });
+                }
+            }, 4000);
+        };
+        script.src = './displays/minimal_manual/metaData.js';
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

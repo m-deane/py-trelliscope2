@@ -1,5 +1,5 @@
 # Virtual environment
-py-tidymodels2/
+py-trelliscope/
 venv/
 env/
 
@@ -33,7 +33,7 @@ htmlcov/
 .tox/
 
 # Jupyter
-.ipynb_checkpoints
+.ipynb_checkpoints/
 *.ipynb_checkpoints/
 
 # IDE
@@ -42,6 +42,10 @@ htmlcov/
 *.swp
 *.swo
 
+# Output
+trelliscope_output/
+**/displays/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -49,3 +53,9 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# Research and reference (keep in repo for reference)
+# These are excluded from .gitignore
+# reference/
+# .claude_research/
+.Rproj.user

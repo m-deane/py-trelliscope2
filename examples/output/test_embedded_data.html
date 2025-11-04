@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Embedded Data Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== EMBEDDED DATA TEST ===');
+
+        // Load displayInfo and metadata
+        const displayInfoResp = await fetch('./basic_viewer_demo/displayInfo.json');
+        const displayInfo = await displayInfoResp.json();
+        console.log('1. Loaded displayInfo:', displayInfo.name);
+
+        const metadataResp = await fetch('./basic_viewer_demo/metadata.csv');
+        const metadataText = await metadataResp.text();
+        console.log('2. Loaded metadata.csv');
+
+        // Parse CSV to JSON
+        const lines = metadataText.trim().split('\n');
+        const headers = lines[0].split(',');
+        const rows = lines.slice(1).map(line => {
+            const values = line.split(',');
+            const row = {};
+            headers.forEach((header, i) => {
+                // Convert to appropriate type
+                const val = values[i];
+                if (!isNaN(val) && val !== '') {
+                    row[header] = parseFloat(val);
+                } else {
+                    row[header] = val;
+                }
+            });
+            return row;
+        });
+        console.log('3. Parsed', rows.length, 'data rows');
+        console.log('   First row:', rows[0]);
+
+        // Create config with embedded data
+        const config = {
+            ...displayInfo,
+            // Try embedding the data directly
+            data: rows,
+            // Or try different field names
+            metaData: rows,
+            panels: rows
+        };
+
+        // Remove dataSource since we're embedding
+        delete config.dataSource;
+
+        console.log('4. Created config with embedded data');
+
+        // Write modified config to test location
+        const configBlob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+        const configUrl = URL.createObjectURL(configBlob);
+
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('5. Trying to initialize with embedded data config...');
+
+        // Try passing the config object directly instead of a path
+        const result = initFunc('trelliscope-root', config);
+        console.log('6. Init returned:', typeof result);
+
+        setTimeout(() => {
+            const root = document.getElementById('trelliscope-root');
+            const imgCount = root.querySelectorAll('img').length;
+            console.log('7. After 2s - Images found:', imgCount);
+
+            if (imgCount > 0) {
+                console.log('✓✓✓ SUCCESS with embedded data!');
+            } else {
+                console.log('   Still no images. Trying with blob URL...');
+
+                // Clear and try with blob URL
+                root.innerHTML = '<div id="trelliscope-root" class="trelliscope-not-spa"></div>';
+
+                const result2 = initFunc('trelliscope-root', configUrl);
+                console.log('8. Init with blob URL returned:', typeof result2);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

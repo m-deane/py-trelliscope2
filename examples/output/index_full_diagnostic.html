@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Full Diagnostic</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== FULL DIAGNOSTIC MODE ===');
+
+        // Intercept ALL fetch requests to see what viewer is loading
+        const originalFetch = window.fetch;
+        const fetchLog = [];
+        window.fetch = async function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0].url;
+            const startTime = Date.now();
+            console.log(`[FETCH START] ${url}`);
+            fetchLog.push({ url, status: 'pending', startTime });
+
+            try {
+                const response = await originalFetch.apply(this, args);
+                const duration = Date.now() - startTime;
+                console.log(`[FETCH ${response.status}] ${url} (${duration}ms)`);
+                fetchLog[fetchLog.length - 1].status = response.status;
+                fetchLog[fetchLog.length - 1].duration = duration;
+
+                // Clone response to peek at content
+                const clone = response.clone();
+                const contentType = response.headers.get('content-type');
+
+                if (contentType && contentType.includes('json')) {
+                    const data = await clone.json();
+                    console.log(`[FETCH JSON] ${url}:`, data);
+                } else if (contentType && contentType.includes('text')) {
+                    const text = await clone.text();
+                    console.log(`[FETCH TEXT] ${url}: ${text.length} chars`);
+                }
+
+                return response;
+            } catch (err) {
+                const duration = Date.now() - startTime;
+                console.error(`[FETCH ERROR] ${url} (${duration}ms):`, err);
+                fetchLog[fetchLog.length - 1].status = 'error';
+                fetchLog[fetchLog.length - 1].error = err.message;
+                throw err;
+            }
+        };
+
+        // Intercept all image loads
+        const images = new Map();
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.tagName === 'IMG') {
+                        const src = node.src;
+                        console.log('[IMG ADDED]', src);
+                        images.set(src, { element: node, status: 'loading' });
+
+                        node.addEventListener('load', () => {
+                            console.log('[IMG LOADED]', src, `${node.naturalWidth}x${node.naturalHeight}`);
+                            images.get(src).status = 'loaded';
+                        });
+
+                        node.addEventListener('error', (e) => {
+                            console.error('[IMG ERROR]', src, e);
+                            images.get(src).status = 'error';
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Intercept console errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            console.log('[CONSOLE ERROR DETECTED]:', ...args);
+            originalError.apply(console, args);
+        };
+
+        // Load and initialize viewer
+        console.log('1. Loading trelliscopejs module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        console.log('2. Module loaded, exports:', Object.keys(module));
+
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+        console.log('3. Init function type:', typeof initFunc);
+
+        if (typeof initFunc === 'function') {
+            console.log('4. Calling trelliscopeApp("trelliscope-root", "./basic_viewer_demo/displayInfo.json")');
+
+            const result = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+            console.log('5. trelliscopeApp returned:', typeof result, result);
+
+            // Monitor DOM changes
+            let checkCount = 0;
+            const checkInterval = setInterval(() => {
+                checkCount++;
+                const root = document.getElementById('trelliscope-root');
+                const childCount = root.children.length;
+                const imgCount = root.querySelectorAll('img').length;
+
+                console.log(`[CHECK ${checkCount}] Root children: ${childCount}, Images: ${imgCount}`);
+
+                if (imgCount > 0) {
+                    console.log('✓✓✓ IMAGES DETECTED! Panels are loading!');
+                    clearInterval(checkInterval);
+
+                    // Log all image sources
+                    const imgs = root.querySelectorAll('img');
+                    imgs.forEach((img, i) => {
+                        console.log(`  Image ${i}: ${img.src} (${img.complete ? 'loaded' : 'loading'})`);
+                    });
+                }
+
+                if (checkCount >= 10) {
+                    console.log('❌ Stopped checking after 10 attempts');
+                    console.log('Final fetch log:', fetchLog);
+                    console.log('Final images:', Array.from(images.entries()));
+                    clearInterval(checkInterval);
+                }
+            }, 1000);
+
+        } else {
+            console.error('4. ✗ Init function not found!');
+        }
+
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            console.error('[WINDOW ERROR]', e.message, e.filename, e.lineno);
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('[UNHANDLED PROMISE]', e.reason);
+        });
+    </script>
+</body>
+</html>

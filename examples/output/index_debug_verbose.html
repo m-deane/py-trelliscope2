@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Debug Verbose</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== TRELLISCOPE DEBUG MODE ===');
+        console.log('1. Starting initialization...');
+
+        // Load module with esm.sh bundling (includes all dependencies)
+        console.log('2. Loading module from esm.sh...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        console.log('3. Module loaded!');
+        console.log('   Module exports:', Object.keys(module));
+
+        // Check all possible init functions
+        console.log('4. Checking initialization functions:');
+        console.log('   window.trelliscopeApp:', typeof window.trelliscopeApp);
+        console.log('   module.trelliscopeApp:', typeof module.trelliscopeApp);
+        console.log('   module.Trelliscope:', typeof module.Trelliscope);
+        console.log('   module.TrelliscopeApp:', typeof module.TrelliscopeApp);
+
+        // Get the initialization function - try multiple possibilities
+        let initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        if (typeof initFunc === 'function') {
+            console.log('5. ✓ Found initialization function!');
+            console.log('   Function type:', typeof initFunc);
+            console.log('   Function name:', initFunc.name);
+
+            const elementId = 'trelliscope-root';
+            const configPath = './basic_viewer_demo/displayInfo.json';
+
+            console.log('6. Calling initialization with:');
+            console.log('   Element ID:', elementId);
+            console.log('   Config path:', configPath);
+
+            // Test if the config file is accessible
+            console.log('7. Testing config file accessibility...');
+            try {
+                const testFetch = await fetch(configPath);
+                console.log('   Config fetch status:', testFetch.status, testFetch.statusText);
+                const testData = await testFetch.json();
+                console.log('   Config loaded successfully!');
+                console.log('   Display name:', testData.name);
+                console.log('   Number of metas:', testData.metas.length);
+                console.log('   Panel interface:', testData.panelInterface);
+            } catch (err) {
+                console.error('   ✗ Config fetch failed:', err);
+            }
+
+            console.log('8. Calling trelliscopeApp...');
+
+            // Call the initialization
+            const result = initFunc(elementId, configPath);
+
+            console.log('9. trelliscopeApp returned:', typeof result);
+            if (result) {
+                console.log('   Result keys:', Object.keys(result));
+            }
+
+            // Check if viewer rendered
+            setTimeout(() => {
+                const root = document.getElementById('trelliscope-root');
+                console.log('10. After 1s - Root element children:', root.children.length);
+                if (root.children.length > 0) {
+                    console.log('    ✓ Viewer has rendered!');
+                    console.log('    First child:', root.children[0].tagName);
+                    console.log('    Child classes:', root.children[0].className);
+                } else {
+                    console.error('    ✗ Viewer root is still empty!');
+                }
+
+                // Look for React root
+                const reactRoot = root.querySelector('[data-reactroot], [data-reactid]');
+                console.log('    React root found:', reactRoot !== null);
+
+                // Check for any panels
+                const panels = root.querySelectorAll('img, [class*="panel"]');
+                console.log('    Panel elements found:', panels.length);
+            }, 1000);
+
+            // Check after longer delay
+            setTimeout(() => {
+                const root = document.getElementById('trelliscope-root');
+                console.log('11. After 3s - Root element children:', root.children.length);
+
+                // Look for images
+                const images = root.querySelectorAll('img');
+                console.log('    Images found:', images.length);
+                images.forEach((img, i) => {
+                    console.log(`    Image ${i}: src=${img.src}, complete=${img.complete}, naturalWidth=${img.naturalWidth}`);
+                });
+
+                // Look for error indicators
+                const errors = root.querySelectorAll('[class*="error"]');
+                console.log('    Error elements:', errors.length);
+            }, 3000);
+
+        } else {
+            console.error('5. ✗ Initialization function not found!');
+            console.error('   window.trelliscopeApp:', typeof window.trelliscopeApp);
+            console.error('   module.trelliscopeApp:', typeof module.trelliscopeApp);
+            console.error('   Available module exports:', Object.keys(module));
+
+            // Try alternative initialization
+            if (typeof module.Trelliscope === 'function') {
+                console.log('6. Trying module.Trelliscope instead...');
+                console.log('   Function signature:', module.Trelliscope.toString().substring(0, 200));
+            }
+        }
+    </script>
+</body>
+</html>

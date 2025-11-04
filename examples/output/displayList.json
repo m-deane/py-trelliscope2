@@ -1,0 +1,8 @@
+{
+  "displays": [
+    {
+      "name": "basic_viewer_demo",
+      "path": "./basic_viewer_demo"
+    }
+  ]
+}

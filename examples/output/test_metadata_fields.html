@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Metadata Field Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== METADATA FIELD DISCOVERY ===');
+
+        // Load files
+        const displayInfo = await (await fetch('./basic_viewer_demo/displayInfo.json')).json();
+        console.log('DisplayInfo fields:', Object.keys(displayInfo));
+        console.log('Has metaData:', 'metaData' in displayInfo);
+        console.log('Has n:', 'n' in displayInfo);
+
+        if (displayInfo.metaData) {
+            console.log('metaData rows:', displayInfo.metaData.length);
+            console.log('First row:', displayInfo.metaData[0]);
+        }
+
+        // Initialize viewer
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('Initializing with embedded metadata...');
+        const result = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+        console.log('Result:', result);
+
+        // Monitor for changes
+        setTimeout(() => {
+            const root = document.getElementById('trelliscope-root');
+            const imgs = root.querySelectorAll('img');
+            console.log('After 2s - Images:', imgs.length);
+
+            if (imgs.length > 0) {
+                console.log('✓✓✓ PANELS LOADED!');
+                imgs.forEach((img, i) => {
+                    console.log(`  Panel ${i}: ${img.src} (${img.complete ? 'loaded' : 'loading'})`);
+                });
+            } else {
+                console.log('Still no images.');
+                console.log('Root innerHTML:', root.innerHTML.substring(0, 500));
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

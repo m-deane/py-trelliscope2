@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Legacy Browser Compatible</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-family: Arial;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Loading Trelliscope...</div>
+    <div id="trelliscope-root"></div>
+
+    <!-- Load the library with traditional script tag (no ES modules) -->
+    <script src="./trelliscope-lib.min.js"></script>
+
+    <script>
+        // Wait for library to load, then initialize
+        setTimeout(function() {
+            var loading = document.getElementById('loading');
+
+            try {
+                // Check if Trelliscope exists in window
+                console.log('Window keys:', Object.keys(window).filter(function(k) {
+                    return k.toLowerCase().indexOf('trell') !== -1;
+                }));
+
+                // Try different possible export names
+                var TrelliscopeInit = window.Trelliscope || window.TrelliscopeApp || window.trelliscopeApp;
+
+                if (typeof TrelliscopeInit === 'function') {
+                    console.log('Found Trelliscope function!');
+                    loading.textContent = 'Initializing...';
+
+                    TrelliscopeInit('trelliscope-root', {
+                        displayListPath: "./basic_viewer_demo/displayInfo.json",
+                        spa: false
+                    });
+
+                    loading.style.display = 'none';
+                } else if (typeof window.Trelliscope === 'object' && window.Trelliscope.createApp) {
+                    console.log('Found Trelliscope.createApp!');
+                    loading.textContent = 'Initializing...';
+
+                    window.Trelliscope.createApp({
+                        id: 'trelliscope-root',
+                        displayListPath: "./basic_viewer_demo/displayInfo.json",
+                        spa: false
+                    });
+
+                    loading.style.display = 'none';
+                } else {
+                    loading.textContent = 'ERROR: Trelliscope not found';
+                    loading.style.color = 'red';
+                    console.error('Trelliscope not found. Available in window:',
+                        Object.keys(window).filter(function(k) { return k.length < 30; }));
+                }
+            } catch (error) {
+                loading.textContent = 'ERROR: ' + error.message;
+                loading.style.color = 'red';
+                console.error('Initialization error:', error);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

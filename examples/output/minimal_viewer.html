@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minimal Trelliscope Viewer - POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header .description {
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .controls {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .panel-count {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .panel-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .panel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .panel-image-container {
+            width: 100%;
+            height: 300px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .panel-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .loading {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+        }
+
+        .panel-meta {
+            padding: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+
+        .meta-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .meta-value {
+            color: #333;
+        }
+
+        .status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .status.error {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="display-name">Loading...</h1>
+        <div class="description" id="display-description"></div>
+    </div>
+
+    <div class="controls">
+        <div class="panel-count" id="panel-count">Loading panels...</div>
+    </div>
+
+    <div class="panel-grid" id="panel-grid"></div>
+
+    <div class="status" id="status">Initializing...</div>
+
+    <script>
+        // Minimal Trelliscope Viewer Implementation
+        // This is a proof-of-concept showing how to render REST panels
+
+        class MinimalTrelliscopeViewer {
+            constructor(containerId, configUrl) {
+                this.container = document.getElementById(containerId);
+                this.configUrl = configUrl;
+                this.config = null;
+                this.displayInfo = null;
+                this.panelData = [];
+            }
+
+            async init() {
+                try {
+                    this.setStatus('Loading configuration...', false);
+
+                    // Load config
+                    const configResponse = await fetch(this.configUrl);
+                    this.config = await configResponse.json();
+
+                    // Load display list
+                    const displayListUrl = `${this.config.display_base}/displayList.json`;
+                    const displayListResponse = await fetch(displayListUrl);
+                    const displayList = await displayListResponse.json();
+
+                    // displayList is an array, use first item
+                    const firstDisplay = displayList[0];
+
+                    // Load displayInfo
+                    const displayInfoUrl = `${this.config.display_base}/${firstDisplay.name}/displayInfo.json`;
+                    const displayInfoResponse = await fetch(displayInfoUrl);
+                    this.displayInfo = await displayInfoResponse.json();
+
+                    // Get panel data
+                    this.panelData = this.displayInfo.cogData;
+
+                    this.setStatus(`Loaded ${this.panelData.length} panels`, false);
+
+                    // Render UI
+                    this.renderHeader();
+                    this.renderPanels();
+
+                } catch (error) {
+                    this.setStatus(`Error: ${error.message}`, true);
+                    console.error('Initialization error:', error);
+                }
+            }
+
+            renderHeader() {
+                document.getElementById('display-name').textContent = this.displayInfo.name;
+                document.getElementById('display-description').textContent = this.displayInfo.description;
+                document.getElementById('panel-count').textContent =
+                    `Showing ${this.panelData.length} panels`;
+            }
+
+            renderPanels() {
+                const grid = this.container;
+                grid.innerHTML = '';
+
+                this.panelData.forEach((panelData, index) => {
+                    const card = this.createPanelCard(panelData, index);
+                    grid.appendChild(card);
+                });
+            }
+
+            createPanelCard(data, index) {
+                const card = document.createElement('div');
+                card.className = 'panel-card';
+
+                // Image container
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'panel-image-container';
+
+                const loading = document.createElement('div');
+                loading.className = 'loading';
+                loading.textContent = 'Loading panel...';
+                imageContainer.appendChild(loading);
+
+                // Create image based on panel interface type
+                const panelInterface = this.displayInfo.panelInterface;
+
+                if (panelInterface.type === 'REST') {
+                    // THIS IS THE KEY CODE THAT WAS MISSING IN THE VIEWER
+                    const panelId = data[panelInterface.panelCol];
+                    const imageUrl = `${panelInterface.base}/${panelId}`;
+
+                    console.log(`Loading panel ${index}: ${imageUrl}`);
+
+                    const img = document.createElement('img');
+                    img.className = 'panel-image';
+                    img.style.display = 'none';
+
+                    img.onload = () => {
+                        loading.remove();
+                        img.style.display = 'block';
+                        console.log(`Panel ${index} loaded successfully`);
+                    };
+
+                    img.onerror = () => {
+                        loading.className = 'error';
+                        loading.textContent = 'Failed to load panel';
+                        console.error(`Panel ${index} failed to load from ${imageUrl}`);
+                    };
+
+                    img.src = imageUrl;
+                    imageContainer.appendChild(img);
+                }
+
+                card.appendChild(imageContainer);
+
+                // Meta information
+                const metaContainer = document.createElement('div');
+                metaContainer.className = 'panel-meta';
+
+                this.displayInfo.metas.forEach(meta => {
+                    const value = data[meta.varname];
+                    if (value !== undefined) {
+                        const row = document.createElement('div');
+                        row.className = 'meta-row';
+
+                        const label = document.createElement('span');
+                        label.className = 'meta-label';
+                        label.textContent = meta.label + ':';
+
+                        const valueSpan = document.createElement('span');
+                        valueSpan.className = 'meta-value';
+                        valueSpan.textContent = value;
+
+                        row.appendChild(label);
+                        row.appendChild(valueSpan);
+                        metaContainer.appendChild(row);
+                    }
+                });
+
+                card.appendChild(metaContainer);
+                return card;
+            }
+
+            setStatus(message, isError) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = isError ? 'status error' : 'status';
+
+                if (!isError) {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        }
+
+        // Initialize viewer when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('='.repeat(60));
+            console.log('MINIMAL TRELLISCOPE VIEWER - PROOF OF CONCEPT');
+            console.log('='.repeat(60));
+            console.log('This demonstrates how to render REST panels');
+            console.log('The missing code from trelliscopejs-lib v0.7.16');
+            console.log('='.repeat(60));
+
+            const viewer = new MinimalTrelliscopeViewer('panel-grid', './config.json');
+            viewer.init();
+        });
+    </script>
+</body>
+</html>

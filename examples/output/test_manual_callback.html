@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manual Callback Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 200px); position: fixed; top: 0; left: 0; }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 11px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ MANUAL CALLBACK TEST ═══<br></div>
+
+    <!-- Load metaData FIRST -->
+    <script src="./minimal_manual/metaData.js"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ metaData.js loaded: window.metaData = ' + (window.metaData ? window.metaData.length + ' rows' : 'MISSING'));
+    </script>
+
+    <script type="module">
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('Initializing viewer...');
+        const result = initFunc('trelliscope-root', './minimal_manual/displayInfo.json');
+
+        // Wait a moment for viewer to set up callbacks
+        setTimeout(() => {
+            log('\n═══ SEARCHING FOR CALLBACKS ═══');
+
+            // Try different ID patterns
+            const ids = ['minimal_manual', 'trelliscope-root', 'trelliscope_root'];
+            const callbackTypes = ['MetaData', 'AppConfig', 'DisplayInfo'];
+
+            let found = false;
+
+            for (const id of ids) {
+                for (const type of callbackTypes) {
+                    const key = `__load${type}__${id}`;
+                    if (window[key] && typeof window[key] === 'function') {
+                        log(`✓ Found: ${key}`);
+                        found = true;
+
+                        // Try calling it
+                        try {
+                            log(`  Calling ${key} with window.metaData...`);
+                            window[key](window.metaData);
+                            log(`  ✓ Called successfully!`);
+                        } catch (e) {
+                            log(`  ✗ Error: ${e.message}`);
+                        }
+                    }
+                }
+            }
+
+            if (!found) {
+                log('✗ No matching callbacks found');
+
+                // List ALL window properties with "load" in the name
+                log('\nAll window properties containing "load":');
+                Object.keys(window).filter(k => k.toLowerCase().includes('load')).forEach(k => {
+                    log(`  window.${k} = ${typeof window[k]}`);
+                });
+            }
+
+            // Check result after 2 more seconds
+            setTimeout(() => {
+                const text = document.body.textContent;
+                log('\n═══ RESULT ═══');
+                if (text.includes('of 3')) {
+                    log('✓✓✓ SUCCESS! Viewer shows 3 panels!');
+                } else {
+                    log('❌ Still shows "0 of 0"');
+                    log('\nDumping displayInfo.json that viewer loaded:');
+
+                    // Try to access viewer state
+                    const allKeys = Object.keys(window).filter(k =>
+                        k.toLowerCase().includes('trell') ||
+                        k.toLowerCase().includes('state') ||
+                        k.toLowerCase().includes('config')
+                    );
+                    allKeys.forEach(k => {
+                        log(`  window.${k} exists`);
+                    });
+                }
+            }, 2000);
+
+        }, 500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test With Paths V2</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 250px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 250px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ WITH PANEL PATHS (CACHE-BUSTED) ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept Image creation
+        const OriginalImage = window.Image;
+        let imageCount = 0;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const id = imageCount++;
+
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log('[IMG ' + id + '] src set to: ' + value);
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            img.addEventListener('load', function() {
+                log('  ✓ [IMG ' + id + '] loaded successfully');
+            });
+            img.addEventListener('error', function() {
+                log('  ✗ [IMG ' + id + '] FAILED: ' + this.src);
+            });
+
+            return img;
+        };
+
+        log('✓ Image interceptor active');
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing viewer...');
+        initFunc('trelliscope-root', './config.json');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        log('3. Loading metaData.js with cache-busting...');
+        const script = document.createElement('script');
+        script.onload = () => {
+            log('✓ metaData.js loaded!');
+            log('\nChecking panel values:');
+            window.metaData.forEach((row, i) => {
+                log('  row[' + i + '].panel = "' + row.panel + '" (type: ' + typeof row.panel + ')');
+            });
+
+            setTimeout(() => {
+                log('\n═══ AFTER 3 SECONDS ═══');
+                const text = document.body.textContent;
+                const imgs = document.querySelectorAll('img');
+
+                if (text.includes('of 3')) {
+                    log('✓ Viewer shows "1 - 3 of 3"');
+                } else {
+                    log('✗ Viewer shows "0 of 0"');
+                }
+
+                log('Images in DOM: ' + imgs.length);
+
+                if (imgs.length > 0) {
+                    log('\n✓✓✓ SUCCESS! IMAGES ARE RENDERING!');
+                    imgs.forEach((img, i) => {
+                        log('  img[' + i + ']: src=' + img.src);
+                        log('           complete=' + img.complete + ', naturalWidth=' + img.naturalWidth);
+                    });
+                } else {
+                    log('\n✗ Still no images');
+                    log('Expected viewer to create img elements with src like:');
+                    log('  displays/minimal_manual/panels/0.png');
+                }
+            }, 3000);
+        };
+        script.src = './displays/minimal_manual/metaData.js?v=' + Date.now();
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

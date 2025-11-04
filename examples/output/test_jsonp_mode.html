@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSONP Mode Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 200px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ JSONP MODE (datatype: jsonp) ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        let imageCount = 0;
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const id = imageCount++;
+
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log('[IMG ' + id + '] ' + value);
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            img.addEventListener('load', () => log('  ✓ loaded'));
+            img.addEventListener('error', () => log('  ✗ failed'));
+
+            return img;
+        };
+
+        log('✓ Interceptor active');
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing with config.json (datatype:jsonp)...');
+        initFunc('trelliscope_root', './config.json');
+
+        setTimeout(() => {
+            log('\n═══ RESULT ═══');
+
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            // Check actual UI text
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Viewer found 3 panels!');
+            } else if (text.includes('0 of 0')) {
+                log('✗ Shows "0 of 0"');
+            }
+
+            const imgs = viewerDiv.querySelectorAll('img');
+            log('Images: ' + imgs.length);
+
+            if (imgs.length > 0) {
+                log('\n🎉 SUCCESS! Images rendering!');
+            }
+        }, 4000);
+    </script>
+</body>
+</html>

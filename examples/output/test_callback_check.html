@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Callback Check</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 300px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 300px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ CALLBACK REGISTRATION CHECK ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ Starting...');
+
+        // Intercept callback registration
+        const originalDefineProperty = Object.defineProperty;
+        Object.defineProperty = function(obj, prop, descriptor) {
+            if (obj === window && prop.startsWith('__load')) {
+                log('Callback registered: ' + prop);
+            }
+            return originalDefineProperty.call(this, obj, prop, descriptor);
+        };
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing viewer (this registers callbacks)...');
+        initFunc('trelliscope_root', './config.json');
+
+        await new Promise(r => setTimeout(r, 1000));
+
+        log('\n3. Checking registered callbacks:');
+        const callbacks = Object.keys(window).filter(k => k.startsWith('__load'));
+        if (callbacks.length > 0) {
+            callbacks.forEach(cb => log('  ' + cb));
+        } else {
+            log('  ✗ No callbacks found!');
+        }
+
+        log('\n4. Manually loading JSONP files as scripts...');
+        const scripts = [
+            './config.jsonp',
+            './displays/displayList.jsonp',
+            './displays/minimal_manual/displayInfo.jsonp',
+            './displays/minimal_manual/metaData.jsonp'
+        ];
+
+        for (const src of scripts) {
+            const script = document.createElement('script');
+            script.src = src + '?v=' + Date.now();
+            await new Promise((resolve, reject) => {
+                script.onload = () => {
+                    log('  ✓ Loaded: ' + src);
+                    resolve();
+                };
+                script.onerror = () => {
+                    log('  ✗ Failed: ' + src);
+                    resolve();
+                };
+                document.body.appendChild(script);
+            });
+        }
+
+        log('\n5. Waiting for viewer to process...');
+        await new Promise(r => setTimeout(r, 2000));
+
+        log('\n═══ RESULT ═══');
+        const viewerDiv = document.getElementById('trelliscope_root');
+        const text = viewerDiv.textContent;
+
+        if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+            log('✓ Viewer found 3 panels');
+        } else if (text.includes('0 of 0')) {
+            log('✗ Shows "0 of 0"');
+        }
+
+        if (text.includes('No Image')) {
+            log('⚠ Shows "No Image" placeholders');
+        }
+
+        const imgs = viewerDiv.querySelectorAll('img');
+        log('Images created: ' + imgs.length);
+
+        if (imgs.length > 0) {
+            imgs.forEach((img, i) => {
+                log('  img[' + i + '].src = ' + img.src);
+            });
+        }
+    </script>
+</body>
+</html>

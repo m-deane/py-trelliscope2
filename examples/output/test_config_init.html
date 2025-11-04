@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Config Init Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 250px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 250px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ CONFIG INIT DIAGNOSTIC ═══<br></div>
+
+    <script src="./displays/minimal_manual/metaData.js"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ metaData.js loaded: window.metaData = ' + (window.metaData ? JSON.stringify(window.metaData[0]) : 'MISSING'));
+
+        // Intercept fetch
+        const fetchLog = [];
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0].url;
+            log('[FETCH] ' + url);
+            fetchLog.push(url);
+            return originalFetch.apply(this, args).then(response => {
+                log('  → ' + response.status + ' ' + response.statusText);
+                return response;
+            }).catch(err => {
+                log('  → ERROR: ' + err.message);
+                throw err;
+            });
+        };
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+        log('✓ Module loaded, trelliscopeApp = ' + typeof initFunc);
+
+        log('\n2. Checking config.json...');
+        try {
+            const configResp = await fetch('./config.json');
+            const configData = await configResp.json();
+            log('✓ config.json: ' + JSON.stringify(configData));
+        } catch (e) {
+            log('✗ config.json error: ' + e.message);
+        }
+
+        log('\n3. Checking displayList.json...');
+        try {
+            const listResp = await fetch('./displays/displayList.json');
+            const listData = await listResp.json();
+            log('✓ displayList.json: ' + JSON.stringify(listData));
+        } catch (e) {
+            log('✗ displayList.json error: ' + e.message);
+        }
+
+        log('\n4. Checking displayInfo.json...');
+        try {
+            const infoResp = await fetch('./displays/minimal_manual/displayInfo.json');
+            const infoData = await infoResp.json();
+            log('✓ displayInfo.json: name=' + infoData.name + ', n=' + infoData.n);
+            log('  panelInterface: ' + JSON.stringify(infoData.panelInterface));
+        } catch (e) {
+            log('✗ displayInfo.json error: ' + e.message);
+        }
+
+        log('\n5. Initializing viewer with config.json...');
+        initFunc('trelliscope-root', './config.json');
+
+        setTimeout(() => {
+            log('\n═══ AFTER 3 SECONDS ═══');
+            log('Fetches made: ' + fetchLog.length);
+            fetchLog.forEach((url, i) => log('  ' + (i+1) + '. ' + url));
+
+            const text = document.body.textContent;
+            if (text.includes('of 3')) {
+                log('\n✓✓✓ SUCCESS! Shows 3 panels!');
+            } else if (text.includes('0 of 0')) {
+                log('\n❌ Shows "0 of 0" - viewer not finding data');
+            } else {
+                log('\n⚠ Unknown state');
+            }
+
+            // Check for images
+            const imgs = document.querySelectorAll('img');
+            log('Images in DOM: ' + imgs.length);
+            imgs.forEach((img, i) => {
+                log('  img[' + i + '].src = ' + img.src);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

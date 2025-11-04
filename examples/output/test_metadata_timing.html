@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>metaData Timing Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <!-- Load metaData.js synchronously FIRST -->
+    <script src="./basic_viewer_demo/metaData.js"></script>
+
+    <!-- Verify it loaded before doing anything else -->
+    <script>
+        console.log('=== METADATA TIMING TEST ===');
+        console.log('1. window.metaData immediately after loading:', typeof window.metaData);
+        console.log('2. metaData rows:', window.metaData?.length);
+
+        if (!window.metaData || window.metaData.length === 0) {
+            console.error('FATAL: metaData not loaded!');
+        } else {
+            console.log('3. ✓ metaData loaded, first row:', window.metaData[0]);
+        }
+    </script>
+
+    <!-- NOW load and initialize viewer -->
+    <script type="module">
+        console.log('4. Module script starting...');
+        console.log('5. metaData still available:', typeof window.metaData, window.metaData?.length);
+
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        console.log('6. Module loaded');
+        console.log('7. metaData still available:', typeof window.metaData, window.metaData?.length);
+
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+        console.log('8. Init function ready');
+        console.log('9. metaData still available:', typeof window.metaData, window.metaData?.length);
+
+        console.log('10. Calling init...');
+        const result = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+        console.log('11. Init returned:', typeof result);
+
+        // Check viewer state
+        setTimeout(() => {
+            const root = document.getElementById('trelliscope-root');
+            const text = root.textContent || '';
+
+            console.log('\n12. After 3s:');
+            console.log('  metaData still available:', typeof window.metaData, window.metaData?.length);
+
+            if (text.includes('0 of 0')) {
+                console.error('  ❌ Viewer shows "0 of 0" - NOT finding metaData');
+            } else if (text.includes(' of 20') || text.includes('20 of 20')) {
+                console.log('  ✓ Viewer found 20 panels!');
+
+                const imgs = root.querySelectorAll('img');
+                console.log('  Images rendered:', imgs.length);
+
+                if (imgs.length > 0) {
+                    console.log('  ✓✓✓ SUCCESS!');
+                } else {
+                    console.log('  ⚠ Has panels but no images');
+                }
+            } else {
+                console.log('  Text content:', text.substring(0, 200));
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

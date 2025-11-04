@@ -1,0 +1,100 @@
+url: https://trelliscope.github.io/trelliscope/
+# url: https://trelliscope.org
+template:
+  bootstrap: 5
+  # bootswatch: flatly
+
+home:
+  title: Interactively Explore Data Frames of Visualizations
+
+authors:
+  Ryan Hafen:
+    href: https://ryanhafen.com
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - panels
+  - embed
+  - bigdata
+
+reference:
+
+- title: Create a Trelliscope data frame
+  contents:
+  - '`as_trelliscope_df`'
+
+- title: Panel visualization specification
+  contents:
+  - '`panel_local`'
+  - '`panel_lazy`'
+  - '`panel_url`'
+  - '`facet_panels`'
+  - '`as_panels_df`'
+  - '`panel_options`'
+
+- title: Meta variables
+  desc:  Special meta variable types beyond the basic R types
+  contents:
+  - '`number`'
+  - '`currency`'
+  - '`href`'
+  - '`filter_cat_href`'
+
+- title: Pipe functions
+  desc:  These functions receive and return a modified trelliscope data frame
+  contents:
+  - '`set_tags`'
+  - '`set_var_labels`'
+  - '`set_panel_options`'
+  - '`set_primary_panel`'
+  - '`set_default_filters`'
+  - '`set_default_labels`'
+  - '`set_default_layout`'
+  - '`set_default_sort`'
+  - '`add_inputs`'
+  - '`add_view`'
+  - '`set_info_html`'
+  - '`set_theme`'
+  - '`set_show_info_on_load`'
+  - '`add_charm`'
+  - '`write_trelliscope`'
+  - '`view_trelliscope`'
+
+- title: Inputs
+  desc:  Specify panel-level user inputs
+  contents:
+  - '`input_checkbox`'
+  - '`input_multiselect`'
+  - '`input_number`'
+  - '`input_radio`'
+  - '`input_select`'
+  - '`input_text`'
+
+- title: State specification
+  desc:  Specify states to be used in default and custom views
+  contents:
+  - '`filter_range`'
+  - '`filter_string`'
+  - '`state_labels`'
+  - '`state_layout`'
+  - '`state_sort`'
+
+- title: Miscellanious utilities/data
+  contents:
+  - '`show_info`'
+  - '`as_json`'
+  - '`update_display_list`'
+  - '`currencies`'
+  - '`rover_icon_b64`'
+
+- title: Embedding
+  contents:
+  - '`trelliscope-shiny`'
+  - '`add_trelliscope_resource_path`'
+
+- title: Example datasets
+  contents:
+  - '`gap`'
+  - '`mars_rover`'

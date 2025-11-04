@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - React Component Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root"></div>
+
+    <!-- Load React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script type="module">
+        console.log('=== REACT COMPONENT APPROACH ===');
+
+        // Load config
+        const resp = await fetch(`./basic_viewer_demo/displayInfo.json?v=${Date.now()}`, {
+            cache: 'no-store'
+        });
+        const displayInfo = await resp.json();
+
+        console.log('1. Config loaded:', displayInfo.name);
+        console.log('2. Has metaData:', !!displayInfo.metaData);
+        console.log('3. Rows:', displayInfo.metaData?.length);
+
+        // Load module
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+
+        console.log('4. Module exports:', Object.keys(module));
+        console.log('5. TrelliscopeApp type:', typeof module.TrelliscopeApp);
+
+        // Try rendering with React
+        const { TrelliscopeApp } = module;
+
+        if (typeof TrelliscopeApp === 'function') {
+            console.log('6. Creating React element...');
+
+            // Different prop patterns
+            const propOptions = [
+                {
+                    desc: 'config prop',
+                    props: {
+                        config: displayInfo,
+                        id: 'trelliscope-root'
+                    }
+                },
+                {
+                    desc: 'data prop',
+                    props: {
+                        data: displayInfo,
+                        id: 'trelliscope-root'
+                    }
+                },
+                {
+                    desc: 'displayInfo prop',
+                    props: {
+                        displayInfo: displayInfo,
+                        id: 'trelliscope-root'
+                    }
+                },
+                {
+                    desc: 'direct props spread',
+                    props: {
+                        ...displayInfo,
+                        id: 'trelliscope-root'
+                    }
+                }
+            ];
+
+            for (const option of propOptions) {
+                console.log(`\n7. Trying: ${option.desc}`);
+
+                try {
+                    const element = React.createElement(TrelliscopeApp, option.props);
+                    const root = ReactDOM.createRoot(document.getElementById('trelliscope-root'));
+                    root.render(element);
+
+                    console.log(`   Rendered with ${option.desc}`);
+
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    const imgs = document.querySelectorAll('img');
+                    console.log(`   Images: ${imgs.length}`);
+
+                    if (imgs.length > 0) {
+                        console.log(`   ✓✓✓ SUCCESS with ${option.desc}!`);
+                        break;
+                    } else {
+                        console.log(`   No images, trying next...`);
+                        // Clear for next attempt
+                        document.getElementById('trelliscope-root').innerHTML = '';
+                    }
+                } catch (err) {
+                    console.error(`   Error: ${err.message}`);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

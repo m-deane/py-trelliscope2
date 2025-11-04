@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Final Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+        #status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: black;
+            color: lime;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 400px;
+            z-index: 10000;
+            border: 2px solid lime;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Loading...</div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        const status = document.getElementById('status');
+        function log(msg) {
+            console.log(msg);
+            status.innerHTML += '<br>' + msg;
+        }
+
+        log('1. Fetching displayInfo...');
+        const cacheBust = Date.now();
+        const resp = await fetch(`./basic_viewer_demo/displayInfo.json?v=${cacheBust}`, {
+            cache: 'no-store'
+        });
+        const info = await resp.json();
+
+        log(`2. Fields: ${Object.keys(info).join(', ')}`);
+        log(`3. Has metaData: ${!!info.metaData}`);
+        log(`4. Has n: ${!!info.n}`);
+
+        if (info.metaData) {
+            log(`5. ✓ metaData: ${info.metaData.length} rows`);
+            log(`   Panel col: ${info.panelInterface.panelCol}`);
+            log(`   Panel base: ${info.panelInterface.base}`);
+            log(`   Panel format: ${info.panelInterface.format}`);
+            log(`   First panel value: ${info.metaData[0][info.panelInterface.panelCol]}`);
+
+            // Construct expected panel path
+            const firstPanelValue = info.metaData[0][info.panelInterface.panelCol];
+            const expectedPath = `./basic_viewer_demo${info.panelInterface.base.substring(1)}/${firstPanelValue}.${info.panelInterface.format}`;
+            log(`   Expected path: ${expectedPath}`);
+
+            // Test if panel image exists
+            const testImg = new Image();
+            testImg.onload = () => log(`6. ✓ Test panel loaded: ${testImg.naturalWidth}x${testImg.naturalHeight}`);
+            testImg.onerror = () => log(`6. ✗ Test panel FAILED to load`);
+            testImg.src = expectedPath;
+        } else {
+            log('5. ✗ NO metaData! Still cached?');
+        }
+
+        log('7. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('8. Initializing...');
+        const result = initFunc('trelliscope-root', `./basic_viewer_demo/displayInfo.json?v=${cacheBust}`);
+
+        setTimeout(() => {
+            const imgs = document.querySelectorAll('#trelliscope-root img');
+            log(`9. After 3s: ${imgs.length} images`);
+            if (imgs.length > 0) {
+                log('✓✓✓ SUCCESS!');
+                status.style.background = 'green';
+            } else {
+                log('Still no panels');
+                status.style.background = 'red';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

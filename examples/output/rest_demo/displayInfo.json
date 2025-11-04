@@ -1,0 +1,64 @@
+{
+  "name": "rest_demo",
+  "description": "Demonstration of REST panel loading",
+  "keysig": "59eada3dd6165c6991e9f0cdb8e5aca7",
+  "metas": [
+    {
+      "varname": "category",
+      "label": "Category",
+      "type": "factor",
+      "levels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "varname": "value",
+      "label": "Value",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    },
+    {
+      "varname": "panel",
+      "type": "panel",
+      "label": "Panel",
+      "paneltype": "img",
+      "tags": [],
+      "filterable": false,
+      "sortable": false,
+      "maxnchar": 0,
+      "log": false,
+      "digits": 0,
+      "filterSortOrder": "ct,asc",
+      "locale": false,
+      "aspect": 1.0,
+      "source": {
+        "type": "REST",
+        "url": "http://localhost:5001/api/panels/minimal_manual",
+        "isLocal": true,
+        "port": 5001
+      }
+    }
+  ],
+  "state": {
+    "layout": {
+      "ncol": 3,
+      "nrow": 1,
+      "page": 1,
+      "arrangement": "row"
+    },
+    "labels": [
+      "category",
+      "value"
+    ],
+    "sort": [],
+    "filter": []
+  },
+  "views": [],
+  "dataSource": "./metadata.csv",
+  "n": 3,
+  "primarypanel": "panel"
+}

@@ -1,0 +1,73 @@
+{
+  "name": "simple_static",
+  "description": "Simple Static Panel Example",
+  "keysig": "4745d671755e7587ba52ce3b3233e93b",
+  "metas": [
+    {
+      "varname": "category",
+      "label": "category",
+      "type": "factor",
+      "levels": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ]
+    },
+    {
+      "varname": "id",
+      "label": "id",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    },
+    {
+      "varname": "value",
+      "label": "value",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    },
+    {
+      "varname": "panel",
+      "type": "panel",
+      "label": "Panel",
+      "paneltype": "img",
+      "tags": [],
+      "filterable": false,
+      "sortable": false,
+      "maxnchar": 0,
+      "log": false,
+      "digits": 0,
+      "filterSortOrder": "ct,asc",
+      "locale": false,
+      "aspect": 1.0,
+      "source": {
+        "type": "file",
+        "isLocal": true,
+        "port": 0
+      }
+    }
+  ],
+  "state": {
+    "layout": {
+      "ncol": 3,
+      "nrow": null,
+      "page": 1,
+      "arrangement": "row"
+    },
+    "labels": [
+      "category",
+      "value"
+    ],
+    "sort": [],
+    "filter": []
+  },
+  "views": [],
+  "dataSource": "./metadata.csv",
+  "n": 5,
+  "primarypanel": "panel"
+}

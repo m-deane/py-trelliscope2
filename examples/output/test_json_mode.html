@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSON Mode Diagnostic</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 300px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.98); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 11px;
+            max-height: 300px; overflow: auto; z-index: 10000;
+            border-top: 3px solid #0f0;
+        }
+        .success { color: #00ff00; font-weight: bold; }
+        .error { color: #ff0000; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ JSON MODE DIAGNOSTIC ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span><br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept Image creation
+        let imageCount = 0;
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const id = imageCount++;
+
+            log(`[IMG ${id}] New Image() created`, 'success');
+
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log(`[IMG ${id}] src set: ${value}`, 'success');
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            img.addEventListener('load', function() {
+                log(`  ✓✓✓ [IMG ${id}] LOADED ${this.naturalWidth}x${this.naturalHeight}`, 'success');
+            });
+            img.addEventListener('error', function() {
+                log(`  ✗✗✗ [IMG ${id}] FAILED: ${this.src}`, 'error');
+            });
+
+            return img;
+        };
+
+        log('✓ Image interceptor active\n');
+    </script>
+
+    <script type="module">
+        log('Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('Initializing with config.json (JSON mode)...\n');
+        initFunc('trelliscope_root', './config.json');
+
+        setTimeout(() => {
+            log('═══ 5 SECOND CHECK ═══');
+
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Shows "1 - 3 of 3"', 'success');
+            } else if (text.includes('0 of 0')) {
+                log('✗ Shows "0 of 0"', 'error');
+            }
+
+            if (text.includes('No Image')) {
+                log('⚠ Shows "No Image" text (table mode or load failure)', 'error');
+            }
+
+            const imgs = viewerDiv ? viewerDiv.querySelectorAll('img') : [];
+            log(`\nImages in DOM: ${imgs.length}`, imgs.length > 0 ? 'success' : 'error');
+
+            if (imgs.length > 0) {
+                log('\n🎉🎉🎉 IMAGES IN DOM! 🎉🎉🎉', 'success');
+                imgs.forEach((img, i) => {
+                    log(`  Img ${i}: ${img.src}`, 'success');
+                    log(`    complete: ${img.complete}, naturalWidth: ${img.naturalWidth}`);
+                });
+            } else if (imageCount > 0) {
+                log(`\n⚠ Image() called ${imageCount} times but no <img> in DOM`, 'error');
+            } else {
+                log('\n✗ No Image() calls - images not being created', 'error');
+            }
+
+            log('\nDEBUG: Check browser Network tab for image requests');
+            log('Expected: displays/minimal_manual/panels/0.png');
+        }, 5000);
+    </script>
+</body>
+</html>

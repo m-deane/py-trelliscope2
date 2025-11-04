@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Debug Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; font-family: monospace; }
+        #trelliscope_root {
+            width: 100vw;
+            height: 70vh;
+            border: 3px solid red;
+            background: #f0f0f0;
+        }
+        #info {
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+            height: 30vh;
+            overflow: auto;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #00bfff; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="info">
+        <h3>Debug Info</h3>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span><br>`;
+        }
+
+        log('Starting initialization...');
+        log('Viewer div ID: trelliscope_root');
+        log('Using config: ./config.json');
+        log('');
+    </script>
+
+    <script type="module">
+        try {
+            log('Loading module from CDN...');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+            log('✓ Module loaded', 'success');
+
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                log('✓ Found trelliscopeApp function', 'success');
+                log('Calling: trelliscopeApp("trelliscope_root", "./config.json")');
+                log('');
+
+                initFunc('trelliscope_root', './config.json');
+
+                log('✓ Init function called', 'success');
+                log('');
+                log('WHAT TO LOOK FOR:');
+                log('1. Red-bordered area above should contain the viewer');
+                log('2. Look for "TRELLISCOPE" text in top-left');
+                log('3. Display dropdown should be next to it');
+                log('4. If you see a white/grey grid, viewer is working');
+                log('');
+
+                setTimeout(() => {
+                    log('');
+                    log('=== 3 SECOND CHECK ===');
+                    const root = document.getElementById('trelliscope_root');
+                    log('Root div exists: ' + (root ? 'YES' : 'NO'), root ? 'success' : 'error');
+                    log('Root innerHTML length: ' + (root ? root.innerHTML.length : 0));
+
+                    if (root && root.innerHTML.length > 0) {
+                        log('✓ Viewer has rendered content', 'success');
+
+                        // Check for display selector
+                        const selects = root.querySelectorAll('select');
+                        log('Select elements found: ' + selects.length);
+
+                        // Check for any text content
+                        const text = root.textContent.substring(0, 200);
+                        log('First 200 chars of content: ' + text);
+
+                        // Check for images
+                        const imgs = root.querySelectorAll('img');
+                        log('Images found: ' + imgs.length, imgs.length > 0 ? 'success' : 'error');
+                    } else {
+                        log('✗ Viewer appears empty', 'error');
+                        log('This means initialization failed');
+                    }
+                }, 3000);
+
+            } else {
+                log('✗ trelliscopeApp function not found', 'error');
+                log('Available in module: ' + Object.keys(module).join(', '));
+            }
+        } catch (error) {
+            log('✗ ERROR: ' + error.message, 'error');
+            console.error(error);
+        }
+    </script>
+</body>
+</html>

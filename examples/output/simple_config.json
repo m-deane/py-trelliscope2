@@ -1,0 +1,6 @@
+{
+  "name": "Simple Static Displays",
+  "datatype": "json",
+  "id": "trelliscope_root",
+  "display_base": "static_displays"
+}

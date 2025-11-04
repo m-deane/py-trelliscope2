@@ -1,0 +1,45 @@
+Package: trelliscope
+Title: Create Interactive Multi-Panel Displays
+Version: 0.1.14
+Authors@R:
+    person("Ryan", "Hafen", , "rhafen@gmail.com", role = c("aut", "cre", "cph"),
+        comment = c(ORCID = "0000-0002-5516-8367"))
+Description: Trelliscope enables interactive exploration of data frames of visualizations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests:
+    testthat (>= 3.0.0),
+    covr,
+    plotly,
+    fidelius,
+    dygraphs,
+    rmarkdown
+Config/testthat/edition: 3
+Imports:
+    R6,
+    jsonlite,
+    ggplot2 (>= 3.2.1),
+    dplyr,
+    rlang,
+    svglite,
+    htmlwidgets,
+    htmltools,
+    cli,
+    tidyr,
+    httpuv,
+    knitr,
+    digest,
+    glue,
+    magick,
+    shiny,
+    pillar,
+    vctrs,
+    tibble
+Depends: 
+    R (>= 4.1)
+LazyData: true
+URL: https://trelliscope.org/trelliscope, https://github.com/trelliscope/trelliscope
+BugReports: https://github.com/trelliscope/trelliscope/issues
+VignetteBuilder: knitr

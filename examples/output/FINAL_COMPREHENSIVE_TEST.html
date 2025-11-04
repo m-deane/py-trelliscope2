@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FINAL COMPREHENSIVE TEST</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; font-family: monospace; }
+        #log { padding: 20px; max-width: 1200px; margin: 0 auto; font-size: 12px; }
+        .success { color: #0f0; font-weight: bold; }
+        .error { color: #f00; }
+        .info { color: #ff0; }
+        #trelliscope-root { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: -1; }
+    </style>
+</head>
+<body>
+    <div id="log">FINAL COMPREHENSIVE TEST - Testing ALL possible configurations...<br><br></div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        const log = document.getElementById('log');
+        function addLog(msg, type = 'info') {
+            console.log(msg);
+            log.innerHTML += `<span class="${type}">${msg}</span><br>`;
+        }
+
+        addLog('═══════════════════════════════════════════', 'info');
+        addLog('LOADING DATA AND MODULE', 'info');
+        addLog('═══════════════════════════════════════════', 'info');
+
+        // Load real data
+        const displayInfo = await (await fetch(`./basic_viewer_demo/displayInfo.json?v=${Date.now()}`, { cache: 'no-store' })).json();
+        addLog(`✓ Loaded displayInfo with fields: ${Object.keys(displayInfo).join(', ')}`, 'success');
+
+        // Check for data
+        const dataFields = ['cogData', 'panelData', 'data', 'df', 'table', 'metaData'];
+        const foundDataField = dataFields.find(f => displayInfo[f]);
+        if (foundDataField) {
+            addLog(`✓ Found data in field: ${foundDataField} (${displayInfo[foundDataField].length} rows)`, 'success');
+        } else {
+            addLog(`✗ NO DATA FOUND in any of: ${dataFields.join(', ')}`, 'error');
+        }
+
+        // Load module
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        addLog(`✓ Module loaded, exports: ${Object.keys(module).join(', ')}`, 'success');
+
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+        addLog(`✓ Init function: ${initFunc.name} (${initFunc.length} parameters)`, 'success');
+
+        addLog('<br>═══════════════════════════════════════════', 'info');
+        addLog('TESTING INITIALIZATION PATTERNS', 'info');
+        addLog('═══════════════════════════════════════════', 'info');
+
+        const tests = [
+            {
+                name: "Test 1: Path to displayInfo.json",
+                init: () => initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json')
+            },
+            {
+                name: "Test 2: Path to directory",
+                init: () => {
+                    document.getElementById('trelliscope-root').innerHTML = '';
+                    return initFunc('trelliscope-root', './basic_viewer_demo');
+                }
+            },
+            {
+                name: "Test 3: Path without .json extension",
+                init: () => {
+                    document.getElementById('trelliscope-root').innerHTML = '';
+                    return initFunc('trelliscope-root', './basic_viewer_demo/displayInfo');
+                }
+            }
+        ];
+
+        for (const test of tests) {
+            addLog(`<br>${test.name}...`, 'info');
+            try {
+                const result = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+                addLog(`  Result type: ${typeof result}`, 'info');
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const imgs = document.querySelectorAll('#trelliscope-root img');
+                const text = document.body.textContent;
+
+                if (imgs.length > 0) {
+                    addLog(`  ✓✓✓ SUCCESS! Found ${imgs.length} images!`, 'success');
+                    addLog(`  Panel sources:`, 'success');
+                    imgs.forEach((img, i) => {
+                        addLog(`    ${i}: ${img.src}`, 'success');
+                    });
+                    break; // Stop on first success
+                } else if (text.includes(' of 20') || text.includes(' of 2')) {
+                    addLog(`  ⚠ Viewer found panels but no images rendered`, 'error');
+                    addLog(`  Page text: ${text.substring(0, 200)}`, 'info');
+                } else {
+                    addLog(`  ✗ No images, shows "0 of 0"`, 'error');
+                }
+            } catch (err) {
+                addLog(`  ✗ Error: ${err.message}`, 'error');
+            }
+        }
+
+        addLog('<br>═══════════════════════════════════════════', 'info');
+        addLog('FINAL STATUS', 'info');
+        addLog('═══════════════════════════════════════════', 'info');
+
+        const finalImgs = document.querySelectorAll('#trelliscope-root img');
+        if (finalImgs.length > 0) {
+            addLog(`SUCCESS! ${finalImgs.length} panels rendered`, 'success');
+        } else {
+            addLog(`FAILED - No panels rendered`, 'error');
+            addLog(`The viewer loads but cannot find/render panel data`, 'error');
+            addLog(`<br>displayInfo structure that viewer received:`, 'info');
+            addLog(JSON.stringify(displayInfo, null, 2), 'info');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test Both Path Versions</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+        #status {
+            position: fixed; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.9); color: lime;
+            padding: 15px; font-family: monospace; font-size: 12px;
+            z-index: 10000; border: 2px solid lime;
+            max-width: 500px; max-height: 80vh; overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Testing...</div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        const status = document.getElementById('status');
+        function log(msg) {
+            console.log(msg);
+            status.innerHTML += msg + '<br>';
+        }
+
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        // Test Version 2 first (panel as number)
+        log('Testing Version 2: panel column = number...');
+        const v2 = await (await fetch(`./basic_viewer_demo/displayInfo_v2.json?v=${Date.now()}`, {cache: 'no-store'})).json();
+
+        log(`  Panel value: ${v2.cogData[0].panel}`);
+        log(`  Panel base: ${v2.panelInterface.base}`);
+
+        let result = initFunc('trelliscope-root', `./basic_viewer_demo/displayInfo_v2.json?v=${Date.now()}`);
+
+        await new Promise(r => setTimeout(r, 3000));
+
+        let imgs = document.querySelectorAll('#trelliscope-root img');
+        log(`  Images: ${imgs.length}`);
+
+        if (imgs.length > 0) {
+            log('✓✓✓ SUCCESS with Version 2!');
+            status.style.background = 'green';
+            imgs.forEach((img, i) => {
+                log(`    ${i}: ${img.src}`);
+            });
+        } else {
+            log('Version 2 failed. Trying Version 1...');
+
+            // Clear and try Version 1
+            document.getElementById('trelliscope-root').innerHTML = '';
+
+            const v1 = await (await fetch(`./basic_viewer_demo/displayInfo_v1.json?v=${Date.now()}`, {cache: 'no-store'})).json();
+            log(`  Panel value: ${v1.cogData[0].panel}`);
+
+            result = initFunc('trelliscope-root', `./basic_viewer_demo/displayInfo_v1.json?v=${Date.now()}`);
+
+            await new Promise(r => setTimeout(r, 3000));
+
+            imgs = document.querySelectorAll('#trelliscope-root img');
+            log(`  Images: ${imgs.length}`);
+
+            if (imgs.length > 0) {
+                log('✓✓✓ SUCCESS with Version 1!');
+                status.style.background = 'green';
+            } else {
+                log('❌ Both versions failed');
+                status.style.background = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

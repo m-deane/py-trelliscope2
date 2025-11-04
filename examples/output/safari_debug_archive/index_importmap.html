@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope</title>
+    <link rel="stylesheet" href="./trelliscope.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+
+    <!-- Import map to resolve React and other dependencies -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+            "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@4.29.5",
+            "@mui/material": "https://esm.sh/@mui/material@5.13.0",
+            "@mui/icons-material": "https://esm.sh/@mui/icons-material@5.13.0",
+            "@reduxjs/toolkit": "https://esm.sh/@reduxjs/toolkit@1.9.5",
+            "react-redux": "https://esm.sh/react-redux@8.1.1",
+            "d3": "https://esm.sh/d3@7.8.5",
+            "papaparse": "https://esm.sh/papaparse@5.4.1",
+            "immer": "https://esm.sh/immer@10.0.2"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <!-- Load library which creates window.trelliscopeApp -->
+    <script type="module" src="./trelliscope-lib.min.js"></script>
+
+    <!-- Initialize after library loads -->
+    <script type="module">
+        // Wait for library to load and create window.trelliscopeApp
+        setTimeout(() => {
+            console.log('Checking window.trelliscopeApp...');
+            console.log('Type:', typeof window.trelliscopeApp);
+
+            if (typeof window.trelliscopeApp === 'function') {
+                console.log('✓ Found! Calling trelliscopeApp...');
+
+                // R package pattern: trelliscopeApp(id, config_path)
+                window.trelliscopeApp(
+                    'trelliscope-root',
+                    './basic_viewer_demo/displayInfo.json'
+                );
+
+                console.log('✓ Called successfully!');
+            } else {
+                console.error('window.trelliscopeApp not found!');
+                const trellKeys = Object.keys(window).filter(k => k.toLowerCase().includes('trell'));
+                console.log('Trelliscope-related keys:', trellKeys);
+            }
+        }, 2000); // Wait 2 seconds for module to fully load
+    </script>
+</body>
+</html>

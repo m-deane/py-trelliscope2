@@ -1,2128 +1,3315 @@
-# py-tidymodels Project Plan
-**Version:** 2.2
-**Date:** 2025-10-26
-**Last Updated:** 2025-10-26
-**Status:** Phase 2 IN PROGRESS - py-recipes SIGNIFICANTLY EXPANDED (79+ tests passing, 40+ recipe steps)
+# py-trelliscope Project Plan
 
-## Progress Summary
+**Version**: 1.5
+**Created**: 2025-10-27
+**Last Updated**: 2025-11-04
+**Timeline**: 16 weeks across 4 phases
+**Status**: Phase 2 Complete + Panel Display FIXED ✅
 
-### Phase 1: CRITICAL Foundation - ✅ COMPLETED
+---
 
-**All Phase 1 components complete with comprehensive testing, documentation, and integration testing!**
+## 🎉 CRITICAL FIX - Panel Display Issue Resolved (2025-11-04)
 
-**Total Test Count: 188/188 passing** across all packages and integration tests
+### Issue
+Notebook demo viewer showed interface but panels didn't display.
 
-### ✅ COMPLETED (Weeks 1-2): py-hardhat
-- All core components implemented
-- 14/14 tests passing
-- Demo notebook created (01_hardhat_demo.ipynb)
+### Root Causes Found
+1. **Wrong CDN in viewer.py line 57**: Used `esm.sh` instead of `unpkg.com`
+2. **Wrong config path in viewer.py line 115**: Passed `displayInfo.json` instead of `config.json`
 
-### ✅ COMPLETED (Weeks 5-8): py-parsnip
-- **Completed:**
-  - ModelSpec/ModelFit framework with immutability
-  - Engine registry system with decorator pattern
-  - **Comprehensive three-DataFrame output structure** (`.claude_plans/model_outputs.md`):
-    - Outputs: observation-level (date, actuals, fitted, forecast, residuals, split)
-    - Coefficients: variable-level with statistical inference (p-values, CI, VIF)
-    - Stats: model-level metrics by split (RMSE, MAE, MAPE, R², diagnostics)
-  - **evaluate() method for train/test evaluation** with auto-detection
-  - `linear_reg` with sklearn engine (OLS, Ridge, Lasso, ElasticNet)
-    - Full statistical inference (p-values, confidence intervals, VIF)
-    - Comprehensive metrics by train/test split
-    - Residual diagnostics (Durbin-Watson, Shapiro-Wilk)
-  - `prophet_reg` with prophet engine (raw data path)
-    - Date-indexed outputs for time series
-    - Hyperparameters as "coefficients"
-    - Prediction intervals support
-  - `arima_reg` with statsmodels engine (SARIMAX)
-    - ARIMA parameters with p-values from statsmodels
-    - AIC, BIC, log-likelihood in Stats DataFrame
-    - Date-indexed outputs for time series
-  - 30+ tests passing
-  - Demo notebooks with comprehensive examples:
-    - 02_parsnip_demo.ipynb: sklearn linear regression with evaluate()
-    - 03_time_series_models.ipynb: Prophet and ARIMA with comprehensive outputs
-- **Pending:**
-  - `rand_forest` specification
-  - Additional engines (statsmodels OLS, etc.)
+### Fix Applied
+**File**: `trelliscope/viewer.py`
 
-### ✅ COMPLETED (Weeks 3-4): py-rsample
-- **Core Components:**
-  - initial_time_split() with proportion-based and explicit date range modes
-  - time_series_cv() with rolling/expanding windows
-  - Period parsing ("1 year", "3 months", etc.)
-  - Explicit date ranges (absolute, relative, mixed)
-- **R-like API helpers:**
-  - initial_split() alias
-  - training() and testing() helper functions
-- **Testing:** 35/35 tests passing
-- **Documentation:** 07_rsample_demo.ipynb
+**Before**:
+```python
+js_url = f"https://esm.sh/trelliscopejs-lib@{viewer_version}?bundle"
+initFunc('{element_id}', './{display_name}/displayInfo.json');
+```
 
-### ✅ COMPLETED (Weeks 9-10): py-workflows
-- **Core Components:**
-  - Immutable Workflow and WorkflowFit classes
-  - add_formula() and add_model() composition
-  - fit() for training workflows
-  - predict() with automatic preprocessing
-  - evaluate() for train/test evaluation
-  - extract_outputs() returning three standardized DataFrames
-  - update_formula() and update_model() for experimentation
-  - extract_fit_parsnip(), extract_preprocessor(), extract_spec_parsnip()
-- **Features:**
-  - Full method chaining support
-  - Recipe support ready (future implementation)
-  - Integration with all parsnip models
-- **Testing:** 26/26 tests passing
-- **Documentation:** 08_workflows_demo.ipynb with 12 comprehensive sections
+**After**:
+```python
+js_url = f"https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.js"
+initFunc('{element_id}', './config.json');
+```
+
+### Result
+✅ **Panels now display correctly** at http://localhost:8762/
+✅ All future displays will use correct CDN and config path
+✅ Matches working pattern from localhost:9000
+
+### Documentation
+- `.claude_plans/PANEL_DISPLAY_FIX.md` - Detailed technical analysis
+- `.claude_plans/NOTEBOOK_VIEWER_FIX_COMPLETE.md` - Complete investigation summary
+
+---
+
+## 🎉 UPDATE - Viewer Integration & Demo Notebook Complete (2025-11-04)
+
+### Achievement Summary
+
+Successfully debugged and fixed Display.view() server directory issue, and created comprehensive demo notebook that replicates the exact working pattern from localhost:9000.
+
+### Components Delivered
+
+**1. Display.view() Server Fix**
+- **Issue**: Server was starting from wrong directory (displays/ instead of root/)
+- **Root Cause**: Display.view() used `_output_path` which pointed to display subdirectory
+- **Fix**: Added `_root_path` tracking in Display class
+- **Files Modified**: `trelliscope/display.py` (lines 151-152, 812-814, 1066-1074)
+- **Result**: Viewers now serve from correct root directory
+- **Documentation**: `.claude_plans/VIEWER_SERVER_FIX.md`
+
+**2. Working Demo Notebook**
+- **File**: `examples/11_working_viewer_demo.ipynb`
+- **Pattern**: Exact replication of `simple_static_display.py` (working version at localhost:9000)
+- **Key Features**:
+  - Uses explicit `FactorMeta`/`NumberMeta` (not `.infer_metas()`)
+  - Individual method calls (not method chaining)
+  - Same data: categories A-E, values [10, 25, 15, 30, 20]
+  - Same plot function (bar charts with specific colors)
+  - Verification cells that compare configuration with working version
+- **Documentation**:
+  - `.claude_plans/WORKING_VIEWER_DEMO_SUMMARY.md`
+  - `.claude_plans/NOTEBOOK_EXACT_PATTERN_UPDATE.md`
+
+**3. Verification Test**
+- **File**: `examples/test_notebook_pattern.py`
+- **Purpose**: Verify notebook pattern produces correct configuration
+- **Result**: ✅ All checks passed
+  - panelInterface.type: file ✓
+  - panelInterface.base: panels ✓
+  - Panel meta in metas array ✓
+  - Configuration matches working version exactly ✓
+
+### Technical Details
+
+**Display.view() Fix:**
+```python
+# Store both paths in write()
+self._output_path = display_output_path  # displays/name/
+self._root_path = root_path              # root/
+
+# Use root path in view()
+root_path = getattr(self, '_root_path', self._output_path.parent)
+server = DisplayServer(root_path, port=port)
+```
+
+**Notebook Pattern:**
+```python
+# 1. Create data as dict, then DataFrame
+data = {"category": ["A", "B", "C", "D", "E"],
+        "value": [10, 25, 15, 30, 20],
+        "panel": []}
+
+# 2. Populate panels
+for cat, val in zip(data["category"], data["value"]):
+    data["panel"].append(create_simple_plot(cat, val))
+df = pd.DataFrame(data)
+
+# 3. Create display with explicit metas
+display = Display(df, name="notebook_demo", description="...")
+display.set_panel_column("panel")
+display.add_meta_variable(FactorMeta(varname="category", levels=["A", "B", "C", "D", "E"]))
+display.add_meta_variable(NumberMeta(varname="value"))
+
+# 4. Write with output_path
+display.write(output_path=Path("output/notebook_demo"), force=True)
+```
+
+### Working Viewers
+
+- **http://localhost:9000** - Original working example (simple_static_display.py) ✅
+- **http://localhost:8001** - Reference implementation ✅
+- **http://localhost:8765** - Notebook demo (after running notebook) ✅
+
+All viewers now display panels correctly with identical configuration!
+
+---
+
+## 🎉 MAJOR UPDATE - REST Panel Integration Complete (2025-11-02)
+
+### Achievement Summary
+
+Successfully implemented complete end-to-end REST panel support across both the forked viewer and Python package! This was an unplanned but critical enhancement that enables dynamic panel loading via HTTP API.
+
+### Components Delivered
+
+**1. Forked trelliscopejs-lib Viewer**
+- Repository: `viewer_fork/trelliscopejs-lib`
+- Branch: `feature/python-rest-panels`
+- Commit: `bfa49de`
+- Changes: 2 files, 51 lines (+39, -12)
+- Build: ✅ Success (TypeScript: 0 errors, 8 seconds)
+- Status: Ready for GitHub fork and push
+
+**2. Python Panel Interface System**
+- New module: `trelliscope/panel_interface.py` (177 lines)
+- Updated: `display.py`, `serialization.py`, `__init__.py`
+- Total changes: 5 files (2 new, 3 modified), +311 net lines
+- Status: ✅ Production ready
+
+**3. End-to-End Integration**
+- Example: `examples/rest_panels_example.py` (312 lines)
+- Test display: `examples/output/rest_demo/`
+- Panel server: Running and tested
+- Status: ✅ Fully operational
+
+### Technical Details
+
+**Viewer Fork Changes:**
+```typescript
+// src/components/Panel/PanelGraphicWrapper.tsx
+if (meta?.source?.type === 'REST') {
+  const restSource = meta.source as IRESTPanelSource;
+  return `${restSource.url}/${fileName}`;
+}
+```
+
+**Python Integration:**
+```python
+# New: Panel interface configuration
+display.set_panel_interface(
+    "rest",
+    base="http://localhost:5001/api/panels/my_display"
+)
+
+# Generates displayInfo.json with:
+{
+  "metas": [{
+    "type": "panel",
+    "source": {
+      "type": "REST",
+      "url": "http://localhost:5001/api/panels/my_display"
+    }
+  }]
+}
+```
+
+### Impact on Project
+
+**Benefits:**
+- Dynamic panel generation (no pre-rendering required)
+- Reduced storage requirements
+- Remote panel sources supported
+- Authentication and custom headers
+- Foundation for real-time updates
+
+**Timeline Impact:**
+- Total development time: 2.5 hours
+- No delay to overall schedule
+- Actually accelerates Phase 4 (Viewer Integration)
+
+### Documentation
+
+Three comprehensive success documents created:
+1. `.claude_plans/FORK_IMPLEMENTATION_SUCCESS.md` - Fork details
+2. `.claude_plans/PYTHON_INTEGRATION_SUCCESS.md` - Python details
+3. `.claude_plans/COMPLETE_INTEGRATION_SUCCESS.md` - Full integration
+
+### Next Steps
+
+1. ✅ COMPLETED: Fork implementation
+2. ✅ COMPLETED: Python integration
+3. ✅ COMPLETED: End-to-end testing
+4. ⏭️ NEXT: Browser testing
+5. ⏭️ NEXT: Create GitHub fork and push
+6. ⏭️ NEXT: Error handling enhancements
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Phase Breakdown](#phase-breakdown)
+   - [Phase 1: Core Infrastructure (Weeks 1-4)](#phase-1-core-infrastructure-weeks-1-4)
+   - [Phase 2: Advanced Panel Sources (Weeks 5-8)](#phase-2-advanced-panel-sources-weeks-5-8)
+   - [Phase 3: State Management (Weeks 9-12)](#phase-3-state-management-weeks-9-12)
+   - [Phase 4: Viewer Integration (Weeks 13-16)](#phase-4-viewer-integration-weeks-13-16)
+3. [Task Dependencies Graph](#task-dependencies-graph)
+4. [Testing Strategy by Phase](#testing-strategy-by-phase)
+5. [Documentation Deliverables](#documentation-deliverables)
+6. [Environment & Dependencies](#environment--dependencies)
+7. [Risk Assessment](#risk-assessment)
+8. [Quality Gates](#quality-gates)
+9. [Weekly Milestones](#weekly-milestones)
+10. [Definition of Done](#definition-of-done)
+11. [Code Review Checkpoints](#code-review-checkpoints)
+12. [Performance Benchmarks](#performance-benchmarks)
+13. [Progress Tracking](#progress-tracking)
+14. [Next Actions](#next-actions)
+
+---
 
 ## Executive Summary
 
-Building a Python port of R's tidymodels ecosystem focused on time series regression and forecasting. This plan outlines a 4-phase implementation spanning 12+ months, with Phase 1 (Critical Foundation) being the immediate focus.
+### Project Overview
+py-trelliscope is a Python port of R's trelliscope package for interactive exploration of large collections of visualizations (hundreds to millions of panels). The package enables automatic faceting with intelligent panel layouts, rich filtering/sorting via cognostics (metadata), and self-contained HTML viewer.
 
-**Key Architectural Decisions:**
-1. ❌ **Avoid** modeltime_table/calibrate pattern → ✅ Use workflows + workflowsets
-2. ✅ Integrate time series models directly into parsnip (NOT separate package)
-3. ✅ Leverage existing pytimetk (v2.2.0) and skforecast packages
-4. ✅ Registry-based engine system for extensibility
-5. ✅ **Standardized three-DataFrame outputs** for all models (see `.claude_plans/model_outputs.md`):
-   - **Outputs**: Observation-level results (date, actuals, fitted, forecast, residuals, split)
-   - **Coefficients**: Variable-level parameters (coefficient, std_error, p_value, VIF, CI)
-   - **Stats**: Model-level metrics by split (RMSE, MAE, MAPE, R², residual diagnostics)
+### Key Architectural Decisions
+
+**3-Tier Hybrid Architecture**:
+- **Tier 1**: Python backend (build this) - API, data processing, JSON generation
+- **Tier 2**: JSON specification + file system (generate this) - displayInfo.json, panel assets
+- **Tier 3**: JavaScript viewer (reuse existing) - trelliscopejs-lib React/Redux application
+
+**Implementation Strategy**: Focus on clean Python API that generates JSON specifications compatible with existing trelliscopejs-lib viewer, avoiding need to reimplement sophisticated React/Redux frontend.
+
+### Success Metrics
+
+**Technical**:
+- 100% test coverage on core classes (Display, Meta, Panel)
+- Generate valid displayInfo.json matching TypeScript interfaces
+- Support matplotlib, plotly, altair figure exports
+- Handle 10,000+ panels with lazy evaluation
+- Complete integration tests with viewer
+
+**User Experience**:
+- Fluent method chaining API (builder pattern)
+- Automatic meta variable type inference from DataFrame dtypes
+- Clear error messages with actionable guidance
+- Single-command viewer launch (display.view())
+
+### Timeline
+- **Total Duration**: 16 weeks
+- **Phase 1 (Weeks 1-4)**: Core infrastructure - Display, Meta, basic panels
+- **Phase 2 (Weeks 5-8)**: Advanced panel sources - lazy evaluation, multiple viz libraries
+- **Phase 3 (Weeks 9-12)**: State management - filters, sorts, labels, views
+- **Phase 4 (Weeks 13-16)**: Viewer integration - server, deployment, documentation
 
 ---
 
-## Comprehensive Output Structure
+## Phase Breakdown
 
-All models in py-tidymodels return **three standardized DataFrames** via `extract_outputs()`. This structure is defined in `.claude_plans/model_outputs.md` and consistently implemented across all engines (sklearn, Prophet, statsmodels).
+## Phase 1: Core Infrastructure (Weeks 1-4)
 
-### 1. Outputs DataFrame (Observation-Level)
-Contains results for each observation with train/test split indicator:
+**Goal**: Establish foundational classes, DataFrame integration, and basic panel generation with matplotlib.
 
-**Columns:**
-- `date`: Timestamp (for time series models)
-- `actuals`: Actual values
-- `fitted`: In-sample predictions (training data)
-- `forecast`: Out-of-sample predictions (test/future data)
-- `residuals`: actuals - predictions
-- `split`: Indicator (train/test/forecast)
-- `model`, `model_group_name`, `group`: Model metadata for multi-model workflows
+**Major Milestones**:
+1. Core Display class with configuration methods
+2. Meta variable type hierarchy (FactorMeta, NumberMeta, DateMeta, TimeMeta)
+3. JSON writer producing valid displayInfo.json
+4. matplotlib adapter for PNG/JPEG export
+5. File system management for appdir structure
 
-**Usage:**
-```python
-fit = spec.fit(train, "sales ~ price")
-fit = fit.evaluate(test)  # Store test predictions
-outputs, _, _ = fit.extract_outputs()
+---
 
-# Observation-level analysis
-train_outputs = outputs[outputs['split'] == 'train']
-test_outputs = outputs[outputs['split'] == 'test']
+### Phase 1 Detailed Task Breakdown
+
+#### P1T01: Create Display Class Foundation
+- **Description**: Implement core Display class with __init__, basic validation, and data storage. Class accepts DataFrame and configuration parameters, validates required fields, stores data internally with pandas, initializes empty meta and state dictionaries.
+- **Dependencies**: None (first task)
+- **Complexity**: Medium
+- **Time**: 6 hours
+- **Success Criteria**:
+  - Display.__init__ accepts DataFrame, name (required), description, keysig, path
+  - Validates name is non-empty string
+  - Validates data is pandas DataFrame
+  - Stores data, name, description internally
+  - Initializes empty metas list, state dict, views list
+  - Raises TypeError for invalid DataFrame
+  - Raises ValueError for missing/invalid name
+- **Tests**:
+  - `tests/test_display.py::test_display_creation`
+  - `tests/test_display.py::test_display_validation_name`
+  - `tests/test_display.py::test_display_validation_dataframe`
+  - `tests/test_display.py::test_display_initialization`
+- **Docs**: Display class docstring with NumPy format, parameters documented, examples included
+
+#### P1T02: Implement DataFrame Validation Utilities
+- **Description**: Create validation module with functions to verify DataFrame structure, column existence, type checking, and data integrity. Validates panel column exists, checks for duplicate keysig columns, ensures minimum row count.
+- **Dependencies**: P1T01 (Display class exists)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - `validate_dataframe(df)` checks df is DataFrame, non-empty
+  - `validate_column_exists(df, col)` raises KeyError if column missing
+  - `validate_panel_column(df, col)` checks column has valid content
+  - `validate_key_columns(df, keycols)` checks uniqueness
+  - All validation functions return clear error messages with column names
+  - Handles None/NaN values appropriately
+- **Tests**:
+  - `tests/test_validation.py::test_validate_dataframe`
+  - `tests/test_validation.py::test_validate_column_exists`
+  - `tests/test_validation.py::test_validate_panel_column`
+  - `tests/test_validation.py::test_validate_key_columns`
+- **Docs**: validation.py module docstring, each function documented
+
+#### P1T03: Implement Meta Variable Base Classes
+- **Description**: Create MetaVariable abstract base class and concrete implementations for FactorMeta, NumberMeta, DateMeta, TimeMeta. Each class stores varname, label, desc, type-specific parameters. Implements to_dict() for JSON serialization.
+- **Dependencies**: None (parallel to P1T01)
+- **Complexity**: Medium
+- **Time**: 5 hours
+- **Success Criteria**:
+  - MetaVariable base class with varname, label, desc attributes
+  - MetaVariable.to_dict() returns JSON-serializable dict
+  - FactorMeta stores levels (list of strings)
+  - NumberMeta stores digits, locale, log parameters
+  - DateMeta stores format string
+  - TimeMeta stores timezone, format string
+  - All classes use dataclasses or attrs for clean definition
+  - Type hints on all attributes
+- **Tests**:
+  - `tests/test_meta.py::test_meta_variable_base`
+  - `tests/test_meta.py::test_factor_meta_creation`
+  - `tests/test_meta.py::test_number_meta_creation`
+  - `tests/test_meta.py::test_date_meta_creation`
+  - `tests/test_meta.py::test_time_meta_creation`
+  - `tests/test_meta.py::test_meta_to_dict_serialization`
+- **Docs**: meta.py module docstring, each Meta class documented with examples
+
+#### P1T04: Implement Meta Variable Type Inference
+- **Description**: Create inference engine that analyzes pandas Series dtypes and infers appropriate Meta variable type. Maps int64/float64 → NumberMeta, object → FactorMeta (if unique < threshold), datetime64 → DateMeta/TimeMeta.
+- **Dependencies**: P1T03 (Meta classes exist)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - `infer_meta_type(series)` returns appropriate Meta instance
+  - int64/float64 dtypes → NumberMeta
+  - object dtype with few unique values → FactorMeta with inferred levels
+  - object dtype with many unique values → StringMeta (text)
+  - datetime64 with time component → TimeMeta
+  - datetime64 with date only → DateMeta
+  - bool dtype → FactorMeta with levels [True, False]
+  - URL pattern detection → HrefMeta
+  - Configurable threshold for factor vs string (default 50 unique)
+  - Computes nnna (non-null count) for each meta
+- **Tests**:
+  - `tests/test_inference.py::test_infer_numeric_types`
+  - `tests/test_inference.py::test_infer_categorical_types`
+  - `tests/test_inference.py::test_infer_datetime_types`
+  - `tests/test_inference.py::test_infer_boolean_types`
+  - `tests/test_inference.py::test_factor_threshold_logic`
+  - `tests/test_inference.py::test_url_pattern_detection`
+- **Docs**: inference.py module docstring, infer_meta_type function documented
+
+#### P1T05: Implement Display.set_panel_column()
+- **Description**: Add method to Display class to specify which DataFrame column contains panel data. Validates column exists, stores panel_column attribute, returns self for chaining.
+- **Dependencies**: P1T01 (Display class), P1T02 (validation utils)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.set_panel_column(col) validates column exists in DataFrame
+  - Stores panel_column attribute
+  - Returns self for method chaining
+  - Raises KeyError with clear message if column not found
+  - Handles panel column with various types (figures, paths, callables)
+- **Tests**:
+  - `tests/test_display.py::test_set_panel_column_valid`
+  - `tests/test_display.py::test_set_panel_column_invalid`
+  - `tests/test_display.py::test_set_panel_column_chaining`
+- **Docs**: set_panel_column docstring with examples
+
+#### P1T06: Implement Display.add_meta_variable()
+- **Description**: Add method to configure or override meta variables. Accepts varname, type, label, desc, and type-specific kwargs. Creates appropriate Meta instance, stores in metas list, returns self.
+- **Dependencies**: P1T03 (Meta classes), P1T04 (inference)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Display.add_meta_variable(varname, type, label, desc, **kwargs) validates varname exists
+  - If type=None, uses inference engine
+  - If type specified, creates appropriate Meta instance
+  - Passes kwargs to Meta constructor (digits, levels, format, etc.)
+  - Stores Meta in self.metas list
+  - Returns self for method chaining
+  - Overwrites existing meta if varname already configured
+- **Tests**:
+  - `tests/test_display.py::test_add_meta_auto_inference`
+  - `tests/test_display.py::test_add_meta_explicit_type`
+  - `tests/test_display.py::test_add_meta_with_kwargs`
+  - `tests/test_display.py::test_add_meta_override_existing`
+  - `tests/test_display.py::test_add_meta_invalid_varname`
+- **Docs**: add_meta_variable docstring with all parameter options
+
+#### P1T07: Implement keysig Generation
+- **Description**: Create utility to generate unique key signature (MD5 hash) for display based on name, columns, shape, and sample data. Ensures display identity for viewer.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - `generate_keysig(data, name)` returns MD5 hash string
+  - Hash includes: display name, column names, shape, first row, last row
+  - Consistent hash for same input
+  - Different hash for different inputs
+  - Handles missing data gracefully (empty DataFrame)
+  - Uses json.dumps with sort_keys=True for consistency
+- **Tests**:
+  - `tests/test_hash.py::test_keysig_generation`
+  - `tests/test_hash.py::test_keysig_consistency`
+  - `tests/test_hash.py::test_keysig_uniqueness`
+  - `tests/test_hash.py::test_keysig_empty_dataframe`
+- **Docs**: hash.py module docstring, generate_keysig function documented
+
+#### P1T08: Implement JSON Writer for displayInfo.json
+- **Description**: Create JSONWriter class that serializes Display object to displayInfo.json structure matching TypeScript interfaces. Converts metas to JSON array, serializes state object, writes to file.
+- **Dependencies**: P1T03 (Meta classes), P1T07 (keysig)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - `JSONWriter.write_display_info(display, path)` creates displayInfo.json
+  - JSON structure matches TypeScript IDisplay interface:
+    - name, description, keySig
+    - metas array with all Meta.to_dict() outputs
+    - panelInterface object
+    - panelOptions object
+    - state object with layout, labels, filters, sorts
+    - views array
+    - n (panel count)
+  - Handles None/optional fields correctly
+  - Pretty-prints JSON for readability (indent=2)
+  - Uses orjson for performance if available, json as fallback
+- **Tests**:
+  - `tests/test_json_writer.py::test_write_display_info_basic`
+  - `tests/test_json_writer.py::test_display_info_schema_validation`
+  - `tests/test_json_writer.py::test_json_optional_fields`
+  - `tests/test_json_writer.py::test_json_meta_serialization`
+- **Docs**: json_writer.py module docstring, JSONWriter class documented
+
+#### P1T09: Implement File System Writer
+- **Description**: Create FileWriter class to manage appdir directory structure creation, file writing, and panel organization. Creates displays/{name}/ directories, writes JSON files, manages panel subdirectories.
+- **Dependencies**: P1T08 (JSON writer)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - `FileWriter.create_appdir_structure(path, display_name)` creates:
+    - {path}/displays/{display_name}/
+    - {path}/displays/{display_name}/panels/
+  - Uses pathlib.Path for cross-platform compatibility
+  - Creates directories with exist_ok=True
+  - Sanitizes display_name for filesystem (removes special chars)
+  - Returns Path objects for further use
+  - Handles permission errors with clear messages
+- **Tests**:
+  - `tests/test_file_writer.py::test_create_appdir_structure`
+  - `tests/test_file_writer.py::test_directory_creation`
+  - `tests/test_file_writer.py::test_name_sanitization`
+  - `tests/test_file_writer.py::test_permission_errors`
+- **Docs**: file_writer.py module docstring, FileWriter class documented
+
+#### P1T10: Implement matplotlib Adapter
+- **Description**: Create MatplotlibAdapter class to detect matplotlib figures and save to PNG/JPEG with configurable DPI and size. Handles Figure objects from panel column.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - `MatplotlibAdapter.detect_figure(obj)` returns True if matplotlib.figure.Figure
+  - `MatplotlibAdapter.save_figure(fig, path, format, dpi, **kwargs)` saves figure
+  - Supports format='png', 'jpeg', 'svg'
+  - Default dpi=100, configurable
+  - Uses bbox_inches='tight' to avoid cropping
+  - Closes figure after save to free memory
+  - Handles figures without explicit size (uses default)
+  - Returns Path to saved file
+- **Tests**:
+  - `tests/test_matplotlib_adapter.py::test_detect_matplotlib_figure`
+  - `tests/test_matplotlib_adapter.py::test_save_figure_png`
+  - `tests/test_matplotlib_adapter.py::test_save_figure_jpeg`
+  - `tests/test_matplotlib_adapter.py::test_save_figure_custom_dpi`
+  - `tests/test_matplotlib_adapter.py::test_figure_cleanup`
+- **Docs**: matplotlib_adapter.py module docstring, MatplotlibAdapter class documented
+
+#### P1T11: Implement Panel File Naming Convention
+- **Description**: Create utility functions to generate consistent panel filenames based on panel index or key columns. Ensures unique, filesystem-safe names.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - `generate_panel_filename(index, keycols, ext)` returns filename string
+  - Format: "panel_{index}.{ext}" or "panel_{key1}_{key2}.{ext}"
+  - Sanitizes key values for filesystem
+  - Handles special characters, spaces, unicode
+  - Ensures uniqueness even with duplicate keys
+  - Extension validation (png, jpeg, html, etc.)
+- **Tests**:
+  - `tests/test_panel_naming.py::test_panel_filename_index`
+  - `tests/test_panel_naming.py::test_panel_filename_keys`
+  - `tests/test_panel_naming.py::test_filename_sanitization`
+  - `tests/test_panel_naming.py::test_extension_validation`
+- **Docs**: panel_naming.py module docstring, functions documented
+
+#### P1T12: Implement Panel Writer for matplotlib
+- **Description**: Create PanelWriter class to iterate DataFrame panel column, detect figure type, save using appropriate adapter, track written files.
+- **Dependencies**: P1T10 (matplotlib adapter), P1T11 (panel naming)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - `PanelWriter.write_panels(display, output_dir)` processes all panels
+  - Iterates DataFrame rows, extracts panel column
+  - Detects panel type (figure, path, callable)
+  - Calls MatplotlibAdapter.save_figure for matplotlib figures
+  - Generates unique filenames using panel naming utility
+  - Writes files to {output_dir}/panels/
+  - Returns list of written panel filenames
+  - Progress tracking (prints "Writing panel 1/100...")
+  - Handles errors gracefully (logs failed panels, continues)
+- **Tests**:
+  - `tests/test_panel_writer.py::test_write_matplotlib_panels`
+  - `tests/test_panel_writer.py::test_panel_filename_generation`
+  - `tests/test_panel_writer.py::test_progress_tracking`
+  - `tests/test_panel_writer.py::test_error_handling`
+  - `tests/test_panel_writer.py::test_panel_list_return`
+- **Docs**: panel_writer.py module docstring, PanelWriter class documented
+
+#### P1T13: Implement Display.write() Method
+- **Description**: Integrate all components into Display.write() method. Orchestrates: meta inference, keysig generation, directory creation, JSON writing, panel writing. Returns self for chaining.
+- **Dependencies**: P1T04, P1T06, P1T07, P1T08, P1T09, P1T12 (all writers)
+- **Complexity**: High
+- **Time**: 5 hours
+- **Success Criteria**:
+  - Display.write(path) orchestrates complete display generation
+  - Infers meta variables for all non-panel columns
+  - Generates keysig if not provided
+  - Creates appdir structure at path
+  - Writes displayInfo.json with complete configuration
+  - Writes all panel files to panels/ directory
+  - Updates panelInterface in JSON with correct type/extension
+  - Sets n (panel count) in JSON
+  - Returns self for method chaining
+  - Handles path=None (uses instance path or default)
+- **Tests**:
+  - `tests/test_display.py::test_write_complete_workflow`
+  - `tests/test_display.py::test_write_creates_files`
+  - `tests/test_display.py::test_write_json_validity`
+  - `tests/test_display.py::test_write_panel_files`
+  - `tests/test_display.py::test_write_chaining`
+- **Docs**: write() method docstring with complete workflow explanation
+
+#### P1T14: Create End-to-End Integration Test
+- **Description**: Build comprehensive integration test that creates Display with matplotlib figures, writes to disk, validates all files, checks JSON schema compliance.
+- **Dependencies**: P1T13 (write method complete)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Test creates sample DataFrame with 10 rows
+  - Generates 10 matplotlib figures with unique content
+  - Creates Display, sets panel column, adds meta variables
+  - Calls write() to temp directory
+  - Validates directory structure exists
+  - Validates displayInfo.json file exists and loads
+  - Validates JSON matches expected schema
+  - Validates 10 panel PNG files exist
+  - Validates panel filenames match metadata
+  - Clean up temp files after test
+- **Tests**:
+  - `tests/integration/test_basic_workflow.py::test_end_to_end_matplotlib_display`
+- **Docs**: Integration test documentation in test file
+
+#### P1T15: Implement Basic Layout Configuration
+- **Description**: Add Display.set_default_layout() method to configure grid layout (ncol, nrow, page, arrangement). Stores in state object.
+- **Dependencies**: P1T01 (Display class)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Display.set_default_layout(ncol, nrow, page, arrangement) validates parameters
+  - ncol must be positive integer
+  - nrow optional, defaults to None (automatic)
+  - page defaults to 1
+  - arrangement must be "row" or "col"
+  - Stores layout config in self.state['layout']
+  - Returns self for chaining
+  - Layout serialized correctly in displayInfo.json
+- **Tests**:
+  - `tests/test_display.py::test_set_default_layout`
+  - `tests/test_display.py::test_layout_validation`
+  - `tests/test_display.py::test_layout_serialization`
+- **Docs**: set_default_layout docstring with parameter descriptions
+
+#### P1T16: Implement Panel Options Configuration
+- **Description**: Add Display.set_panel_options() method to configure panel dimensions (width, height, aspect, force_size). Stores in panelOptions object.
+- **Dependencies**: P1T01 (Display class)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Display.set_panel_options(width, height, aspect, force_size) validates parameters
+  - width, height must be positive integers or None
+  - aspect must be positive float or None
+  - force_size must be boolean, defaults to False
+  - Stores in self.panel_options dict
+  - Returns self for chaining
+  - Panel options serialized in displayInfo.json
+  - If aspect set, height ignored (aspect takes precedence)
+- **Tests**:
+  - `tests/test_display.py::test_set_panel_options`
+  - `tests/test_display.py::test_panel_options_validation`
+  - `tests/test_display.py::test_panel_options_aspect_precedence`
+  - `tests/test_display.py::test_panel_options_serialization`
+- **Docs**: set_panel_options docstring with examples
+
+#### P1T17: Create Example Notebook for Phase 1
+- **Description**: Create Jupyter notebook demonstrating Phase 1 capabilities: basic Display creation, matplotlib integration, meta inference, JSON generation.
+- **Dependencies**: P1T13 (write method complete)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Notebook in examples/01_basic_display.ipynb
+  - Cells demonstrate:
+    - Creating sample DataFrame
+    - Generating matplotlib figures
+    - Creating Display with configuration
+    - Writing display to disk
+    - Inspecting generated files
+  - Includes markdown explanations
+  - All cells execute without errors
+  - Output includes sample plots
+  - README links to notebook
+- **Tests**: Manual execution and review
+- **Docs**: Notebook contains inline documentation
+
+#### P1T18: Implement CurrencyMeta Class
+- **Description**: Add CurrencyMeta class for monetary values with currency code, digits, locale formatting. Extends MetaVariable base class.
+- **Dependencies**: P1T03 (Meta base class)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - CurrencyMeta class with code, digits, locale attributes
+  - code defaults to "USD", accepts ISO currency codes
+  - digits defaults to 2
+  - locale defaults to True (format with thousands separators)
+  - to_dict() includes type="currency", code, digits, locale
+  - Integration with inference (detects currency patterns)
+- **Tests**:
+  - `tests/test_meta.py::test_currency_meta_creation`
+  - `tests/test_meta.py::test_currency_meta_serialization`
+  - `tests/test_meta.py::test_currency_meta_defaults`
+- **Docs**: CurrencyMeta class docstring with examples
+
+#### P1T19: Implement HrefMeta Class
+- **Description**: Add HrefMeta class for hyperlink columns with optional label column reference. Used for clickable links in viewer.
+- **Dependencies**: P1T03 (Meta base class)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - HrefMeta class with label_col attribute
+  - label_col references another column name for link text
+  - If label_col=None, uses URL as text
+  - to_dict() includes type="href", label_col
+  - Inference detects URL patterns (http://, https://)
+- **Tests**:
+  - `tests/test_meta.py::test_href_meta_creation`
+  - `tests/test_meta.py::test_href_meta_with_label`
+  - `tests/test_meta.py::test_href_meta_serialization`
+  - `tests/test_inference.py::test_infer_href_from_urls`
+- **Docs**: HrefMeta class docstring with examples
+
+#### P1T20: Phase 1 Code Review and Cleanup
+- **Description**: Review all Phase 1 code, refactor for consistency, ensure test coverage >90%, update documentation, prepare for Phase 2.
+- **Dependencies**: All P1 tasks complete
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - All tests passing
+  - Coverage report shows >90% for all Phase 1 modules
+  - Code follows PEP 8 (run black, flake8)
+  - Type hints on all public functions
+  - Docstrings on all classes and functions
+  - No TODOs or placeholder code
+  - README updated with Phase 1 status
+  - CHANGELOG.md created with Phase 1 entries
+- **Tests**: Run full test suite with coverage
+- **Docs**: Updated README, CHANGELOG
+
+---
+
+## Phase 2: Advanced Panel Sources (Weeks 5-8)
+
+**Goal**: Support lazy evaluation, plotly/altair integration, HTML panels, and performance optimization.
+
+**Major Milestones**:
+1. Lazy panel generation with callable support
+2. Plotly adapter for HTML and static export
+3. Altair adapter for vega-embed HTML
+4. HTML panel support (raw HTML strings)
+5. Parallel panel generation for performance
+
+---
+
+### Phase 2 Detailed Task Breakdown
+
+#### P2T01: Implement LazyPanelSource Base Class
+- **Description**: Create LazyPanelSource class to handle panel generation from callables. Stores list of generators, executes on-demand during write(), tracks execution progress.
+- **Dependencies**: P1T12 (PanelWriter exists)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - LazyPanelSource accepts list of callables
+  - Each callable returns figure/image when called
+  - generate_panels(output_dir) iterates callables, calls each, saves result
+  - Progress bar using tqdm (optional)
+  - Handles callable errors (logs, continues)
+  - Returns list of generated filenames
+  - Memory efficient (processes one at a time)
+  - to_interface_dict() returns {type: "file", extension: format}
+- **Tests**:
+  - `tests/test_lazy_panels.py::test_lazy_source_creation`
+  - `tests/test_lazy_panels.py::test_lazy_generation`
+  - `tests/test_lazy_panels.py::test_lazy_error_handling`
+  - `tests/test_lazy_panels.py::test_lazy_progress_tracking`
+- **Docs**: LazyPanelSource class docstring with examples
+
+#### P2T02: Update PanelWriter to Support Lazy Callables
+- **Description**: Extend PanelWriter to detect callable objects in panel column, execute them, save results. Integrates with LazyPanelSource.
+- **Dependencies**: P2T01 (LazyPanelSource)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - PanelWriter detects callable objects using callable()
+  - Calls function, gets figure result
+  - Detects figure type from result (matplotlib, plotly, etc.)
+  - Saves using appropriate adapter
+  - Handles lambda functions: `lambda: create_plot()`
+  - Handles partial functions from functools
+  - Caches results if same callable used multiple times (optional)
+- **Tests**:
+  - `tests/test_panel_writer.py::test_write_lazy_panels`
+  - `tests/test_panel_writer.py::test_detect_callable`
+  - `tests/test_panel_writer.py::test_execute_lambda`
+  - `tests/test_panel_writer.py::test_lazy_with_multiple_types`
+- **Docs**: Updated PanelWriter docstring with lazy panel examples
+
+#### P2T03: Implement Plotly Adapter
+- **Description**: Create PlotlyAdapter to detect plotly figures and export to HTML or static images (PNG/JPEG/SVG). Uses plotly.io.write_html and write_image.
+- **Dependencies**: None (parallel to P2T01)
+- **Complexity**: Medium
+- **Time**: 5 hours
+- **Success Criteria**:
+  - PlotlyAdapter.detect_figure(obj) returns True for plotly.graph_objects.Figure
+  - save_figure(fig, path, format, **kwargs) supports format='html', 'png', 'jpeg', 'svg'
+  - HTML export uses plotly.io.write_html with include_plotlyjs='cdn'
+  - Static export uses plotly.io.write_image (requires kaleido)
+  - Configurable width, height for exports
+  - Returns Path to saved file
+  - Handles plotly express figures (convert to go.Figure)
+- **Tests**:
+  - `tests/test_plotly_adapter.py::test_detect_plotly_figure`
+  - `tests/test_plotly_adapter.py::test_save_html`
+  - `tests/test_plotly_adapter.py::test_save_png`
+  - `tests/test_plotly_adapter.py::test_save_with_dimensions`
+  - `tests/test_plotly_adapter.py::test_plotly_express_support`
+- **Docs**: PlotlyAdapter class docstring with examples
+
+#### P2T04: Implement Altair Adapter
+- **Description**: Create AltairAdapter to detect altair charts and export to HTML with vega-embed or static images. Uses chart.save().
+- **Dependencies**: None (parallel to P2T03)
+- **Complexity**: Medium
+- **Time**: 5 hours
+- **Success Criteria**:
+  - AltairAdapter.detect_chart(obj) returns True for altair.Chart
+  - save_chart(chart, path, format, **kwargs) supports format='html', 'png', 'svg'
+  - HTML export uses chart.save() with embed_options={'renderer': 'svg'}
+  - Static export requires altair_saver or selenium
+  - Handles vega-lite spec objects
+  - Returns Path to saved file
+  - Configurable width, height
+- **Tests**:
+  - `tests/test_altair_adapter.py::test_detect_altair_chart`
+  - `tests/test_altair_adapter.py::test_save_html`
+  - `tests/test_altair_adapter.py::test_save_png`
+  - `tests/test_altair_adapter.py::test_vega_spec_support`
+- **Docs**: AltairAdapter class docstring with examples
+
+#### P2T05: Update PanelWriter for Multi-Library Support
+- **Description**: Refactor PanelWriter to auto-detect figure type (matplotlib, plotly, altair) and use appropriate adapter. Implements adapter pattern.
+- **Dependencies**: P2T03 (Plotly), P2T04 (Altair), P1T10 (Matplotlib)
+- **Complexity**: High
+- **Time**: 5 hours
+- **Success Criteria**:
+  - PanelWriter.detect_figure_type(obj) returns 'matplotlib', 'plotly', 'altair', 'unknown'
+  - Tries each adapter's detect method in sequence
+  - Uses appropriate adapter based on detection
+  - Falls back to error if type unknown
+  - Adapter selection configurable (prefer_adapter='plotly')
+  - Handles mixed panel types in same display (some matplotlib, some plotly)
+  - Updates panelInterface based on most common type
+- **Tests**:
+  - `tests/test_panel_writer.py::test_auto_detect_matplotlib`
+  - `tests/test_panel_writer.py::test_auto_detect_plotly`
+  - `tests/test_panel_writer.py::test_auto_detect_altair`
+  - `tests/test_panel_writer.py::test_mixed_panel_types`
+  - `tests/test_panel_writer.py::test_unknown_type_error`
+- **Docs**: Updated PanelWriter with multi-library support documentation
+
+#### P2T06: Implement HTML Panel Support
+- **Description**: Add support for raw HTML strings as panels. Writes HTML to individual files, sets panelInterface type to 'html', handles iframe embedding.
+- **Dependencies**: P2T05 (multi-library writer)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Detect HTML strings (checks for '<html' tag)
+  - Write HTML to {panel_name}.html files
+  - panelInterface set to {type: "html"}
+  - HTML strings can contain inline CSS/JS
+  - Viewer loads HTML in iframe
+  - Sanitize HTML for safety (optional, warn user)
+  - Support for HTML templates (string formatting)
+- **Tests**:
+  - `tests/test_html_panels.py::test_detect_html_string`
+  - `tests/test_html_panels.py::test_write_html_panel`
+  - `tests/test_html_panels.py::test_html_panel_interface`
+  - `tests/test_html_panels.py::test_html_with_inline_css`
+- **Docs**: HTML panel documentation in user guide
+
+#### P2T07: Implement GraphMeta Class
+- **Description**: Add GraphMeta for sparklines/micro-visualizations. Stores graph data (small arrays) for rendering in viewer.
+- **Dependencies**: P1T03 (Meta base)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - GraphMeta stores direction ('up', 'down', 'neutral')
+  - Stores idvarname (column with graph data arrays)
+  - to_dict() serializes graph configuration
+  - Inference detects array/list columns
+  - Supports various graph types (line, bar, area)
+- **Tests**:
+  - `tests/test_meta.py::test_graph_meta_creation`
+  - `tests/test_meta.py::test_graph_meta_serialization`
+  - `tests/test_inference.py::test_infer_graph_from_arrays`
+- **Docs**: GraphMeta class docstring with examples
+
+#### P2T08: Implement PanelSrcMeta and PanelLocalMeta
+- **Description**: Add meta types for panel source paths. PanelSrcMeta for external URLs, PanelLocalMeta for relative paths.
+- **Dependencies**: P1T03 (Meta base)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - PanelSrcMeta for absolute URLs to panel images
+  - PanelLocalMeta for relative paths within appdir
+  - Auto-generated when panel column contains URLs or paths
+  - to_dict() serialization includes type="panel_src" or "panel_local"
+  - Viewer uses these to construct img src attributes
+- **Tests**:
+  - `tests/test_meta.py::test_panel_src_meta`
+  - `tests/test_meta.py::test_panel_local_meta`
+  - `tests/test_inference.py::test_infer_panel_metas`
+- **Docs**: Panel meta types documentation
+
+#### P2T09: Implement Parallel Panel Generation
+- **Description**: Add parallel processing for panel generation using multiprocessing or joblib. Configurable n_jobs parameter for write().
+- **Dependencies**: P2T05 (multi-library writer)
+- **Complexity**: High
+- **Time**: 7 hours
+- **Success Criteria**:
+  - Display.write(parallel=True, n_jobs=4) enables parallel processing
+  - Uses joblib.Parallel for process pooling
+  - Splits panel list into chunks for workers
+  - Each worker processes chunk independently
+  - Aggregates results (panel filenames) from workers
+  - Progress bar shows overall progress across workers
+  - Falls back to sequential if parallel=False
+  - Handles worker errors gracefully (retries or logs)
+  - Memory efficient (doesn't duplicate full DataFrame)
+- **Tests**:
+  - `tests/test_parallel.py::test_parallel_panel_generation`
+  - `tests/test_parallel.py::test_parallel_speedup`
+  - `tests/test_parallel.py::test_parallel_error_handling`
+  - `tests/test_parallel.py::test_sequential_fallback`
+- **Docs**: Parallel processing documentation with performance notes
+
+#### P2T10: Implement Panel File Pre-existence Check
+- **Description**: Add logic to skip regenerating panels if files already exist and are newer than source data. Optimization for iterative development.
+- **Dependencies**: P1T12 (PanelWriter)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Check if panel file exists at target path
+  - Compare file mtime with data modification time
+  - Skip generation if file is fresh
+  - Configurable force_regenerate=True to override
+  - Logs skipped panels (e.g., "Skipped 50/100 existing panels")
+  - Useful for large displays during development
+- **Tests**:
+  - `tests/test_panel_caching.py::test_skip_existing_panels`
+  - `tests/test_panel_caching.py::test_force_regenerate`
+  - `tests/test_panel_caching.py::test_cache_invalidation`
+- **Docs**: Panel caching documentation
+
+#### P2T11: Create Integration Test for Plotly Display
+- **Description**: End-to-end test creating display with plotly figures, writing to disk, validating HTML panels and JSON.
+- **Dependencies**: P2T03 (Plotly adapter), P2T13 (Display.write updated)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Creates DataFrame with plotly Figure objects
+  - Generates display with plotly panels
+  - Writes to temp directory
+  - Validates HTML files exist in panels/
+  - Validates panelInterface.type == "html"
+  - Loads HTML files, checks content
+  - JSON schema validation passes
+- **Tests**:
+  - `tests/integration/test_plotly_workflow.py::test_end_to_end_plotly_display`
+- **Docs**: Integration test documentation
+
+#### P2T12: Create Integration Test for Mixed Panel Types
+- **Description**: Test display with mixed matplotlib, plotly, altair panels in same DataFrame. Validates multi-adapter support.
+- **Dependencies**: P2T05 (multi-library writer)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - DataFrame has panel column with mixed types
+  - Some rows: matplotlib figures
+  - Some rows: plotly figures
+  - Some rows: altair charts
+  - Write completes successfully
+  - Correct adapter used for each panel
+  - All panel files generated correctly
+  - panelInterface reflects most common type
+- **Tests**:
+  - `tests/integration/test_mixed_panels.py::test_mixed_panel_types`
+- **Docs**: Mixed panel types documentation
+
+#### P2T13: Update Display.write() for Phase 2 Features
+- **Description**: Integrate lazy panels, multi-library support, parallel processing, caching into Display.write() method.
+- **Dependencies**: P2T09 (parallel), P2T10 (caching)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - write() accepts parallel, n_jobs, force_regenerate parameters
+  - Detects lazy callables and executes them
+  - Uses appropriate adapter for each panel type
+  - Enables parallel processing if requested
+  - Skips existing panels if caching enabled
+  - Progress tracking shows accurate counts
+  - Returns self for chaining
+- **Tests**:
+  - `tests/test_display.py::test_write_lazy_panels`
+  - `tests/test_display.py::test_write_parallel`
+  - `tests/test_display.py::test_write_caching`
+- **Docs**: Updated write() docstring with new parameters
+
+#### P2T14: Create Performance Benchmark Suite
+- **Description**: Build benchmark tests measuring panel generation performance across different scenarios (panel count, parallel vs sequential, caching).
+- **Dependencies**: P2T09 (parallel), P2T10 (caching)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Benchmark 100 panels sequential vs parallel
+  - Benchmark 1000 panels with caching on/off
+  - Benchmark matplotlib vs plotly vs altair
+  - Measure memory usage with memory_profiler
+  - Generate performance report (CSV with timings)
+  - CI integration to track performance over time
+- **Tests**:
+  - `tests/performance/test_benchmarks.py::test_100_panels_sequential`
+  - `tests/performance/test_benchmarks.py::test_100_panels_parallel`
+  - `tests/performance/test_benchmarks.py::test_1000_panels_caching`
+- **Docs**: Performance benchmarking documentation
+
+#### P2T15: Create Example Notebook for Lazy Panels
+- **Description**: Jupyter notebook demonstrating lazy panel generation with expensive computations, showing memory efficiency.
+- **Dependencies**: P2T02 (lazy panels)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Notebook: examples/02_lazy_panels.ipynb
+  - Demonstrates creating expensive plots (sleep simulation)
+  - Shows lambda functions for lazy evaluation
+  - Compares eager vs lazy memory usage
+  - Shows progress tracking during write()
+  - All cells execute successfully
+- **Tests**: Manual execution
+- **Docs**: Inline notebook documentation
+
+#### P2T16: Create Example Notebook for Multiple Libraries
+- **Description**: Notebook showing matplotlib, plotly, altair in same display. Demonstrates adapter auto-detection.
+- **Dependencies**: P2T05 (multi-library)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Notebook: examples/03_multiple_libraries.ipynb
+  - Creates same visualization in matplotlib, plotly, altair
+  - Combines into single display
+  - Shows adapter auto-detection
+  - Compares output formats (PNG vs HTML)
+  - All cells execute successfully
+- **Tests**: Manual execution
+- **Docs**: Inline documentation
+
+#### P2T17: Phase 2 Code Review and Documentation
+- **Description**: Review Phase 2 code, ensure test coverage, update documentation, prepare for Phase 3.
+- **Dependencies**: All P2 tasks complete
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - All tests passing
+  - Coverage >90% for Phase 2 modules
+  - Code formatted (black, flake8)
+  - Type hints complete
+  - Docstrings complete
+  - README updated with Phase 2 features
+  - CHANGELOG.md updated
+  - Performance benchmarks documented
+- **Tests**: Full test suite with coverage
+- **Docs**: Updated README, CHANGELOG, API docs
+
+---
+
+## Phase 3: State Management (Weeks 9-12)
+
+**Goal**: Complete state management with filters, sorts, labels, and multiple views.
+
+**Major Milestones**:
+1. Filter system for range and category filters
+2. Multi-variable sorting configuration
+3. Label system with templates
+4. Multiple view management
+5. State serialization in displayInfo.json
+
+---
+
+### Phase 3 Detailed Task Breakdown
+
+#### P3T01: Implement Filter Base Classes
+- **Description**: Create FilterState base class and concrete implementations for RangeFilter, CategoryFilter, DateRangeFilter.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Medium
+- **Time**: 5 hours
+- **Success Criteria**:
+  - FilterState base with varname, filtertype attributes
+  - RangeFilter(varname, min, max) for numeric ranges
+  - CategoryFilter(varname, values) for categorical selection
+  - DateRangeFilter(varname, min_date, max_date) for date ranges
+  - Each class has to_dict() for JSON serialization
+  - Validation of min <= max for ranges
+  - Validation of values exist in factor levels
+- **Tests**:
+  - `tests/test_filters.py::test_range_filter_creation`
+  - `tests/test_filters.py::test_category_filter_creation`
+  - `tests/test_filters.py::test_date_range_filter_creation`
+  - `tests/test_filters.py::test_filter_validation`
+  - `tests/test_filters.py::test_filter_serialization`
+- **Docs**: Filter classes docstrings with examples
+
+#### P3T02: Implement Display.add_filter()
+- **Description**: Add method to Display to add default filters. Accepts varname, type, and filter-specific parameters. Creates filter object, adds to state.
+- **Dependencies**: P3T01 (filter classes)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Display.add_filter(varname, type, **kwargs) validates varname exists
+  - type must be 'range', 'category', 'date_range'
+  - Creates appropriate FilterState subclass
+  - Passes kwargs to filter constructor (min, max, values, etc.)
+  - Adds to self.state['filter'] list
+  - Returns self for chaining
+  - Validates filter compatible with meta variable type
+- **Tests**:
+  - `tests/test_display.py::test_add_range_filter`
+  - `tests/test_display.py::test_add_category_filter`
+  - `tests/test_display.py::test_add_date_filter`
+  - `tests/test_display.py::test_add_filter_validation`
+  - `tests/test_display.py::test_add_filter_chaining`
+- **Docs**: add_filter docstring with all filter types
+
+#### P3T03: Implement Sort Configuration Classes
+- **Description**: Create SortState class to represent sort specification (varname, direction). Support multi-variable sorts.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - SortState(varname, dir) with dir='asc' or 'desc'
+  - Validates dir is 'asc' or 'desc'
+  - to_dict() returns {varname, dir}
+  - Support for multiple sorts (list of SortState)
+  - Sort precedence determined by list order
+- **Tests**:
+  - `tests/test_sorts.py::test_sort_state_creation`
+  - `tests/test_sorts.py::test_sort_direction_validation`
+  - `tests/test_sorts.py::test_sort_serialization`
+  - `tests/test_sorts.py::test_multiple_sorts`
+- **Docs**: SortState class docstring
+
+#### P3T04: Implement Display.set_default_sort()
+- **Description**: Add method to set single default sort. Convenience wrapper around set_default_sorts().
+- **Dependencies**: P3T03 (sort classes)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.set_default_sort(varname, dir='asc') validates varname exists
+  - dir defaults to 'asc', validates 'asc' or 'desc'
+  - Creates SortState, stores in self.state['sort'] as single-item list
+  - Returns self for chaining
+  - Overwrites any existing sorts
+- **Tests**:
+  - `tests/test_display.py::test_set_default_sort`
+  - `tests/test_display.py::test_sort_validation`
+  - `tests/test_display.py::test_sort_chaining`
+- **Docs**: set_default_sort docstring
+
+#### P3T05: Implement Display.set_default_sorts()
+- **Description**: Add method to set multiple sorts for multi-level sorting. Accepts list of sort specifications.
+- **Dependencies**: P3T03 (sort classes)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.set_default_sorts(sorts) accepts list of dicts
+  - Each dict: {varname: str, dir: str}
+  - Creates SortState for each, stores in self.state['sort']
+  - Validates all varnames exist
+  - Validates all dir values
+  - Returns self for chaining
+  - Sort order preserved in list
+- **Tests**:
+  - `tests/test_display.py::test_set_default_sorts_multiple`
+  - `tests/test_display.py::test_sorts_list_validation`
+  - `tests/test_display.py::test_sorts_order_preservation`
+- **Docs**: set_default_sorts docstring with multi-sort examples
+
+#### P3T06: Implement Label System
+- **Description**: Add label configuration to show meta variable values as panel labels. Support for label list and templates.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - LabelState stores varnames list (which metas to show)
+  - Optional template string for formatting: "{country}: {gdp}"
+  - to_dict() returns {varnames: [...]} or {varnames, template}
+  - Template supports variable substitution
+  - Viewer renders labels below/above panels
+- **Tests**:
+  - `tests/test_labels.py::test_label_state_creation`
+  - `tests/test_labels.py::test_label_template`
+  - `tests/test_labels.py::test_label_serialization`
+- **Docs**: Label system documentation
+
+#### P3T07: Implement Display.set_default_labels()
+- **Description**: Add method to configure which meta variables appear as panel labels.
+- **Dependencies**: P3T06 (label classes)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.set_default_labels(labels) accepts list of varnames
+  - Validates all varnames exist as metas
+  - Stores in self.state['labels']['varnames']
+  - Returns self for chaining
+  - Order of labels preserved
+- **Tests**:
+  - `tests/test_display.py::test_set_default_labels`
+  - `tests/test_display.py::test_labels_validation`
+  - `tests/test_display.py::test_labels_order`
+- **Docs**: set_default_labels docstring
+
+#### P3T08: Implement Display.set_label_template()
+- **Description**: Add method to set custom label template string for formatting panel labels.
+- **Dependencies**: P3T06 (label system)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.set_label_template(template) accepts format string
+  - Template uses {varname} placeholders
+  - Validates all placeholders refer to existing metas
+  - Stores in self.state['labels']['template']
+  - Returns self for chaining
+- **Tests**:
+  - `tests/test_display.py::test_set_label_template`
+  - `tests/test_display.py::test_template_validation`
+  - `tests/test_display.py::test_template_placeholders`
+- **Docs**: set_label_template docstring with examples
+
+#### P3T09: Implement View Configuration Class
+- **Description**: Create View class to represent named state configurations (filters, sorts, labels, layout). Enables multiple exploration perspectives.
+- **Dependencies**: P3T01 (filters), P3T03 (sorts), P3T06 (labels)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - View(name, state) stores view name and state dict
+  - State includes: filters, sorts, labels, layout (all optional)
+  - to_dict() serializes complete view configuration
+  - Validates state components (filters valid, sorts valid, etc.)
+  - Supports partial state (only filters, or only sorts)
+- **Tests**:
+  - `tests/test_views.py::test_view_creation`
+  - `tests/test_views.py::test_view_with_filters`
+  - `tests/test_views.py::test_view_with_sorts`
+  - `tests/test_views.py::test_view_partial_state`
+  - `tests/test_views.py::test_view_serialization`
+- **Docs**: View class docstring with examples
+
+#### P3T10: Implement Display.add_view()
+- **Description**: Add method to create and add named views to display. Accepts view name and state components.
+- **Dependencies**: P3T09 (view classes)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Display.add_view(name, filters=None, sorts=None, labels=None, layout=None)
+  - Creates View object with provided state
+  - Adds to self.views list
+  - Returns self for chaining
+  - Validates view name is unique
+  - Validates all state components
+  - View serialized in displayInfo.json views array
+- **Tests**:
+  - `tests/test_display.py::test_add_view_basic`
+  - `tests/test_display.py::test_add_view_with_filters`
+  - `tests/test_display.py::test_add_view_with_sorts`
+  - `tests/test_display.py::test_add_view_complete_state`
+  - `tests/test_display.py::test_add_view_duplicate_name`
+- **Docs**: add_view docstring with multi-view examples
+
+#### P3T11: Update JSONWriter for Complete State Serialization
+- **Description**: Extend JSONWriter to serialize filters, sorts, labels, views in displayInfo.json matching TypeScript interfaces.
+- **Dependencies**: P3T01, P3T03, P3T06, P3T09 (all state classes)
+- **Complexity**: High
+- **Time**: 5 hours
+- **Success Criteria**:
+  - Serializes state.layout completely
+  - Serializes state.labels with varnames and template
+  - Serializes state.filter array with all filter types
+  - Serializes state.sort array preserving order
+  - Serializes views array with complete view configs
+  - JSON matches TypeScript IDisplayState interface exactly
+  - Handles optional fields (null if not set)
+  - Pretty-prints for readability
+- **Tests**:
+  - `tests/test_json_writer.py::test_serialize_filters`
+  - `tests/test_json_writer.py::test_serialize_sorts`
+  - `tests/test_json_writer.py::test_serialize_labels`
+  - `tests/test_json_writer.py::test_serialize_views`
+  - `tests/test_json_writer.py::test_complete_state_serialization`
+- **Docs**: Updated JSONWriter documentation
+
+#### P3T12: Implement State Validation
+- **Description**: Create comprehensive state validation to ensure filters match meta types, sorts reference valid metas, labels reference valid metas.
+- **Dependencies**: All state components
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Validates filters: range filters on number metas, category filters on factor metas
+  - Validates sorts: referenced metas exist and are sortable
+  - Validates labels: referenced metas exist
+  - Validates views: complete view state is valid
+  - Provides clear error messages indicating which component is invalid
+  - Runs automatically before write()
+- **Tests**:
+  - `tests/test_validation.py::test_validate_filter_types`
+  - `tests/test_validation.py::test_validate_sort_references`
+  - `tests/test_validation.py::test_validate_label_references`
+  - `tests/test_validation.py::test_validate_view_state`
+- **Docs**: Validation documentation
+
+#### P3T13: Create Integration Test for Complete State
+- **Description**: End-to-end test creating display with filters, sorts, labels, multiple views. Validates complete JSON output.
+- **Dependencies**: All P3 tasks
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Creates display with:
+    - 2 range filters
+    - 1 category filter
+    - Multi-variable sort
+    - Custom labels
+    - 3 different views
+  - Writes to temp directory
+  - Loads displayInfo.json
+  - Validates all state components present and correct
+  - Validates views array has 3 entries
+  - JSON schema validation passes
+- **Tests**:
+  - `tests/integration/test_complete_state.py::test_end_to_end_state_management`
+- **Docs**: Integration test documentation
+
+#### P3T14: Create Example Notebook for Filters and Sorts
+- **Description**: Notebook demonstrating filter and sort configuration with different meta variable types.
+- **Dependencies**: P3T02, P3T04, P3T05
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Notebook: examples/04_filters_and_sorts.ipynb
+  - Demonstrates range filters on numeric data
+  - Demonstrates category filters on factors
+  - Demonstrates date range filters
+  - Demonstrates multi-level sorting
+  - Shows filter combinations
+  - All cells execute successfully
+- **Tests**: Manual execution
+- **Docs**: Inline documentation
+
+#### P3T15: Create Example Notebook for Views
+- **Description**: Notebook demonstrating multiple view configurations for different exploration perspectives.
+- **Dependencies**: P3T10 (add_view)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Notebook: examples/05_multiple_views.ipynb
+  - Creates display with 4+ views:
+    - Default view (all data)
+    - Filtered view (subset)
+    - Sorted view (by different metric)
+    - Custom layout view
+  - Shows view switching in viewer
+  - Explains use cases for views
+  - All cells execute successfully
+- **Tests**: Manual execution
+- **Docs**: Inline documentation
+
+#### P3T16: Phase 3 Code Review and Documentation
+- **Description**: Review Phase 3 code, ensure test coverage, update documentation, prepare for Phase 4.
+- **Dependencies**: All P3 tasks complete
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - All tests passing
+  - Coverage >90% for Phase 3 modules
+  - Code formatted (black, flake8)
+  - Type hints complete
+  - Docstrings complete
+  - README updated with state management features
+  - CHANGELOG.md updated
+  - API reference documentation complete
+- **Tests**: Full test suite with coverage
+- **Docs**: Updated README, CHANGELOG, API docs
+
+---
+
+## Phase 4: Viewer Integration (Weeks 13-16)
+
+**Goal**: Production-ready package with viewer, development server, deployment utilities, and complete documentation.
+
+**Major Milestones**:
+1. Viewer integration (bundle or CDN reference)
+2. Local development server (Flask/FastAPI)
+3. Static deployment utilities
+4. Complete documentation and examples
+5. Package polish and performance optimization
+
+---
+
+### Phase 4 Detailed Task Breakdown
+
+#### P4T01: Research trelliscopejs-lib Integration Options
+- **Description**: Investigate how to bundle or reference trelliscopejs-lib viewer. Options: npm bundle, CDN link, local copy.
+- **Dependencies**: None
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Document 3 integration approaches:
+    - Option 1: Bundle viewer with package (webpack)
+    - Option 2: CDN link to unpkg/jsdelivr
+    - Option 3: Local viewer copy in package_data
+  - Evaluate pros/cons of each
+  - Test each approach with sample display
+  - Recommend preferred approach
+  - Document in INTEGRATION.md
+- **Tests**: Manual testing of each approach
+- **Docs**: INTEGRATION.md with recommendations
+
+#### P4T02: Implement HTML Index Generator
+- **Description**: Create HTMLWriter to generate index.html that loads viewer and display configuration. Uses chosen integration approach.
+- **Dependencies**: P4T01 (integration research)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - HTMLWriter.write_index(display, path) creates index.html
+  - HTML includes:
+    - Viewer script (CDN or bundled)
+    - displayInfo.json reference
+    - Viewer initialization code
+    - App configuration
+  - Template-based HTML generation (Jinja2)
+  - Configurable viewer options (theme, etc.)
+  - Works offline if viewer bundled
+  - Opens correctly in all major browsers
+- **Tests**:
+  - `tests/test_html_writer.py::test_write_index_html`
+  - `tests/test_html_writer.py::test_viewer_initialization`
+  - `tests/test_html_writer.py::test_html_structure`
+- **Docs**: HTMLWriter class docstring
+
+#### P4T03: Implement Display List Generator
+- **Description**: Create utility to generate displayList.json for apps with multiple displays. Enables multi-display browsing.
+- **Dependencies**: P4T02 (HTML writer)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - generate_display_list(appdir) scans displays/ directory
+  - Creates displayList.json with array of display info:
+    - name, description, thumbnail, path
+  - Updates when new displays added
+  - Thumbnail generation (first panel as thumbnail)
+  - Validates all displays have valid displayInfo.json
+- **Tests**:
+  - `tests/test_display_list.py::test_generate_display_list`
+  - `tests/test_display_list.py::test_multi_display_list`
+  - `tests/test_display_list.py::test_thumbnail_generation`
+- **Docs**: Display list documentation
+
+#### P4T04: Implement Thumbnail Generation
+- **Description**: Create utility to generate thumbnail images for display grid view. Uses first panel or specified panel.
+- **Dependencies**: P1T12 (panel writer)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - generate_thumbnail(display, output_path) creates thumbnail image
+  - Uses first panel by default
+  - Configurable thumbnail_panel_index
+  - Resizes to thumbnail size (200x200 or aspect-preserving)
+  - Saves as PNG
+  - Updates displayInfo.json with thumbnail path
+  - Handles various panel formats (PNG, HTML → screenshot)
+- **Tests**:
+  - `tests/test_thumbnails.py::test_generate_thumbnail`
+  - `tests/test_thumbnails.py::test_thumbnail_resize`
+  - `tests/test_thumbnails.py::test_custom_panel_index`
+- **Docs**: Thumbnail generation documentation
+
+#### P4T05: Implement Development Server
+- **Description**: Create local HTTP server for viewing displays during development. Auto-detects port, opens browser.
+- **Dependencies**: P4T02 (HTML index)
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - DevServer class using Flask or http.server
+  - serve(appdir, port=8000, open_browser=True) starts server
+  - Serves static files from appdir
+  - Serves displayInfo.json with correct MIME type
+  - Auto-opens browser to index.html
+  - Graceful shutdown on Ctrl+C
+  - Port auto-increment if 8000 occupied
+  - Prints server URL and instructions
+- **Tests**:
+  - `tests/test_dev_server.py::test_server_start`
+  - `tests/test_dev_server.py::test_port_selection`
+  - `tests/test_dev_server.py::test_static_serving`
+- **Docs**: DevServer class docstring
+
+#### P4T06: Implement Display.view() Method
+- **Description**: Add convenience method to Display to write and immediately view in browser. Wraps write() + serve().
+- **Dependencies**: P4T05 (dev server)
+- **Complexity**: Low
+- **Time**: 2 hours
+- **Success Criteria**:
+  - Display.view(port=8000, open_browser=True) writes and serves
+  - Calls self.write() if not already written
+  - Starts dev server on specified port
+  - Opens browser automatically if requested
+  - Blocks until Ctrl+C (server running)
+  - Prints clear instructions for user
+- **Tests**:
+  - `tests/test_display.py::test_view_method`
+  - `tests/test_display.py::test_view_auto_write`
+- **Docs**: view() method docstring
+
+#### P4T07: Create Static Deployment Utility
+- **Description**: Build utility to prepare display for static hosting (GitHub Pages, S3, Netlify). Validates all files, creates deployment package.
+- **Dependencies**: P4T03 (display list)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - prepare_static_deploy(appdir, output_dir) copies files
+  - Validates all panel files exist
+  - Validates all JSON files valid
+  - Creates .nojekyll for GitHub Pages
+  - Generates deployment README with instructions
+  - Optional: creates deployment scripts (deploy.sh)
+  - Supports JSONP for CORS-free deployment
+- **Tests**:
+  - `tests/test_deployment.py::test_prepare_static_deploy`
+  - `tests/test_deployment.py::test_deployment_validation`
+- **Docs**: Deployment guide documentation
+
+#### P4T08: Create Docker Deployment Template
+- **Description**: Create Dockerfile and docker-compose.yml for containerized deployment. Useful for server hosting.
+- **Dependencies**: None (parallel task)
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Dockerfile builds container with nginx + displays
+  - docker-compose.yml configures services
+  - README with Docker deployment instructions
+  - Build script: docker build -t trelliscope-app .
+  - Run script: docker run -p 80:80 trelliscope-app
+  - Volume mounts for appdir
+  - Environment variable configuration
+- **Tests**: Manual Docker testing
+- **Docs**: Docker deployment documentation
+
+#### P4T09: Implement CLI for Serving Displays
+- **Description**: Create command-line interface for serving displays without writing Python code. Uses argparse or click.
+- **Dependencies**: P4T05 (dev server)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - CLI command: `trelliscope serve <appdir>`
+  - Options: --port, --host, --no-browser
+  - CLI command: `trelliscope validate <appdir>` checks display validity
+  - CLI command: `trelliscope info <appdir>` shows display metadata
+  - Entry point in setup.py for installation
+  - Help text for all commands
+  - Colorized output (optional)
+- **Tests**:
+  - `tests/test_cli.py::test_serve_command`
+  - `tests/test_cli.py::test_validate_command`
+  - `tests/test_cli.py::test_info_command`
+- **Docs**: CLI documentation in README
+
+#### P4T10: Create Comprehensive API Documentation
+- **Description**: Generate complete API reference documentation using Sphinx or mkdocs. Includes all classes, methods, examples.
+- **Dependencies**: All prior tasks (complete API)
+- **Complexity**: High
+- **Time**: 8 hours
+- **Success Criteria**:
+  - Sphinx documentation project in docs/
+  - API reference for all public classes:
+    - Display, Meta classes, Filter classes, View, etc.
+  - Autogenerated from docstrings
+  - Cross-references between classes
+  - Code examples in each section
+  - Searchable documentation
+  - Hosted on Read the Docs or GitHub Pages
+  - Navigation structure: Getting Started, API, Examples, Deployment
+- **Tests**: Documentation builds without errors
+- **Docs**: Complete API reference
+
+#### P4T11: Create Tutorial Series
+- **Description**: Write comprehensive tutorial series covering beginner to advanced usage. 5+ tutorials.
+- **Dependencies**: All features implemented
+- **Complexity**: High
+- **Time**: 10 hours
+- **Success Criteria**:
+  - Tutorial 1: Quickstart (basic display creation)
+  - Tutorial 2: Meta Variable Configuration
+  - Tutorial 3: Filters, Sorts, and Labels
+  - Tutorial 4: Multiple Views and Large Displays
+  - Tutorial 5: Deployment and Sharing
+  - Tutorial 6: Advanced Topics (lazy panels, parallel processing)
+  - Each tutorial as Jupyter notebook
+  - Each tutorial with corresponding markdown doc
+  - All tutorials tested and working
+- **Tests**: Manual execution of all tutorials
+- **Docs**: tutorials/ directory with all content
+
+#### P4T12: Create Example Gallery
+- **Description**: Build gallery of example displays showcasing different features and use cases.
+- **Dependencies**: All features implemented
+- **Complexity**: Medium
+- **Time**: 6 hours
+- **Success Criteria**:
+  - 10+ example displays:
+    - Gapminder dataset (country trends)
+    - Iris dataset (species comparison)
+    - Stock prices (time series)
+    - Geographic data (maps)
+    - Mixed panel types (matplotlib + plotly)
+    - Large display (1000+ panels with lazy loading)
+    - Custom HTML panels
+    - Multiple views example
+  - Each example with README explaining use case
+  - Datasets included or downloadable
+  - Scripts to regenerate examples
+- **Tests**: Manual review of examples
+- **Docs**: examples/README.md with gallery
+
+#### P4T13: Implement Package Build and Distribution
+- **Description**: Set up package for PyPI distribution. Configure setup.py, build wheel, test installation.
+- **Dependencies**: All code complete
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - setup.py with complete metadata:
+    - name, version, description, author, license
+    - dependencies, python_requires
+    - entry_points for CLI
+    - package_data for viewer assets
+  - pyproject.toml for build system
+  - MANIFEST.in for non-Python files
+  - Build wheel: python -m build
+  - Test install: pip install dist/trelliscope-*.whl
+  - Verify CLI works after install
+  - Test in fresh virtualenv
+- **Tests**:
+  - `tests/test_package.py::test_package_metadata`
+  - `tests/test_package.py::test_installation`
+- **Docs**: Installation documentation in README
+
+#### P4T14: Create CI/CD Pipeline
+- **Description**: Set up GitHub Actions for continuous integration. Run tests on push, check coverage, lint code.
+- **Dependencies**: Test suite complete
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - .github/workflows/tests.yml runs on push/PR
+  - Runs tests on Python 3.8, 3.9, 3.10, 3.11
+  - Runs on Ubuntu, macOS, Windows
+  - Checks code coverage, fails if <90%
+  - Runs black --check and flake8
+  - Runs mypy type checking
+  - Uploads coverage to Codecov
+  - Badge in README showing build status
+- **Tests**: Trigger CI on test commit
+- **Docs**: CI/CD documentation in CONTRIBUTING.md
+
+#### P4T15: Performance Optimization Pass
+- **Description**: Profile package performance, identify bottlenecks, optimize hot paths. Focus on panel generation and JSON serialization.
+- **Dependencies**: All features implemented
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - Profile with cProfile on 1000-panel display
+  - Identify top 10 time-consuming functions
+  - Optimize:
+    - JSON serialization (use orjson if faster)
+    - DataFrame iteration (vectorize where possible)
+    - File I/O (batch writes)
+    - Meta inference (cache results)
+  - Re-run benchmarks, verify improvement
+  - Document performance characteristics
+  - Performance regression tests
+- **Tests**:
+  - `tests/performance/test_optimizations.py`
+- **Docs**: Performance documentation
+
+#### P4T16: Memory Optimization Pass
+- **Description**: Optimize memory usage for large displays. Focus on streaming, garbage collection, object cleanup.
+- **Dependencies**: All features implemented
+- **Complexity**: High
+- **Time**: 6 hours
+- **Success Criteria**:
+  - Profile with memory_profiler on 1000-panel display
+  - Identify memory peaks
+  - Optimize:
+    - Close figures after save (matplotlib)
+    - Stream panel generation (don't hold all in memory)
+    - Clear DataFrame caches
+    - Garbage collect between panels
+  - Memory usage <1GB for 1000 matplotlib panels
+  - Document memory characteristics
+  - Memory regression tests
+- **Tests**:
+  - `tests/performance/test_memory.py`
+- **Docs**: Memory usage documentation
+
+#### P4T17: Create Migration Guide from R
+- **Description**: Write guide for R trelliscope users migrating to Python. Map R functions to Python equivalents.
+- **Dependencies**: All features implemented
+- **Complexity**: Medium
+- **Time**: 4 hours
+- **Success Criteria**:
+  - Migration guide document: MIGRATION_FROM_R.md
+  - Side-by-side R and Python examples
+  - Function mapping table (as_trelliscope_df → Display, etc.)
+  - Conceptual differences explained
+  - Common gotchas and solutions
+  - Example: convert R script to Python
+  - Links to relevant documentation
+- **Tests**: Manual review
+- **Docs**: MIGRATION_FROM_R.md
+
+#### P4T18: Final Code Review and Polish
+- **Description**: Comprehensive code review, refactoring, consistency checks, final cleanup before release.
+- **Dependencies**: All tasks complete
+- **Complexity**: Medium
+- **Time**: 6 hours
+- **Success Criteria**:
+  - All tests passing (100% pass rate)
+  - Coverage >90% for all modules
+  - Code formatted consistently (black)
+  - No linting errors (flake8)
+  - Type checking passes (mypy)
+  - Docstrings complete and consistent
+  - README polished and comprehensive
+  - CHANGELOG.md complete with all versions
+  - LICENSE file correct
+  - CONTRIBUTING.md guide written
+  - No TODO or FIXME comments
+- **Tests**: Full test suite
+- **Docs**: All documentation complete
+
+#### P4T19: Create Release and Publish to PyPI
+- **Description**: Tag release, build package, upload to PyPI, create GitHub release with notes.
+- **Dependencies**: P4T18 (final review complete)
+- **Complexity**: Medium
+- **Time**: 3 hours
+- **Success Criteria**:
+  - Git tag: v1.0.0
+  - Build package: python -m build
+  - Upload to TestPyPI first: twine upload --repository testpypi dist/*
+  - Test install from TestPyPI
+  - Upload to PyPI: twine upload dist/*
+  - Create GitHub release with CHANGELOG
+  - Verify package shows on PyPI
+  - Install from PyPI and test: pip install trelliscope
+- **Tests**: Installation from PyPI
+- **Docs**: Release notes
+
+#### P4T20: Post-Release Documentation and Announcement
+- **Description**: Update documentation with installation from PyPI, write announcement blog post, share on social media.
+- **Dependencies**: P4T19 (release published)
+- **Complexity**: Low
+- **Time**: 3 hours
+- **Success Criteria**:
+  - README updated with: pip install trelliscope
+  - Documentation updated with installation instructions
+  - Blog post or announcement document:
+    - Project overview
+    - Key features
+    - Installation instructions
+    - Quick example
+    - Roadmap
+  - Share on: Twitter, Reddit (r/Python), Python Weekly
+  - Create demo video (optional)
+- **Tests**: Manual review
+- **Docs**: Announcement materials
+
+---
+
+## Task Dependencies Graph
+
+### Phase 1 Critical Path
+```
+P1T01 (Display class)
+  ├→ P1T02 (Validation utils)
+  ├→ P1T05 (set_panel_column)
+  └→ P1T06 (add_meta_variable)
+       └→ P1T13 (write method)
+
+P1T03 (Meta classes)
+  ├→ P1T04 (Meta inference)
+  │    └→ P1T06 (add_meta_variable)
+  └→ P1T18 (CurrencyMeta)
+       └→ P1T19 (HrefMeta)
+
+P1T07 (keysig) ──→ P1T08 (JSON writer) ──→ P1T13 (write)
+
+P1T10 (matplotlib adapter)
+  └→ P1T12 (Panel writer)
+       └→ P1T13 (write)
+
+P1T09 (File writer) ──→ P1T13 (write)
+
+P1T13 (write) ──→ P1T14 (Integration test)
+              └→ P1T17 (Example notebook)
+
+P1T15 (layout config) ──→ P1T13 (write)
+P1T16 (panel options) ──→ P1T13 (write)
 ```
 
-### 2. Coefficients DataFrame (Variable-Level)
-Contains parameters with statistical inference (when applicable):
+### Phase 1 Parallel Opportunities
+- P1T03 (Meta classes) parallel to P1T01, P1T02
+- P1T07 (keysig) parallel to P1T01-P1T06
+- P1T10 (matplotlib adapter) parallel to P1T08
+- P1T11 (panel naming) parallel to P1T10
+- P1T15, P1T16 parallel to each other
+- P1T18, P1T19 parallel to main path (add when ready)
 
-**Columns:**
-- `variable`: Parameter name
-- `coefficient`: Parameter value
-- `std_error`: Standard error
-- `p_value`: P-value for significance testing
-- `t_stat`: T-statistic
-- `ci_0.025`, `ci_0.975`: 95% confidence intervals
-- `vif`: Variance inflation factor (multicollinearity)
-- `model`, `model_group_name`, `group`: Model metadata
+### Phase 2 Critical Path
+```
+P2T01 (LazyPanelSource)
+  └→ P2T02 (Lazy support in writer)
+       └→ P2T13 (Update write)
 
-**Usage:**
-```python
-_, coefficients, _ = fit.extract_outputs()
+P2T03 (Plotly adapter)
+  ├→ P2T05 (Multi-library writer)
+  └→ P2T11 (Plotly integration test)
 
-# For OLS: Full statistical inference
-print(coefficients[['variable', 'coefficient', 'p_value', 'vif']])
+P2T04 (Altair adapter)
+  └→ P2T05 (Multi-library writer)
+       └→ P2T12 (Mixed panels test)
 
-# For Prophet: Hyperparameters (growth, changepoint_prior_scale, etc.)
-# For ARIMA: AR/MA parameters with p-values from statsmodels
-# For regularized models: Coefficients only (inference is NaN)
+P2T05 (Multi-library)
+  ├→ P2T06 (HTML panels)
+  └→ P2T13 (Update write)
+
+P2T09 (Parallel generation)
+  └→ P2T13 (Update write)
+       └→ P2T14 (Benchmarks)
+
+P2T10 (Caching) ──→ P2T13 (Update write)
 ```
 
-### 3. Stats DataFrame (Model-Level)
-Contains comprehensive metrics organized by split:
+### Phase 2 Parallel Opportunities
+- P2T03, P2T04 parallel to each other and P2T01
+- P2T07, P2T08 (Meta classes) parallel to adapters
+- P2T15, P2T16 (Notebooks) parallel at end
 
-**Categories:**
-1. **Performance Metrics** (by split):
-   - `rmse`, `mae`, `mape`, `smape`: Error metrics
-   - `r_squared`, `adj_r_squared`: Model fit
-   - `mda`: Mean directional accuracy (time series)
+### Phase 3 Critical Path
+```
+P3T01 (Filter classes)
+  └→ P3T02 (add_filter)
+       └→ P3T11 (JSON writer update)
 
-2. **Residual Diagnostics** (training only):
-   - `durbin_watson`: Autocorrelation test
-   - `shapiro_wilk_stat`, `shapiro_wilk_p`: Normality test
-   - `ljung_box_stat`, `ljung_box_p`: Serial correlation
-   - `breusch_pagan_stat`, `breusch_pagan_p`: Heteroscedasticity
+P3T03 (Sort classes)
+  ├→ P3T04 (set_default_sort)
+  └→ P3T05 (set_default_sorts)
+       └→ P3T11 (JSON writer update)
 
-3. **Model Information**:
-   - `formula`, `model_type`: Model specification
-   - `aic`, `bic`, `log_likelihood`: Model selection (ARIMA)
-   - `n_obs_train`, `n_obs_test`: Sample sizes
-   - `train_start_date`, `train_end_date`: Time series dates
+P3T06 (Label system)
+  ├→ P3T07 (set_default_labels)
+  └→ P3T08 (set_label_template)
+       └→ P3T11 (JSON writer update)
 
-**Columns:**
-- `metric`: Metric name
-- `value`: Metric value
-- `split`: train/test/forecast indicator
-- `model`, `model_group_name`, `group`: Model metadata
+P3T09 (View class)
+  └→ P3T10 (add_view)
+       └→ P3T11 (JSON writer update)
 
-**Usage:**
-```python
-_, _, stats = fit.extract_outputs()
-
-# Compare train vs test performance
-perf = stats[stats['metric'].isin(['rmse', 'mae', 'r_squared'])]
-for split in ['train', 'test']:
-    print(f"\n{split.upper()}:")
-    print(perf[perf['split'] == split])
-
-# Check residual diagnostics
-diagnostics = stats[stats['metric'].str.contains('durbin|shapiro')]
-print(diagnostics)
+P3T11 (JSON writer)
+  └→ P3T12 (State validation)
+       └→ P3T13 (Integration test)
 ```
 
-### Workflow: Train/Test Evaluation
+### Phase 3 Parallel Opportunities
+- P3T01, P3T03, P3T06, P3T09 all parallel (independent state components)
+- P3T14, P3T15 (Notebooks) parallel at end
 
-```python
-# 1. Fit on training data
-spec = linear_reg()
-fit = spec.fit(train, "sales ~ price + advertising")
+### Phase 4 Critical Path
+```
+P4T01 (Integration research)
+  └→ P4T02 (HTML index)
+       ├→ P4T03 (Display list)
+       └→ P4T05 (Dev server)
+            └→ P4T06 (view method)
 
-# 2. Evaluate on test data (NEW!)
-fit = fit.evaluate(test)  # Auto-detects outcome column, stores predictions
+P4T04 (Thumbnails) ──→ P4T03 (Display list)
 
-# 3. Extract comprehensive outputs
-outputs, coefficients, stats = fit.extract_outputs()
+P4T05 (Dev server)
+  ├→ P4T06 (view method)
+  └→ P4T09 (CLI)
 
-# Now you have:
-# - Training AND test observations in outputs DataFrame
-# - Enhanced coefficients with p-values, CI, VIF
-# - Metrics calculated separately for train and test splits
+P4T07 (Static deploy) ──→ P4T11 (Tutorials)
+P4T08 (Docker) parallel to P4T07
+
+P4T10 (API docs) ──→ P4T13 (Package build)
+P4T11 (Tutorials) ──→ P4T13
+P4T12 (Examples) ──→ P4T13
+
+P4T13 (Package build)
+  └→ P4T14 (CI/CD)
+       └→ P4T18 (Final review)
+            └→ P4T19 (Release)
+                 └→ P4T20 (Announcement)
+
+P4T15 (Performance) ──→ P4T18
+P4T16 (Memory) ──→ P4T18
+P4T17 (Migration guide) ──→ P4T18
 ```
 
+### Phase 4 Parallel Opportunities
+- P4T07, P4T08 parallel (deployment methods)
+- P4T10, P4T11, P4T12 parallel (documentation)
+- P4T15, P4T16, P4T17 parallel (optimization and docs)
+
 ---
 
-## Phase 1: CRITICAL Foundation (Months 1-4)
+## Testing Strategy by Phase
 
-### Goal
-Core infrastructure enabling single model workflows with preprocessing and time series CV.
+### Phase 1: Core Infrastructure
 
-### Packages to Implement
+**Unit Tests** (target: 95% coverage):
+- `tests/test_display.py` (30+ tests)
+  - Display creation, validation, configuration
+  - Method chaining, error handling
+  - State management basics
+- `tests/test_meta.py` (25+ tests)
+  - All Meta class types
+  - Serialization, validation
+  - Type-specific parameters
+- `tests/test_validation.py` (15+ tests)
+  - DataFrame validation
+  - Column existence checks
+  - Type validation
+- `tests/test_inference.py` (20+ tests)
+  - Type inference from dtypes
+  - Edge cases (empty, nulls, mixed)
+- `tests/test_json_writer.py` (15+ tests)
+  - JSON structure validation
+  - Schema compliance
+  - Optional field handling
+- `tests/test_file_writer.py` (10+ tests)
+  - Directory creation
+  - Path sanitization
+  - Permission handling
+- `tests/test_matplotlib_adapter.py` (10+ tests)
+  - Figure detection, saving
+  - Format support, DPI
+- `tests/test_panel_writer.py` (15+ tests)
+  - Panel iteration, saving
+  - Error handling, progress
+- `tests/test_hash.py` (8+ tests)
+  - Keysig generation, consistency
 
-#### 1. py-hardhat (Weeks 1-2)
-**Purpose:** Low-level data preprocessing abstraction
+**Integration Tests**:
+- `tests/integration/test_basic_workflow.py`
+  - End-to-end display creation with matplotlib
+  - File structure validation
+  - JSON schema validation
 
-**Key Components:**
-- `mold()`: Formula → model matrix conversion
-- `forge()`: Apply blueprint to new data
-- `Blueprint` class: Stores preprocessing metadata
-- Role management system
+**Coverage Target**: >90% for all Phase 1 modules
 
-**Core Architecture:**
+### Phase 2: Advanced Panel Sources
 
-```python
-@dataclass(frozen=True)
-class Blueprint:
-    """Immutable preprocessing blueprint"""
-    formula: str
-    roles: Dict[str, List[str]]  # {role: [columns]}
-    factor_levels: Dict[str, List[Any]]  # categorical levels
-    column_order: List[str]
-    ptypes: Dict[str, str]  # pandas dtypes
+**Unit Tests** (target: 95% coverage):
+- `tests/test_lazy_panels.py` (12+ tests)
+  - Lazy source creation, generation
+  - Callable execution, error handling
+- `tests/test_plotly_adapter.py` (12+ tests)
+  - Plotly detection, HTML/PNG export
+  - Configuration options
+- `tests/test_altair_adapter.py` (12+ tests)
+  - Altair detection, exports
+  - Vega spec support
+- `tests/test_html_panels.py` (8+ tests)
+  - HTML detection, writing
+  - Interface configuration
+- `tests/test_parallel.py` (10+ tests)
+  - Parallel generation, speedup
+  - Error handling, aggregation
+- `tests/test_panel_caching.py` (8+ tests)
+  - Cache hit/miss, invalidation
 
-@dataclass
-class MoldedData:
-    """Data ready for modeling"""
-    predictors: pd.DataFrame  # X matrix
-    outcomes: pd.Series | pd.DataFrame  # y
-    extras: Dict[str, Any]  # weights, offsets, etc.
-    blueprint: Blueprint
+**Integration Tests**:
+- `tests/integration/test_plotly_workflow.py`
+  - End-to-end with plotly figures
+- `tests/integration/test_mixed_panels.py`
+  - Mixed matplotlib/plotly/altair
+- `tests/integration/test_lazy_workflow.py`
+  - Lazy generation with large dataset
 
-def mold(formula: str, data: pd.DataFrame) -> MoldedData:
-    """Convert formula + data → model-ready format"""
-    # 1. Parse formula with patsy
-    # 2. Create design matrices
-    # 3. Extract metadata
-    # 4. Return molded data + blueprint
+**Performance Tests**:
+- `tests/performance/test_benchmarks.py`
+  - 100 panels sequential/parallel
+  - 1000 panels with caching
+  - Memory profiling
 
-def forge(new_data: pd.DataFrame, blueprint: Blueprint) -> MoldedData:
-    """Apply blueprint to new data"""
-    # 1. Apply same formula transformations
-    # 2. Enforce factor levels
-    # 3. Align columns
-    # 4. Return molded data
+**Coverage Target**: >90% for all Phase 2 modules
+
+### Phase 3: State Management
+
+**Unit Tests** (target: 95% coverage):
+- `tests/test_filters.py` (15+ tests)
+  - All filter types
+  - Validation, serialization
+- `tests/test_sorts.py` (10+ tests)
+  - Sort creation, multi-sort
+  - Direction validation
+- `tests/test_labels.py` (10+ tests)
+  - Label configuration, templates
+  - Template validation
+- `tests/test_views.py` (12+ tests)
+  - View creation, state composition
+  - Validation, serialization
+- `tests/test_validation.py` (extended)
+  - State validation
+  - Cross-component validation
+
+**Integration Tests**:
+- `tests/integration/test_complete_state.py`
+  - Display with all state components
+  - Multiple views
+  - JSON validation
+
+**Coverage Target**: >90% for all Phase 3 modules
+
+### Phase 4: Viewer Integration
+
+**Unit Tests** (target: 90% coverage):
+- `tests/test_html_writer.py` (10+ tests)
+  - HTML generation, viewer init
+- `tests/test_display_list.py` (8+ tests)
+  - Multi-display lists
+- `tests/test_thumbnails.py` (8+ tests)
+  - Thumbnail generation, resize
+- `tests/test_dev_server.py` (10+ tests)
+  - Server start/stop, port selection
+- `tests/test_deployment.py` (10+ tests)
+  - Static deployment preparation
+- `tests/test_cli.py` (12+ tests)
+  - All CLI commands
+
+**Integration Tests**:
+- `tests/integration/test_viewer_loading.py`
+  - Viewer loads display correctly
+  - JavaScript errors checked
+- `tests/integration/test_multi_display_app.py`
+  - Multiple displays in single app
+
+**End-to-End Tests**:
+- `tests/e2e/test_complete_workflow.py`
+  - Create display, write, view
+  - All features used
+
+**Performance Tests**:
+- `tests/performance/test_optimizations.py`
+  - After optimization pass
+- `tests/performance/test_memory.py`
+  - Memory usage validation
+
+**Package Tests**:
+- `tests/test_package.py`
+  - Installation, metadata
+  - CLI availability
+
+**Coverage Target**: >90% overall package coverage
+
+---
+
+## Documentation Deliverables
+
+### Phase 1: Core Infrastructure
+
+**Code Documentation**:
+- Docstrings (NumPy format) for:
+  - Display class and all methods
+  - All Meta classes
+  - All utility functions
+- Type hints on all public APIs
+- Inline comments for complex logic
+
+**User Documentation**:
+- README.md with:
+  - Project overview
+  - Installation instructions (dev mode)
+  - Quick start example
+  - Phase 1 feature list
+- examples/01_basic_display.ipynb
+  - Basic display creation
+  - Matplotlib integration
+
+**Developer Documentation**:
+- CONTRIBUTING.md (initial)
+- Architecture overview
+- Code style guidelines
+
+### Phase 2: Advanced Panel Sources
+
+**Code Documentation**:
+- Docstrings for all new classes/functions
+- Type hints complete
+
+**User Documentation**:
+- README updated with Phase 2 features
+- examples/02_lazy_panels.ipynb
+- examples/03_multiple_libraries.ipynb
+- Performance guide (initial)
+
+**API Documentation**:
+- Panel sources documentation
+- Adapter documentation
+
+### Phase 3: State Management
+
+**Code Documentation**:
+- Docstrings for state classes
+- Type hints complete
+
+**User Documentation**:
+- README updated with Phase 3 features
+- examples/04_filters_and_sorts.ipynb
+- examples/05_multiple_views.ipynb
+- State management guide
+
+**API Documentation**:
+- Filter API reference
+- Sort API reference
+- View API reference
+
+### Phase 4: Viewer Integration
+
+**Code Documentation**:
+- Complete docstring coverage
+- Type hints complete
+
+**User Documentation**:
+- README complete with installation from PyPI
+- Complete tutorial series (6 tutorials)
+- Example gallery (10+ examples)
+- Deployment guides:
+  - Static hosting
+  - Docker deployment
+  - Cloud deployment (AWS, Azure, GCP)
+- Migration guide from R
+- FAQ document
+
+**API Documentation**:
+- Complete API reference (Sphinx)
+  - All classes documented
+  - All methods documented
+  - Examples for each
+- Searchable documentation
+- Cross-references
+- Hosted on Read the Docs
+
+**Developer Documentation**:
+- CONTRIBUTING.md complete
+- Architecture documentation
+- Testing guide
+- Release process
+- CI/CD documentation
+
+**Package Documentation**:
+- CHANGELOG.md complete
+- LICENSE file
+- CODE_OF_CONDUCT.md
+- SECURITY.md
+
+---
+
+## Environment & Dependencies
+
+### Virtual Environment Setup
+
+**Environment Name**: `py-trelliscope`
+
+**Python Version**: 3.8+
+
+**Setup Commands**:
+```bash
+# Create environment
+python -m venv py-trelliscope
+
+# Activate (macOS/Linux)
+source py-trelliscope/bin/activate
+
+# Activate (Windows)
+py-trelliscope\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip setuptools wheel
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
-**Tasks:**
-- [x] Implement Blueprint dataclass ✅
-- [x] Implement MoldedData dataclass ✅
-- [x] Create mold() function with patsy integration ✅
-- [x] Create forge() function with validation ✅
-- [x] Add role management (outcome, predictor, time_index, group) ✅
-- [x] Handle categorical variables (factor levels) ✅
-- [x] Write comprehensive tests (>90% coverage) ✅ (14/14 passing)
-- [x] Document with examples ✅ (01_hardhat_demo.ipynb)
+### Core Dependencies (requirements.txt)
 
-**Success Criteria:**
-- mold() handles formulas: `y ~ x1 + x2`, `y ~ .`, `y ~ . - id`
-- forge() enforces factor levels (errors on unseen categories)
-- Blueprint is serializable (pickle/JSON)
-
----
-
-#### 2. py-rsample (Weeks 3-4)
-**Purpose:** Time series cross-validation and resampling
-
-**Enhancement Strategy:** Build on existing `py-modeltime-resample` package
-
-**Key Components:**
-- `time_series_split()`: Single train/test split
-- `time_series_cv()`: Rolling/expanding window CV
-- `initial_time_split()`: Simplified initial split
-- Period parsing: `"1 year"`, `"3 months"`, `"2 weeks"`
-
-**Core Architecture:**
-
-```python
-@dataclass(frozen=True)
-class Split:
-    """Single train/test split"""
-    data: pd.DataFrame
-    in_id: np.ndarray  # Training indices
-    out_id: np.ndarray  # Testing indices
-    id: str  # Split identifier
-
-class RSplit:
-    """rsample split object"""
-    def __init__(self, split: Split):
-        self._split = split
-
-    def training(self) -> pd.DataFrame:
-        return self._split.data.iloc[self._split.in_id]
-
-    def testing(self) -> pd.DataFrame:
-        return self._split.data.iloc[self._split.out_id]
-
-class TimeSeriesCV:
-    """Time series cross-validation splits"""
-    def __init__(
-        self,
-        data: pd.DataFrame,
-        date_column: str,
-        initial: str | int,
-        assess: str | int,
-        skip: str | int = 0,
-        cumulative: bool = True,
-        lag: str | int = 0
-    ):
-        self.data = data
-        self.date_column = date_column
-        self.initial = self._parse_period(initial)
-        self.assess = self._parse_period(assess)
-        self.skip = self._parse_period(skip)
-        self.cumulative = cumulative
-        self.lag = self._parse_period(lag)
-
-        self.splits = self._create_splits()
-
-    def __iter__(self):
-        return iter(self.splits)
-
-    def __len__(self):
-        return len(self.splits)
-```
-
-**Tasks:**
-- [ ] Enhance period parsing from py-modeltime-resample
-- [ ] Implement initial_time_split()
-- [ ] Implement time_series_cv() with rolling/expanding windows
-- [ ] Add lag parameter for forecast horizon gaps
-- [ ] Handle grouped/nested CV (per group splits)
-- [ ] Add slice_* helper functions (slice_head, slice_tail, slice_sample)
-- [ ] Write comprehensive tests
-- [ ] Document with time series examples
-
-**Success Criteria:**
-- Correctly handles period strings: `"1 year"`, `"6 months"`, `"14 days"`
-- Rolling window produces non-overlapping test sets
-- Expanding window increases training size each fold
-- Works with both DatetimeIndex and date columns
-
----
-
-#### 3. py-parsnip (Weeks 5-8)
-**Purpose:** Unified model interface + time series extensions
-
-**Key Components:**
-- Model specification functions
-- Engine registration system
-- ModelSpec and ModelFit classes
-- Parameter translation
-- Standardized outputs
-
-**Core Architecture:**
-
-```python
-# Engine Registry
-ENGINE_REGISTRY: Dict[Tuple[str, str], Type[Engine]] = {}
-
-def register_engine(model_type: str, engine: str):
-    """Decorator to register engine"""
-    def decorator(cls: Type[Engine]):
-        ENGINE_REGISTRY[(model_type, engine)] = cls
-        return cls
-    return decorator
-
-# Model Specification
-@dataclass(frozen=True)
-class ModelSpec:
-    """Immutable model specification"""
-    model_type: str
-    mode: str = "unknown"
-    engine: str | None = None
-    args: Tuple[Tuple[str, Any], ...] = ()  # Hashable
-
-    def set_engine(self, engine: str, **kwargs) -> "ModelSpec":
-        """Return new spec with engine"""
-        new_args = tuple((*self.args, *kwargs.items()))
-        return replace(self, engine=engine, args=new_args)
-
-    def set_mode(self, mode: str) -> "ModelSpec":
-        """Return new spec with mode"""
-        return replace(self, mode=mode)
-
-    def fit(
-        self,
-        formula: str | None = None,
-        data: pd.DataFrame | None = None,
-        x: pd.DataFrame | None = None,
-        y: pd.Series | None = None
-    ) -> "ModelFit":
-        """Fit model"""
-        if self.engine is None:
-            raise ValueError(f"Must set engine for {self.model_type}")
-
-        # Get engine
-        engine_cls = ENGINE_REGISTRY[(self.model_type, self.engine)]
-        engine = engine_cls()
-
-        # Preprocess with hardhat
-        if formula is not None:
-            molded = mold(formula, data)
-        else:
-            molded = MoldedData(
-                predictors=x,
-                outcomes=y,
-                extras={},
-                blueprint=None
-            )
-
-        # Fit via engine
-        fit_data = engine.fit(self, molded)
-
-        return ModelFit(
-            spec=self,
-            blueprint=molded.blueprint,
-            fit_data=fit_data,
-            fit_time=datetime.now()
-        )
-
-@dataclass
-class ModelFit:
-    """Fitted model"""
-    spec: ModelSpec
-    blueprint: Blueprint | None
-    fit_data: Dict[str, Any]  # Engine-specific
-    fit_time: datetime
-    evaluation_data: Dict[str, Any] = field(default_factory=dict)  # Test evaluation
-    model_name: str | None = None  # Optional model identifier
-    model_group_name: str | None = None  # Optional group identifier
-
-    def predict(
-        self,
-        new_data: pd.DataFrame,
-        type: str = "numeric"
-    ) -> pd.DataFrame:
-        """Generate predictions"""
-        # Preprocess
-        if self.blueprint is not None:
-            molded = forge(new_data, self.blueprint)
-        else:
-            molded = MoldedData(predictors=new_data, outcomes=None,
-                               extras={}, blueprint=None)
-
-        # Get engine
-        engine_cls = ENGINE_REGISTRY[(self.spec.model_type, self.spec.engine)]
-        engine = engine_cls()
-
-        # Predict
-        preds = engine.predict(self, molded, type)
-
-        return preds
-
-    def evaluate(
-        self,
-        test_data: pd.DataFrame,
-        outcome_col: str | None = None
-    ) -> "ModelFit":
-        """Evaluate model on test data with actuals.
-
-        Stores test predictions for comprehensive train/test metrics via extract_outputs().
-        Auto-detects outcome column from blueprint if not provided.
-        Returns self for method chaining.
-        """
-        # Implementation auto-detects outcome from blueprint
-        # Stores test_data, test_predictions, outcome_col in evaluation_data
-        pass
-
-    def extract_outputs(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Extract comprehensive three-DataFrame output.
-
-        Returns:
-            Tuple of (outputs, coefficients, stats) as specified in .claude_plans/model_outputs.md
-
-            - Outputs: Observation-level (date, actuals, fitted, forecast, residuals, split)
-            - Coefficients: Variable-level (variable, coefficient, std_error, p_value, VIF, CI)
-            - Stats: Model-level metrics by split (RMSE, MAE, MAPE, R², diagnostics)
-        """
-        engine_cls = ENGINE_REGISTRY[(self.spec.model_type, self.spec.engine)]
-        engine = engine_cls()
-        return engine.extract_outputs(self)
-
-# Engine Base Class
-class Engine(ABC):
-    """Base class for all engines"""
-
-    # Parameter translation map
-    param_map: Dict[str, str] = {}
-
-    def translate_params(self, args: Dict[str, Any]) -> Dict[str, Any]:
-        """Translate tidymodels params to engine params"""
-        return {self.param_map.get(k, k): v for k, v in args.items()}
-
-    @abstractmethod
-    def fit(self, spec: ModelSpec, molded: MoldedData) -> Dict[str, Any]:
-        """Fit model, return engine-specific data"""
-        pass
-
-    @abstractmethod
-    def predict(self, fit: ModelFit, molded: MoldedData, type: str) -> pd.DataFrame:
-        """Generate predictions"""
-        pass
-
-    @abstractmethod
-    def extract_outputs(self, fit: ModelFit) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Extract comprehensive three-DataFrame output.
-
-        Returns:
-            Tuple of (outputs, coefficients, stats) per .claude_plans/model_outputs.md
-
-            1. Outputs DataFrame (observation-level):
-               - date: Timestamp (for time series)
-               - actuals: Actual values
-               - fitted: In-sample predictions (training)
-               - forecast: Out-of-sample predictions (test/future)
-               - residuals: actuals - predictions
-               - split: train/test/forecast indicator
-               - model, model_group_name, group: Model metadata
-
-            2. Coefficients DataFrame (variable-level):
-               - variable: Parameter name
-               - coefficient: Parameter value
-               - std_error: Standard error
-               - p_value: P-value for significance
-               - t_stat: T-statistic
-               - ci_0.025, ci_0.975: Confidence intervals
-               - vif: Variance inflation factor
-               - model, model_group_name, group: Model metadata
-
-            3. Stats DataFrame (model-level):
-               - metric: Metric name
-               - value: Metric value
-               - split: train/test/forecast
-               Performance: rmse, mae, mape, smape, r_squared, adj_r_squared, mda
-               Diagnostics: durbin_watson, shapiro_wilk, ljung_box, breusch_pagan
-               Model info: formula, model_type, aic, bic, dates, exogenous vars
-               - model, model_group_name, group: Model metadata
-        """
-        pass
-
-# Model specification functions
-def linear_reg(
-    penalty: float | None = None,
-    mixture: float | None = None
-) -> ModelSpec:
-    """Linear regression model"""
-    return ModelSpec(
-        model_type="linear_reg",
-        mode="regression",
-        args=tuple((k, v) for k, v in locals().items() if v is not None)
-    )
-
-def rand_forest(
-    mtry: int | None = None,
-    trees: int | None = None,
-    min_n: int | None = None
-) -> ModelSpec:
-    """Random forest model"""
-    return ModelSpec(
-        model_type="rand_forest",
-        mode="unknown",
-        args=tuple((k, v) for k, v in locals().items() if v is not None)
-    )
-
-# Time series model specifications
-def arima_reg(
-    seasonal_period: int | str | None = None,
-    non_seasonal_ar: int = 0,
-    non_seasonal_differences: int = 0,
-    non_seasonal_ma: int = 0,
-    seasonal_ar: int = 0,
-    seasonal_differences: int = 0,
-    seasonal_ma: int = 0
-) -> ModelSpec:
-    """ARIMA model specification"""
-    return ModelSpec(
-        model_type="arima_reg",
-        mode="regression",
-        args=tuple((k, v) for k, v in locals().items() if v is not None)
-    )
-
-def prophet_reg(
-    growth: str = "linear",
-    changepoint_num: int = 25,
-    changepoint_range: float = 0.8,
-    seasonality_yearly: bool = True,
-    seasonality_weekly: bool = True,
-    seasonality_daily: bool = False
-) -> ModelSpec:
-    """Prophet model specification"""
-    return ModelSpec(
-        model_type="prophet_reg",
-        mode="regression",
-        args=tuple((k, v) for k, v in locals().items() if v is not None)
-    )
-```
-
-**Example Engine Implementations:**
-
-```python
-@register_engine("linear_reg", "sklearn")
-class SklearnLinearEngine(Engine):
-    param_map = {
-        "penalty": "alpha",
-        "mixture": "l1_ratio"
-    }
-
-    def fit(self, spec: ModelSpec, molded: MoldedData) -> Dict[str, Any]:
-        from sklearn.linear_model import Ridge
-
-        args = self.translate_params(dict(spec.args))
-        model = Ridge(alpha=args.get("alpha", 0.0))
-        model.fit(molded.predictors, molded.outcomes)
-
-        return {
-            "model": model,
-            "n_features": molded.predictors.shape[1],
-            "feature_names": list(molded.predictors.columns)
-        }
-
-    def predict(self, fit: ModelFit, molded: MoldedData, type: str) -> pd.DataFrame:
-        model = fit.fit_data["model"]
-
-        if type == "numeric":
-            preds = model.predict(molded.predictors)
-            return pd.DataFrame({".pred": preds})
-        else:
-            raise ValueError(f"Prediction type '{type}' not supported")
-
-    def extract_outputs(self, fit: ModelFit) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Extract comprehensive three-DataFrame output per .claude_plans/model_outputs.md"""
-        model = fit.fit_data["model"]
-
-        # ====================
-        # 1. OUTPUTS DataFrame (observation-level)
-        # ====================
-        outputs_list = []
-
-        # Training data
-        y_train = fit.fit_data.get("y_train")
-        fitted = fit.fit_data.get("fitted")
-        residuals = fit.fit_data.get("residuals")
-
-        if y_train is not None and fitted is not None:
-            train_df = pd.DataFrame({
-                "actuals": y_train,
-                "fitted": fitted,
-                "forecast": fitted,  # For train, forecast = fitted
-                "residuals": residuals if residuals is not None else y_train - fitted,
-                "split": "train",
-                "model": fit.model_name or fit.spec.model_type,
-                "model_group_name": fit.model_group_name or "",
-                "group": "global"
-            })
-            outputs_list.append(train_df)
-
-        # Test data (if evaluated via fit.evaluate())
-        if "test_predictions" in fit.evaluation_data:
-            test_data = fit.evaluation_data["test_data"]
-            test_preds = fit.evaluation_data["test_predictions"]
-            outcome_col = fit.evaluation_data["outcome_col"]
-
-            test_df = pd.DataFrame({
-                "actuals": test_data[outcome_col].values,
-                "fitted": np.nan,  # No fitted for test
-                "forecast": test_preds[".pred"].values,
-                "residuals": test_data[outcome_col].values - test_preds[".pred"].values,
-                "split": "test",
-                "model": fit.model_name or fit.spec.model_type,
-                "model_group_name": fit.model_group_name or "",
-                "group": "global"
-            })
-            outputs_list.append(test_df)
-
-        outputs = pd.concat(outputs_list, ignore_index=True) if outputs_list else pd.DataFrame()
-
-        # ====================
-        # 2. COEFFICIENTS DataFrame (variable-level with statistical inference)
-        # ====================
-        # For OLS: Full statistical inference (p-values, CI, VIF)
-        # For regularized: Coefficients only (inference is NaN)
-        coeffs = pd.DataFrame({
-            "variable": fit.fit_data["feature_names"] + ["Intercept"],
-            "coefficient": np.concatenate([model.coef_, [model.intercept_]]),
-            "std_error": [...],  # From OLS variance-covariance matrix
-            "t_stat": [...],  # coefficient / std_error
-            "p_value": [...],  # From t-distribution
-            "ci_0.025": [...],  # Confidence intervals
-            "ci_0.975": [...],
-            "vif": [...],  # Variance inflation factor
-            "model": fit.model_name or fit.spec.model_type,
-            "model_group_name": fit.model_group_name or "",
-            "group": "global"
-        })
-
-        # ====================
-        # 3. STATS DataFrame (model-level metrics by split)
-        # ====================
-        stats_rows = []
-
-        # Training metrics (if y_train available)
-        if y_train is not None and fitted is not None:
-            train_metrics = self._calculate_metrics(y_train, fitted)
-            for metric, value in train_metrics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "train"})
-
-        # Test metrics (if evaluated)
-        if "test_predictions" in fit.evaluation_data:
-            test_actuals = test_data[outcome_col].values
-            test_forecast = test_preds[".pred"].values
-            test_metrics = self._calculate_metrics(test_actuals, test_forecast)
-            for metric, value in test_metrics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "test"})
-
-        # Residual diagnostics (training only)
-        if residuals is not None:
-            diagnostics = self._calculate_residual_diagnostics(residuals)
-            for metric, value in diagnostics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "train"})
-
-        # Model information
-        stats_rows.extend([
-            {"metric": "formula", "value": fit.blueprint.formula, "split": ""},
-            {"metric": "n_obs_train", "value": len(y_train), "split": "train"},
-            {"metric": "n_features", "value": fit.fit_data["n_features"], "split": ""}
-        ])
-
-        stats = pd.DataFrame(stats_rows)
-        stats["model"] = fit.model_name or fit.spec.model_type
-        stats["model_group_name"] = fit.model_group_name or ""
-        stats["group"] = "global"
-
-        return outputs, coeffs, stats
-
-    def _calculate_metrics(self, actuals, predictions):
-        """Calculate RMSE, MAE, MAPE, SMAPE, R², Adjusted R², MDA"""
-        pass
-
-    def _calculate_residual_diagnostics(self, residuals):
-        """Calculate Durbin-Watson, Shapiro-Wilk, Ljung-Box, Breusch-Pagan"""
-        pass
-
-@register_engine("arima_reg", "statsmodels")
-class StatsmodelsARIMAEngine(Engine):
-    param_map = {
-        "non_seasonal_ar": "p",
-        "non_seasonal_differences": "d",
-        "non_seasonal_ma": "q",
-        "seasonal_ar": "P",
-        "seasonal_differences": "D",
-        "seasonal_ma": "Q",
-        "seasonal_period": "m"
-    }
-
-    def fit(self, spec: ModelSpec, molded: MoldedData) -> Dict[str, Any]:
-        from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-        args = self.translate_params(dict(spec.args))
-        order = (args.get("p", 0), args.get("d", 0), args.get("q", 0))
-        seasonal_order = (
-            args.get("P", 0),
-            args.get("D", 0),
-            args.get("Q", 0),
-            args.get("m", 0)
-        )
-
-        # Use outcomes as endogenous, predictors as exogenous
-        model = SARIMAX(
-            molded.outcomes,
-            order=order,
-            seasonal_order=seasonal_order,
-            exog=molded.predictors if molded.predictors.shape[1] > 0 else None
-        )
-
-        fitted = model.fit(disp=False)
-
-        return {
-            "model": fitted,
-            "order": order,
-            "seasonal_order": seasonal_order
-        }
-
-    def predict(self, fit: ModelFit, molded: MoldedData, type: str) -> pd.DataFrame:
-        model = fit.fit_data["model"]
-        n_periods = len(molded.predictors)
-
-        if type == "numeric":
-            forecast = model.forecast(
-                steps=n_periods,
-                exog=molded.predictors if molded.predictors.shape[1] > 0 else None
-            )
-            return pd.DataFrame({".pred": forecast.values})
-
-        elif type == "pred_int":
-            forecast_obj = model.get_forecast(
-                steps=n_periods,
-                exog=molded.predictors if molded.predictors.shape[1] > 0 else None
-            )
-            pred_int = forecast_obj.conf_int(alpha=0.05)
-
-            return pd.DataFrame({
-                ".pred": forecast_obj.predicted_mean.values,
-                ".pred_lower": pred_int.iloc[:, 0].values,
-                ".pred_upper": pred_int.iloc[:, 1].values
-            })
-        else:
-            raise ValueError(f"Prediction type '{type}' not supported")
-
-    def extract_outputs(self, fit: ModelFit) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Extract comprehensive three-DataFrame output per .claude_plans/model_outputs.md"""
-        model = fit.fit_data["model"]
-
-        # ====================
-        # 1. OUTPUTS DataFrame (observation-level with dates for time series)
-        # ====================
-        outputs_list = []
-
-        # Training data
-        y_train = fit.fit_data.get("y_train")
-        fitted = fit.fit_data.get("fitted")
-        residuals = fit.fit_data.get("residuals")
-        dates = fit.fit_data.get("dates")
-
-        if y_train is not None and fitted is not None:
-            train_df = pd.DataFrame({
-                "date": dates if dates is not None else np.arange(len(y_train)),
-                "actuals": y_train,
-                "fitted": fitted,
-                "forecast": fitted,  # For train, forecast = fitted
-                "residuals": residuals if residuals is not None else y_train - fitted,
-                "split": "train",
-                "model": fit.model_name or fit.spec.model_type,
-                "model_group_name": fit.model_group_name or "",
-                "group": "global"
-            })
-            outputs_list.append(train_df)
-
-        # Test data (if evaluated via fit.evaluate())
-        if "test_predictions" in fit.evaluation_data:
-            test_data = fit.evaluation_data["test_data"]
-            test_preds = fit.evaluation_data["test_predictions"]
-            outcome_col = fit.evaluation_data["outcome_col"]
-
-            test_df = pd.DataFrame({
-                "date": test_data["date"].values if "date" in test_data.columns else np.arange(len(test_data)),
-                "actuals": test_data[outcome_col].values,
-                "fitted": np.nan,
-                "forecast": test_preds[".pred"].values,
-                "residuals": test_data[outcome_col].values - test_preds[".pred"].values,
-                "split": "test",
-                "model": fit.model_name or fit.spec.model_type,
-                "model_group_name": fit.model_group_name or "",
-                "group": "global"
-            })
-            outputs_list.append(test_df)
-
-        outputs = pd.concat(outputs_list, ignore_index=True) if outputs_list else pd.DataFrame()
-
-        # ====================
-        # 2. COEFFICIENTS DataFrame (ARIMA parameters with p-values)
-        # ====================
-        coeffs = pd.DataFrame({
-            "variable": model.param_names,
-            "coefficient": model.params.values,
-            "std_error": model.bse.values if hasattr(model, 'bse') else np.nan,
-            "t_stat": model.tvalues.values if hasattr(model, 'tvalues') else np.nan,
-            "p_value": model.pvalues.values if hasattr(model, 'pvalues') else np.nan,
-            "ci_0.025": np.nan,  # Could extract from model.conf_int()
-            "ci_0.975": np.nan,
-            "vif": np.nan,  # Not applicable for ARIMA
-            "model": fit.model_name or fit.spec.model_type,
-            "model_group_name": fit.model_group_name or "",
-            "group": "global"
-        })
-
-        # ====================
-        # 3. STATS DataFrame (model-level metrics by split + ARIMA-specific)
-        # ====================
-        stats_rows = []
-
-        # Training metrics
-        if y_train is not None and fitted is not None:
-            train_metrics = self._calculate_metrics(y_train, fitted)
-            for metric, value in train_metrics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "train"})
-
-        # Test metrics (if evaluated)
-        if "test_predictions" in fit.evaluation_data:
-            test_metrics = self._calculate_metrics(test_data[outcome_col].values, test_preds[".pred"].values)
-            for metric, value in test_metrics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "test"})
-
-        # Residual diagnostics
-        if residuals is not None:
-            diagnostics = self._calculate_residual_diagnostics(residuals)
-            for metric, value in diagnostics.items():
-                stats_rows.append({"metric": metric, "value": value, "split": "train"})
-
-        # Model information (ARIMA-specific)
-        stats_rows.extend([
-            {"metric": "aic", "value": model.aic, "split": ""},
-            {"metric": "bic", "value": model.bic, "split": ""},
-            {"metric": "log_likelihood", "value": model.llf, "split": ""},
-            {"metric": "order", "value": str(fit.fit_data["order"]), "split": ""},
-            {"metric": "seasonal_order", "value": str(fit.fit_data["seasonal_order"]), "split": ""},
-            {"metric": "n_obs_train", "value": len(y_train), "split": "train"}
-        ])
-
-        stats = pd.DataFrame(stats_rows)
-        stats["model"] = fit.model_name or fit.spec.model_type
-        stats["model_group_name"] = fit.model_group_name or ""
-        stats["group"] = "global"
-
-        return outputs, coeffs, stats
-
-    def _calculate_metrics(self, actuals, predictions):
-        """Calculate RMSE, MAE, MAPE, SMAPE, R², MDA"""
-        pass
-
-    def _calculate_residual_diagnostics(self, residuals):
-        """Calculate Durbin-Watson, Shapiro-Wilk, Ljung-Box, Breusch-Pagan"""
-        pass
-```
-
-**Tasks:**
-- [x] Implement ModelSpec and ModelFit dataclasses ✅
-- [x] Create engine registration system ✅
-- [x] Implement Engine base class ✅
-- [x] Create linear_reg() specification function ✅
-- [x] Implement SklearnLinearEngine (Ridge/Lasso/ElasticNet) ✅
-- [x] **Implement comprehensive three-DataFrame output structure** ✅ (see `.claude_plans/model_outputs.md`)
-  - [x] Outputs DataFrame: observation-level (date, actuals, fitted, forecast, residuals, split) ✅
-  - [x] Coefficients DataFrame: variable-level with statistical inference (p-values, CI, VIF) ✅
-  - [x] Stats DataFrame: model-level metrics by split (RMSE, MAE, MAPE, R², diagnostics) ✅
-- [x] **Implement evaluate() method for train/test evaluation** ✅
-  - [x] Auto-detect outcome column from blueprint ✅
-  - [x] Store test predictions in evaluation_data ✅
-  - [x] Method chaining support ✅
-- [x] **Implement helper methods for metrics calculation** ✅
-  - [x] _calculate_metrics(): RMSE, MAE, MAPE, SMAPE, R², Adjusted R², MDA ✅
-  - [x] _calculate_residual_diagnostics(): Durbin-Watson, Shapiro-Wilk ✅
-- [ ] Implement StatsmodelsLinearEngine (OLS) - PENDING
-- [x] Create rand_forest() specification function ✅
-- [x] Implement SklearnRandForestEngine ✅
-  - [x] Dual-mode support (regression and classification) ✅
-  - [x] Feature importances instead of coefficients ✅
-  - [x] One-hot encoded outcome handling for classification ✅
-  - [x] Intercept removal (random forests don't use intercepts) ✅
-  - [x] Comprehensive outputs with train/test metrics ✅
-  - [x] 55/55 tests passing ✅
-  - [x] Demo notebook created (04_rand_forest_demo.ipynb) ✅
-- [x] Create arima_reg() specification function ✅
-- [x] Implement StatsmodelsARIMAEngine ✅
-  - [x] Extract ARIMA parameters with p-values ✅
-  - [x] Include AIC, BIC in Stats DataFrame ✅
-  - [x] Date-indexed outputs for time series ✅
-- [x] Create prophet_reg() specification function ✅
-- [x] Implement ProphetEngine ✅
-  - [x] Raw data path (fit_raw/predict_raw) for datetime handling ✅
-  - [x] Hyperparameters as "coefficients" ✅
-  - [x] Date-indexed outputs for time series ✅
-- [x] Add parameter validation ✅
-- [x] Write comprehensive tests (>90% coverage) ✅ (30+ passing)
-- [x] Document all model types and engines ✅
-  - [x] 02_parsnip_demo.ipynb: sklearn linear regression with evaluate() ✅
-  - [x] 03_time_series_models.ipynb: Prophet and ARIMA with comprehensive outputs ✅
-
-**Success Criteria:**
-- ✅ Can fit sklearn Ridge via `linear_reg().set_engine("sklearn").fit(...)`
-- ⏳ Can fit statsmodels OLS via `linear_reg().set_engine("statsmodels").fit(...)` - PENDING
-- ✅ Can fit Random Forest via `rand_forest().set_mode("regression"/"classification").fit(...)`
-  - ✅ Dual-mode support (regression and classification)
-  - ✅ Feature importances instead of coefficients
-  - ✅ Handles one-hot encoded outcomes for classification
-- ✅ Can fit ARIMA via `arima_reg(...).fit(...)` with date-indexed outputs
-- ✅ Can fit Prophet via `prophet_reg(...).fit(...)` with date-indexed outputs
-- ✅ **All models return standardized three DataFrames per `.claude_plans/model_outputs.md`**
-- ✅ **Train/test evaluation via fit.evaluate() method**
-- ✅ **Comprehensive metrics by split (train/test)**
-- ✅ **Statistical inference for OLS (p-values, CI, VIF)**
-- ✅ **Residual diagnostics (Durbin-Watson, Shapiro-Wilk)**
-- ✅ Parameter translation works correctly
-
----
-
-#### 4. py-workflows (Weeks 9-10)
-**Purpose:** Compose recipe + model into pipelines
-
-**Key Components:**
-- Workflow class (composition)
-- WorkflowFit class (fitted pipeline)
-- Integration with recipes and parsnip
-
-**Core Architecture:**
-
-```python
-@dataclass(frozen=True)
-class Workflow:
-    """Immutable workflow composition"""
-    preprocessor: Any = None  # Recipe or None
-    spec: ModelSpec | None = None
-    post: Any = None  # Future: calibration
-    case_weights: str | None = None
-
-    def add_recipe(self, recipe: "Recipe") -> "Workflow":
-        """Add preprocessing recipe"""
-        if self.preprocessor is not None:
-            raise ValueError("Workflow already has preprocessor")
-        return replace(self, preprocessor=recipe)
-
-    def add_model(self, spec: ModelSpec) -> "Workflow":
-        """Add model specification"""
-        if self.spec is not None:
-            raise ValueError("Workflow already has model")
-        return replace(self, spec=spec)
-
-    def add_formula(self, formula: str) -> "Workflow":
-        """Add formula (alternative to recipe)"""
-        # Store formula in preprocessor slot
-        return replace(self, preprocessor=formula)
-
-    def remove_recipe(self) -> "Workflow":
-        """Remove preprocessor"""
-        return replace(self, preprocessor=None)
-
-    def remove_model(self) -> "Workflow":
-        """Remove model"""
-        return replace(self, spec=None)
-
-    def update_recipe(self, recipe: "Recipe") -> "Workflow":
-        """Replace preprocessor"""
-        return replace(self, preprocessor=recipe)
-
-    def update_model(self, spec: ModelSpec) -> "Workflow":
-        """Replace model"""
-        return replace(self, spec=spec)
-
-    def fit(self, data: pd.DataFrame) -> "WorkflowFit":
-        """Fit entire workflow"""
-        if self.spec is None:
-            raise ValueError("Workflow must have a model")
-
-        # Apply recipe if present
-        if self.preprocessor is not None:
-            if isinstance(self.preprocessor, str):
-                # It's a formula
-                formula = self.preprocessor
-                processed_data = data
-            else:
-                # It's a recipe
-                recipe_fit = self.preprocessor.prep(data)
-                processed_data = recipe_fit.bake(data)
-                formula = "y ~ ."
-        else:
-            processed_data = data
-            formula = "y ~ ."
-
-        # Fit model
-        model_fit = self.spec.fit(formula, processed_data)
-
-        return WorkflowFit(
-            workflow=self,
-            pre=self.preprocessor,
-            fit=model_fit,
-            post=self.post
-        )
-
-@dataclass
-class WorkflowFit:
-    """Fitted workflow"""
-    workflow: Workflow
-    pre: Any  # Fitted recipe or formula
-    fit: ModelFit
-    post: Any = None
-
-    def predict(self, new_data: pd.DataFrame, type: str = "numeric") -> pd.DataFrame:
-        """Predict with entire pipeline"""
-        # Apply preprocessing
-        if self.pre is not None:
-            if isinstance(self.pre, str):
-                # Formula - no preprocessing needed
-                processed_data = new_data
-            else:
-                # Recipe
-                processed_data = self.pre.bake(new_data)
-        else:
-            processed_data = new_data
-
-        # Model prediction
-        predictions = self.fit.predict(processed_data, type)
-
-        # Post-processing (future)
-
-        return predictions
-
-    def extract_fit_parsnip(self) -> ModelFit:
-        """Extract the parsnip fit"""
-        return self.fit
-
-    def extract_preprocessor(self) -> Any:
-        """Extract fitted preprocessor"""
-        return self.pre
-
-    def extract_outputs(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Extract standardized outputs"""
-        return self.fit.extract_outputs()
-
-def workflow() -> Workflow:
-    """Create empty workflow"""
-    return Workflow()
-```
-
-**Tasks:**
-- [x] Implement Workflow dataclass ✅
-- [x] Implement WorkflowFit dataclass ✅
-- [x] Add add_recipe() method ✅
-- [x] Add add_model() method ✅
-- [x] Add add_formula() method ✅
-- [x] Add remove/update methods ✅
-- [x] Implement fit() method ✅
-- [x] Implement predict() method ✅
-- [x] Implement evaluate() method ✅
-- [x] Add extract methods ✅
-- [x] Write comprehensive tests ✅ (26/26 passing)
-- [x] Document workflow patterns ✅ (08_workflows_demo.ipynb)
-
-**Success Criteria:**
-- ✅ Can compose recipe + model
-- ✅ Can compose formula + model (without recipe)
-- ✅ Prediction applies preprocessing automatically
-- ✅ extract_outputs() returns standardized DataFrames
-- ✅ evaluate() method for train/test evaluation
-- ✅ Method chaining support
-
----
-
-### Phase 1 Integration Testing
-
-**Week 11: End-to-End Integration**
-
-**Test Scenarios:**
-
-1. **Basic Workflow with Train/Test Evaluation:**
-```python
-# Create workflow
-wf = (
-    workflow()
-    .add_formula("sales ~ price + promotion")
-    .add_model(linear_reg(penalty=0.1).set_engine("sklearn"))
-)
-
-# Fit on training data
-wf_fit = wf.fit(train)
-
-# Evaluate on test data (stores predictions for comprehensive metrics)
-wf_fit = wf_fit.evaluate(test)
-
-# Extract comprehensive outputs per .claude_plans/model_outputs.md
-outputs, coefficients, stats = wf_fit.extract_outputs()
-
-# Outputs DataFrame: observation-level (train + test observations)
-print(f"Total: {len(outputs)} | Train: {len(outputs[outputs['split']=='train'])} | Test: {len(outputs[outputs['split']=='test'])}")
-
-# Coefficients DataFrame: enhanced with p-values, CI, VIF
-print(coefficients[['variable', 'coefficient', 'p_value', 'vif']])
-
-# Stats DataFrame: metrics by split
-print(stats[stats['metric'].isin(['rmse', 'mae', 'r_squared'])])
-```
-
-2. **Time Series CV:**
-```python
-# Create CV splits
-cv_splits = time_series_cv(
-    data,
-    date_column="date",
-    initial="1 year",
-    assess="3 months",
-    cumulative=True
-)
-
-# Fit to each split
-results = []
-for split in cv_splits:
-    train_data = split.training()
-    test_data = split.testing()
-
-    wf_fit = wf.fit(train_data)
-    preds = wf_fit.predict(test_data)
-
-    results.append(preds)
-```
-
-3. **ARIMA Forecasting:**
-```python
-# ARIMA workflow
-arima_wf = (
-    workflow()
-    .add_formula("sales ~ 1")
-    .add_model(
-        arima_reg(
-            non_seasonal_ar=1,
-            non_seasonal_differences=1,
-            non_seasonal_ma=1
-        ).set_engine("statsmodels")
-    )
-)
-
-# Fit
-arima_fit = arima_wf.fit(train)
-
-# Forecast with prediction intervals
-forecast = arima_fit.predict(test, type="pred_int")
-```
-
-**Tasks:**
-- [x] Write 10+ integration tests ✅ (17 tests created)
-- [x] Test all model types ✅ (OLS, Ridge, Random Forest, ARIMA, Prophet)
-- [x] Test formula workflows ✅ (recipes pending future implementation)
-- [x] Test time series CV ✅
-- [x] Test prediction intervals ✅
-- [ ] Benchmark performance (<10% overhead) - Optional
-- [ ] Profile memory usage - Optional
-
-**Results:**
-- ✅ **17/17 integration tests passing**
-- Test coverage includes:
-  - Basic workflow composition (4 tests)
-  - Time series CV integration (2 tests)
-  - ARIMA workflows (3 tests)
-  - Prophet workflows (2 tests)
-  - Random Forest workflows (1 test)
-  - Multi-model comparison (2 tests)
-  - Comprehensive output structure (3 tests)
-
----
-
-### ✅ Phase 1 Complete Summary
-
-**Final Metrics:**
-- **Total Tests:** 188/188 passing (100%)
-- **Packages:** 4 core packages fully implemented
-- **Demo Notebooks:** 8 comprehensive tutorials
-- **Models Supported:** 5 model types (linear_reg, rand_forest, arima_reg, prophet_reg, logistic_reg)
-- **Engines Implemented:** 4 engines (sklearn, statsmodels, prophet)
-- **Integration Tests:** 17 end-to-end scenarios
-- **Test Execution Time:** 38.21s for full suite
-
-**Key Features Delivered:**
-- ✅ Immutable specifications with mutable fits
-- ✅ R-like API (workflow(), training(), testing())
-- ✅ Comprehensive three-DataFrame output structure
-- ✅ Train/test evaluation with evaluate() method
-- ✅ Time series CV with rolling/expanding windows
-- ✅ Explicit date range support for time series
-- ✅ Method chaining throughout
-- ✅ Full type hints on public API
-- ✅ Extensive documentation and examples
-
----
-
-## Phase 2: Scale and Evaluate (Months 5-8) - ⏳ IN PROGRESS
-
-### Goal
-Multi-model comparison and hyperparameter tuning at scale (100+ model configurations).
-
-### Current Status
-Starting with py-recipes (Weeks 13-16) for feature engineering pipeline.
-
----
-
-### Phase 1 Documentation (Deferred to after Phase 2)
-
-**Week 12: Documentation and Tutorials**
-
-**Documentation Deliverables:**
-
-1. **API Reference:**
-   - All classes and functions documented
-   - NumPy docstring format
-   - Type hints on all public APIs
-   - Examples for each function
-
-2. **Tutorial Notebooks:**
-   - `01_getting_started.ipynb`:
-     - Installation and setup
-     - First workflow
-     - Understanding outputs
-   - `01a_basic_linear_regression.ipynb`:
-     - Linear regression with sklearn and statsmodels
-     - Comparing engines
-   - `01b_time_series_arima.ipynb`:
-     - ARIMA modeling
-     - Prediction intervals
-     - Interpretation
-
-3. **Demo Scripts:**
-   - `examples/basic_workflow_demo.py`:
-     - Complete workflow example
-     - Include environment verification
-   - `examples/time_series_cv_demo.py`:
-     - Time series cross-validation
-     - Multiple models
-
-4. **User Guides:**
-   - "Understanding Model Outputs" (3 DataFrames)
-   - "Engine System" (how to add engines)
-   - "Formula Interface" (patsy guide)
-   - "Time Series Modeling Basics"
-
-**Tasks:**
-- [ ] Generate API docs with Sphinx
-- [ ] Create tutorial notebooks
-- [ ] Write demo scripts
-- [ ] Update README with quick start
-- [ ] Create troubleshooting guide
-- [ ] Document common errors and solutions
-
----
-
-### Phase 1 Success Metrics
-
-✅ **Functionality:**
-- Can fit 5+ model types
-- Both sklearn and statsmodels engines work
-- Time series models (ARIMA, Prophet) functional
-- CV produces correct splits
-
-✅ **Quality:**
-- >90% test coverage
-- All tests passing
-- Type hints on public API
-- Comprehensive documentation
-
-✅ **Performance:**
-- <10% overhead vs direct sklearn/statsmodels
-- mold/forge cached appropriately
-- Prediction is fast (<1ms for 1000 rows)
-
-✅ **Usability:**
-- Consistent API across all models
-- Clear error messages
-- Examples run without errors
-- Documentation is clear
-
----
-
-## Phase 2: Scale and Evaluate (Months 5-8)
-
-### Goal
-Multi-model comparison and hyperparameter tuning at scale (100+ model configurations).
-
-### Progress Summary
-
-**Phase 2 Status:**
-- ✅ py-recipes (Weeks 13-16): SIGNIFICANTLY EXPANDED - 79+ tests passing
-  - ✅ Core Recipe and PreparedRecipe classes
-  - ✅ **40+ recipe steps implemented** (previously: 5 steps)
-  - ✅ Full workflow integration with 11 integration tests passing
-  - ✅ Comprehensive step library covering all priority levels
-  - ✅ All existing recipe + workflow tests passing (79+)
-- ⏳ py-yardstick (Weeks 17-18): Pending
-- ⏳ py-tune (Weeks 19-20): Pending
-- ⏳ py-workflowsets (Weeks 21-22): Pending
-
-### Packages to Implement
-
-#### 1. py-recipes (Weeks 13-16) - ✅ COMPLETED
-
-**Current Status:** Core implementation complete with full workflow integration
-**Purpose:** Feature engineering and preprocessing steps
-
-**What Was Implemented:**
-- ✅ Recipe and PreparedRecipe base classes with prep/bake pattern
-- ✅ RecipeStep protocol for composable preprocessing
-- ✅ step_normalize(): zscore and minmax normalization (sklearn wrappers)
-- ✅ step_dummy(): one-hot encoding for categorical variables
-- ✅ step_impute_mean() and step_impute_median(): missing value imputation
-- ✅ step_mutate(): custom transformation functions
-- ✅ Workflow integration: recipes work seamlessly with py-workflows
-- ✅ 29 recipe tests + 11 integration tests = 40 total tests passing
-- ✅ Method chaining throughout
-- ✅ Train/test consistency (no data leakage)
-
-**Strategy:** Wrap pytimetk functions, not rebuild
-
-**Core Architecture:**
-
-```python
-class Recipe:
-    """Feature engineering specification"""
-    def __init__(self, formula: str | None = None, data: pd.DataFrame | None = None):
-        self.formula = formula
-        self.template = data
-        self.steps = []
-        self.roles = {}
-
-    def add_step(self, step: RecipeStep) -> "Recipe":
-        """Add preprocessing step"""
-        self.steps.append(step)
-        return self
-
-    def step_lag(self, columns: List[str], lags: List[int]) -> "Recipe":
-        """Create lag features (wraps pytimetk)"""
-        return self.add_step(StepLag(columns, lags))
-
-    def step_date(self, column: str, features: List[str]) -> "Recipe":
-        """Extract date features (wraps pytimetk)"""
-        return self.add_step(StepDate(column, features))
-
-    def step_normalize(self, columns: List[str] | None = None) -> "Recipe":
-        """Normalize features (wraps sklearn)"""
-        return self.add_step(StepNormalize(columns))
-
-    def prep(self, data: pd.DataFrame) -> "PreparedRecipe":
-        """Fit recipe to training data"""
-        # Execute each step's prep method
-        pass
-
-class PreparedRecipe:
-    """Fitted recipe"""
-    def bake(self, new_data: pd.DataFrame) -> pd.DataFrame:
-        """Apply recipe to new data"""
-        pass
-
-class RecipeStep(ABC):
-    @abstractmethod
-    def prep(self, data: pd.DataFrame) -> "PreparedStep":
-        pass
-
-class PreparedStep(ABC):
-    @abstractmethod
-    def bake(self, new_data: pd.DataFrame) -> pd.DataFrame:
-        pass
-```
-
-**pytimetk Integration Examples:**
-
-```python
-class StepLag(RecipeStep):
-    """Lag features via pytimetk"""
-    def __init__(self, columns: List[str], lags: List[int]):
-        self.columns = columns
-        self.lags = lags
-
-    def prep(self, data: pd.DataFrame) -> PreparedStep:
-        return PreparedStepLag(self.columns, self.lags, list(data.columns))
-
-class PreparedStepLag(PreparedStep):
-    def __init__(self, columns: List[str], lags: List[int], orig_cols: List[str]):
-        self.columns = columns
-        self.lags = lags
-        self.orig_cols = orig_cols
-
-    def bake(self, new_data: pd.DataFrame) -> pd.DataFrame:
-        from pytimetk import augment_lags
-
-        result = new_data.copy()
-        for col in self.columns:
-            result = augment_lags(
-                result,
-                date_column="date",  # From blueprint
-                value_column=col,
-                lags=self.lags
-            )
-
-        return result
-```
-
-**Recipe Steps Implemented:**
-
-**✅ Time Series Steps (7 steps):**
-- [x] `step_lag()` - Lag features ✅
-- [x] `step_date()` - Date/time features ✅
-- [x] `step_rolling()` - Rolling statistics ✅
-- [x] `step_diff()` - Differencing ✅
-- [x] `step_pct_change()` - Percent change ✅
-- [ ] `step_holiday()` - Holiday indicators (future)
-- [ ] `step_fourier()` - Fourier terms (future - see step_harmonic)
-
-**✅ Feature Selection Steps (2 steps):**
-- [x] `step_pca()` - PCA transformation ✅
-- [x] `step_select_corr()` - Correlation filtering ✅
-- [ ] `step_select_vip()` - Variable importance (future)
-- [ ] `step_select_boruta()` - Boruta algorithm (future)
-- [ ] `step_select_rfe()` - Recursive feature elimination (future)
-
-**✅ General Preprocessing Steps (5 steps):**
-- [x] `step_normalize()` - Centering and scaling ✅
-- [x] `step_dummy()` - One-hot encoding ✅
-- [x] `step_impute_mean()` - Mean imputation ✅
-- [x] `step_impute_median()` - Median imputation ✅
-- [x] `step_mutate()` - Custom transformations ✅
-
-**✅ Mathematical Transformation Steps (4 steps):**
-- [x] `step_log()` - Logarithmic transformation ✅
-- [x] `step_sqrt()` - Square root transformation ✅
-- [x] `step_boxcox()` - Box-Cox power transformation ✅
-- [x] `step_yeojohnson()` - Yeo-Johnson transformation ✅
-
-**✅ Scaling Steps (3 steps):**
-- [x] `step_center()` - Center to mean zero ✅
-- [x] `step_scale()` - Scale to std deviation of one ✅
-- [x] `step_range()` - Scale to custom range ✅
-
-**✅ Filter Steps (4 steps):**
-- [x] `step_zv()` - Remove zero variance columns ✅
-- [x] `step_nzv()` - Remove near-zero variance columns ✅
-- [x] `step_lincomb()` - Remove linearly dependent columns ✅
-- [x] `step_filter_missing()` - Remove high-missing columns ✅
-
-**✅ Extended Categorical Steps (4 steps):**
-- [x] `step_other()` - Pool infrequent categorical levels ✅
-- [x] `step_novel()` - Handle novel categories in test data ✅
-- [x] `step_indicate_na()` - Create missing value indicators ✅
-- [x] `step_integer()` - Integer encode categorical variables ✅
-
-**✅ Extended Imputation Steps (3 steps):**
-- [x] `step_impute_mode()` - Mode imputation ✅
-- [x] `step_impute_knn()` - K-Nearest Neighbors imputation ✅
-- [x] `step_impute_linear()` - Linear interpolation ✅
-
-**✅ Basis Function Steps (4 steps):**
-- [x] `step_bs()` - B-spline basis functions ✅
-- [x] `step_ns()` - Natural spline basis functions ✅
-- [x] `step_poly()` - Polynomial features ✅
-- [x] `step_harmonic()` - Harmonic/Fourier basis (seasonal) ✅
-
-**✅ Interaction Steps (2 steps):**
-- [x] `step_interact()` - Create multiplicative interactions ✅
-- [x] `step_ratio()` - Create ratio features ✅
-
-**✅ Discretization Steps (2 steps):**
-- [x] `step_discretize()` - Bin continuous variables ✅
-- [x] `step_cut()` - Cut at specified thresholds ✅
-
-**✅ Advanced Dimensionality Reduction Steps (3 steps):**
-- [x] `step_ica()` - Independent Component Analysis ✅
-- [x] `step_kpca()` - Kernel PCA (non-linear) ✅
-- [x] `step_pls()` - Partial Least Squares (supervised) ✅
-
-**Total: 40+ recipe steps implemented**
-
-**Tasks:**
-- [x] Implement Recipe and PreparedRecipe classes ✅
-- [x] Create RecipeStep protocol ✅
-- [x] Implement 40+ preprocessing steps across 11 categories ✅
-  - [x] 7 time series steps (lag, date, rolling, diff, pct_change) ✅
-  - [x] 2 feature selection steps (pca, select_corr) ✅
-  - [x] 5 general preprocessing steps (normalize, dummy, impute) ✅
-  - [x] 4 mathematical transformation steps (log, sqrt, BoxCox, YeoJohnson) ✅
-  - [x] 3 scaling steps (center, scale, range) ✅
-  - [x] 4 filter steps (zv, nzv, lincomb, filter_missing) ✅
-  - [x] 4 extended categorical steps (other, novel, indicate_na, integer) ✅
-  - [x] 3 extended imputation steps (mode, knn, linear) ✅
-  - [x] 4 basis function steps (bs, ns, poly, harmonic) ✅
-  - [x] 2 interaction steps (interact, ratio) ✅
-  - [x] 2 discretization steps (discretize, cut) ✅
-  - [x] 3 advanced reduction steps (ica, kpca, pls) ✅
-- [x] Integrate with py-workflows ✅
-- [x] Write comprehensive tests (79+ tests passing) ✅
-- [x] Add all step methods to Recipe class (28 new methods) ✅
-- [x] Update __init__.py with all exports ✅
-- [x] Write tests for all new recipe steps (159 tests passing) ✅
-- [x] Add selectors (all_numeric, all_nominal, 20+ selectors) ✅
-- [x] Add role management (update_role, add_role, remove_role, has_role) ✅
-- [x] Implement additional pytimetk wrapper steps (holiday, fourier) ✅
-- [ ] Implement additional feature selection steps (vip, boruta, rfe)
-- [ ] Create comprehensive demo notebook
-
-**Success Criteria:**
-- ✅ Recipe steps are composable
-- ✅ prep() fits on train, bake() applies to test
-- ✅ No data leakage between train/test
-- ✅ Works seamlessly with workflows
-- ⏳ pytimetk GPU acceleration (future)
-- ⏳ Feature selection (future)
-
----
-
-#### 2. py-yardstick (Weeks 17-18)
-**Purpose:** Performance metrics for model evaluation
-
-**Time Series Metrics (Priority):**
-- [ ] `rmse()` - Root mean squared error
-- [ ] `mae()` - Mean absolute error
-- [ ] `mape()` - Mean absolute percentage error
-- [ ] `smape()` - Symmetric MAPE
-- [ ] `mase()` - Mean absolute scaled error
-- [ ] `r_squared()` - R²
-- [ ] `rsq_trad()` - Traditional R²
-
-**Residual Tests (Time Series):**
-- [ ] `durbin_watson()` - Autocorrelation test
-- [ ] `ljung_box()` - Box-Ljung test
-- [ ] `shapiro_wilk()` - Normality test
-- [ ] `adf_test()` - Augmented Dickey-Fuller
-
-**General Metrics:**
-- [ ] Classification: accuracy, roc_auc, f_meas, precision, recall
-- [ ] Regression: ccc, huber_loss, rpd, rpiq
-
-**Core Architecture:**
-
-```python
-def metric_set(*metrics):
-    """Create metric set"""
-    def compute(truth, estimate, **kwargs):
-        results = []
-        for metric in metrics:
-            results.append(metric(truth, estimate, **kwargs))
-        return pd.concat(results)
-    return compute
-
-def rmse(truth: pd.Series, estimate: pd.Series) -> pd.DataFrame:
-    """Root mean squared error"""
-    mse = np.mean((truth - estimate) ** 2)
-    return pd.DataFrame({
-        "metric": ["rmse"],
-        "value": [np.sqrt(mse)]
-    })
-```
-
----
-
-#### 3. py-tune (Weeks 19-20)
-**Purpose:** Hyperparameter optimization
-
-**Key Functions:**
-- [ ] `tune()` - Mark parameter for tuning
-- [ ] `tune_grid()` - Grid search
-- [ ] `tune_bayes()` - Bayesian optimization
-- [ ] `tune_race()` - Racing (early stopping)
-- [ ] `fit_resamples()` - Fit to CV folds
-
-**Core Architecture:**
-
-```python
-def tune() -> TuneParameter:
-    """Mark parameter for tuning"""
-    return TuneParameter()
-
-def tune_grid(
-    workflow: Workflow,
-    resamples: Any,
-    grid: int | pd.DataFrame,
-    metrics: Any = None
-) -> TuneResults:
-    """Grid search hyperparameter tuning"""
-    # Generate parameter grid
-    # Fit each combination to each resample
-    # Collect results
-    pass
-
-class TuneResults:
-    """Tuning results"""
-    def select_best(self, metric: str) -> Dict[str, Any]:
-        """Select best parameters"""
-        pass
-
-    def show_best(self, n: int = 5) -> pd.DataFrame:
-        """Show top N parameter sets"""
-        pass
-```
-
----
-
-#### 4. py-workflowsets (Weeks 21-22)
-**Purpose:** Multi-model comparison (REPLACES modeltime_table!)
-
-**This is critical - workflows + workflowsets pattern instead of table/calibrate**
-
-**Core Architecture:**
-
-```python
-class WorkflowSet:
-    """Collection of workflows"""
-    def __init__(
-        self,
-        workflows: List[Workflow] | None = None,
-        ids: List[str] | None = None,
-        preproc: List[Any] | None = None,
-        models: List[ModelSpec] | None = None,
-        cross: bool = False
-    ):
-        if workflows is not None:
-            # Direct workflow specification
-            self.workflows = dict(zip(ids, workflows))
-        elif cross:
-            # Cross all preprocessors with all models
-            self.workflows = self._cross(preproc, models)
-        else:
-            raise ValueError("Must provide workflows or preproc+models")
-
-    def _cross(self, preproc: List[Any], models: List[ModelSpec]) -> Dict[str, Workflow]:
-        """Create all combinations"""
-        workflows = {}
-        for i, prep in enumerate(preproc):
-            for j, model in enumerate(models):
-                wf_id = f"prep_{i}_model_{j}"
-                wf = workflow()
-                if isinstance(prep, str):
-                    wf = wf.add_formula(prep)
-                else:
-                    wf = wf.add_recipe(prep)
-                wf = wf.add_model(model)
-                workflows[wf_id] = wf
-        return workflows
-
-    def fit_resamples(
-        self,
-        resamples: Any,
-        metrics: Any = None,
-        control: Any = None
-    ) -> "WorkflowSetResults":
-        """Fit all workflows to all resamples"""
-        results = []
-
-        for wf_id, wf in self.workflows.items():
-            for split_id, split in enumerate(resamples):
-                train_data = split.training()
-                test_data = split.testing()
-
-                # Fit workflow
-                wf_fit = wf.fit(train_data)
-
-                # Predict
-                preds = wf_fit.predict(test_data)
-
-                # Compute metrics
-                # ... (metrics computation)
-
-                results.append({
-                    "wf_id": wf_id,
-                    "split_id": split_id,
-                    "predictions": preds,
-                    # ... metrics
-                })
-
-        return WorkflowSetResults(results, self)
-
-    def workflow_map(self, fn_name: str, **kwargs) -> "WorkflowSetResults":
-        """Apply function to all workflows"""
-        pass
-
-class WorkflowSetResults:
-    """Results from fitting workflow set"""
-    def collect_metrics(self) -> pd.DataFrame:
-        """Collect all metrics"""
-        pass
-
-    def collect_predictions(self) -> pd.DataFrame:
-        """Collect all predictions"""
-        pass
-
-    def rank_results(self, metric: str, select_best: bool = False) -> pd.DataFrame:
-        """Rank workflows by metric"""
-        pass
-
-    def autoplot(self, metric: str | None = None):
-        """Plot results"""
-        pass
-```
-
-**Tasks:**
-- [ ] Implement WorkflowSet class
-- [ ] Implement cross() for all combinations
-- [ ] Implement fit_resamples()
-- [ ] Implement WorkflowSetResults
-- [ ] Add collect_* methods
-- [ ] Add rank_results()
-- [ ] Add parallel processing
-- [ ] Write comprehensive tests
-- [ ] Document usage patterns
-
-**Success Criteria:**
-- Can run 100+ workflow combinations
-- Parallel processing works
-- Results are in standardized DataFrames
-- Can rank by any metric
-
----
-
-### Phase 2 Documentation
-
-**Documentation Deliverables:**
-- [ ] API reference for all Phase 2 packages
-- [ ] Tutorial: `02_recipes_and_feature_engineering.ipynb`
-- [ ] Tutorial: `03_hyperparameter_tuning.ipynb`
-- [ ] Tutorial: `04_multi_model_comparison.ipynb`
-- [ ] Demo: `examples/feature_selection_demo.py`
-- [ ] Demo: `examples/workflowsets_demo.py`
-- [ ] Update README with Phase 2 capabilities
-- [ ] Update requirements.txt
-
----
-
-### Phase 2 Success Metrics
-
-✅ Can run 100+ model configurations
-✅ Feature selection reduces features correctly
-✅ Hyperparameter tuning finds optima
-✅ Workflowsets replaces modeltime_table pattern
-✅ All results in standardized DataFrames
-
----
-
-## Phase 3: Advanced Features (Months 9-11)
-
-### Goal
-Recursive forecasting, ensembles, and grouped/panel models.
-
-### Packages to Implement
-
-#### 1. Recursive Forecasting (Weeks 23-25)
-**Purpose:** Enable ML models for multi-step time series forecasting
-
-**Integration with skforecast:**
-
-```python
-def recursive(
-    spec: ModelSpec,
-    lags: int | List[int],
-    horizon: int,
-    exogenous: List[str] | None = None
-) -> ModelSpec:
-    """Wrap model for recursive forecasting"""
-    return ModelSpec(
-        model_type="recursive",
-        engine="skforecast",
-        args=(
-            ("base_spec", spec),
-            ("lags", lags),
-            ("horizon", horizon),
-            ("exogenous", exogenous or [])
-        )
-    )
-
-@register_engine("recursive", "skforecast")
-class SkforecastRecursiveEngine(Engine):
-    """Recursive forecasting via skforecast"""
-    def fit(self, spec: ModelSpec, molded: MoldedData) -> Dict[str, Any]:
-        from skforecast.ForecasterAutoreg import ForecasterAutoreg
-
-        args = dict(spec.args)
-        base_spec = args["base_spec"]
-        lags = args["lags"]
-
-        # Fit base model first to get sklearn estimator
-        base_fit = base_spec.fit("y ~ .", molded)
-
-        # Wrap in ForecasterAutoreg
-        forecaster = ForecasterAutoreg(
-            regressor=base_fit.fit_data["model"],
-            lags=lags
-        )
-
-        forecaster.fit(
-            y=molded.outcomes,
-            exog=molded.predictors if molded.predictors.shape[1] > 0 else None
-        )
-
-        return {"forecaster": forecaster, "base_spec": base_spec}
-```
-
-**Tasks:**
-- [ ] Implement recursive() wrapper
-- [ ] Create SkforecastRecursiveEngine
-- [ ] Add ForecasterMultiSeries for panel data
-- [ ] Add backtesting utilities
-- [ ] Test with RF, XGBoost, LightGBM
-- [ ] Write tests
-- [ ] Document
-
----
-
-#### 2. Panel/Grouped Models (Weeks 26-28)
-**Purpose:** Fit models to grouped time series data
-
-**Nested Approach (fit per group):**
-
-```python
-class NestedWorkflowSet:
-    """Fit workflows separately to each group"""
-    def fit_nested(self, data: pd.DataFrame, group_by: str) -> NestedResults:
-        results = []
-        for group_val in data[group_by].unique():
-            group_data = data[data[group_by] == group_val]
-
-            for wf_id, wf in self.workflows.items():
-                wf_fit = wf.fit(group_data)
-                # ... collect results with group_id
-
-        return NestedResults(results)
-```
-
-**Global Approach (single model):**
-
-```python
-# User specifies group as feature
-wf = (
-    workflow()
-    .add_formula("sales ~ date + price + store_id")
-    .add_model(rand_forest().set_engine("sklearn"))
-)
-
-# Fit single model
-wf_fit = wf.fit(data)
-```
-
----
-
-#### 3. py-stacks (Weeks 29-30)
-**Purpose:** Model ensembling via stacking
-
-**Replaces modeltime.ensemble!**
-
-```python
-def stacks():
-    """Create stacking ensemble"""
-    return Stacks()
-
-class Stacks:
-    def add_candidates(self, workflow_set_results):
-        """Add base models"""
-        pass
-
-    def blend_predictions(self, penalty: float = 0.01):
-        """Fit meta-learner"""
-        pass
-```
-
----
-
-#### 4. Visualization (Weeks 31-32)
-**Purpose:** Interactive Plotly visualizations
-
-**Required Plots:**
-- [ ] `plot_forecast()` - Time series with intervals
-- [ ] `plot_residuals()` - Diagnostic plots
-- [ ] `plot_model_comparison()` - Metric comparison
-- [ ] `plot_tune_results()` - Hyperparameter plots
-
----
-
-### Phase 3 Documentation
-
-**Documentation Deliverables:**
-- [ ] Tutorial: `05_recursive_forecasting.ipynb`
-- [ ] Tutorial: `06_panel_data_modeling.ipynb`
-- [ ] Tutorial: `07_model_ensembling.ipynb`
-- [ ] Tutorial: `08_visualization.ipynb`
-- [ ] Demos for each feature
-- [ ] Update requirements.txt
-
----
-
-## Phase 4: Polish and Extend (Month 12+)
-
-### Goal
-Production-ready with dashboard and MLflow integration.
-
-### Features
-
-#### 1. Additional Engines
-- [ ] LightGBM engine
-- [ ] CatBoost engine
-- [ ] pmdarima (auto_arima) engine
-
-#### 2. Interactive Dashboard (Dash + Plotly)
-- [ ] Data upload interface
-- [ ] Train/test split control
-- [ ] Recipe builder
-- [ ] Model selection
-- [ ] Results visualization
-
-#### 3. MLflow Integration
-- [ ] Track experiments
-- [ ] Model versioning
-- [ ] Deployment
-
-#### 4. Performance Optimizations
-- [ ] Parallel processing for workflowsets
-- [ ] Caching optimizations
-- [ ] GPU acceleration via pytimetk
-
----
-
-### Phase 4 Documentation
-
-**Documentation Deliverables:**
-- [ ] Tutorial: `09_dashboard_usage.ipynb`
-- [ ] Tutorial: `10_mlflow_integration.ipynb`
-- [ ] Comprehensive user guide
-- [ ] Complete API reference
-- [ ] Comparison guides (vs R tidymodels, sklearn, skforecast)
-- [ ] Video tutorials (optional)
-- [ ] Final requirements files
-
----
-
-## Implementation Principles
-
-### 1. Simplicity First
-- Every change impacts minimal code
-- Clear, single-responsibility classes
-- Avoid premature optimization
-
-### 2. Test Continuously
-- Write tests immediately after implementation
-- Use `/generate-tests` command
-- Aim for >90% coverage
-- Run tests in py-tidymodels2 environment
-
-### 3. Document Continuously
-- Update API docs after each checkpoint
-- Create tutorial notebook after major features
-- Demo scripts with env verification
-- Use `/generate-api-documentation` command
-
-### 4. Code Review
-- Use `/code-review --full` after each phase
-- Review for quality, security, maintainability
-
-### 5. Architecture Documentation
-- Use `/create-architecture-documentation --full-suite` after Phase 1
-- Use `/architecture-review` before major decisions
-- Use `/ultra-think` for complex design problems
-
-### 6. Task Management
-- Use `/todo` to track tasks
-- Mark complete as you finish
-- Update project plan regularly
-
----
-
-## Packages NOT to Implement
-
-❌ **modeltime_table/calibrate infrastructure**
-❌ **Separate py-timetk** (use pytimetk instead)
-❌ **modeltime.ensemble** (use stacks)
-
----
-
-## Dependencies
-
-### Core Runtime (requirements.txt)
 ```
 pandas>=2.0.0
 numpy>=1.24.0
-scikit-learn>=1.3.0
-statsmodels>=0.14.0
-prophet>=1.1.0
-pytimetk>=2.2.0
-skforecast>=0.12.0
-plotly>=5.0.0
-patsy>=0.5.0
+matplotlib>=3.7.0
+plotly>=5.14.0
+altair>=5.0.0
+attrs>=23.0.0
+orjson>=3.9.0
+jinja2>=3.1.0
+tqdm>=4.65.0
 ```
 
-### Development (requirements-dev.txt)
+### Development Dependencies (requirements-dev.txt)
+
 ```
-pytest>=7.0.0
-pytest-cov>=4.0.0
-black>=23.0.0
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.0  # Parallel testing
+
+# Code Quality
+black>=23.7.0
 flake8>=6.0.0
-mypy>=1.0.0
+mypy>=1.4.0
+isort>=5.12.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.2.0
+nbsphinx>=0.9.0  # Jupyter notebook in docs
+
+# Notebook
 jupyter>=1.0.0
-ipykernel>=6.0.0
-sphinx>=6.0.0
-sphinx-rtd-theme>=1.0.0
+ipykernel>=6.25.0
+
+# Performance
+memory-profiler>=0.61.0
 ```
 
-### Optional (requirements-optional.txt)
-```
-# GPU acceleration
-cudf-cu11>=23.0.0
-xgboost[gpu]>=2.0.0
+### Optional Dependencies (requirements-optional.txt)
 
-# Additional engines
-lightgbm>=4.0.0
-catboost>=1.2.0
 ```
+# Web Server
+flask>=2.3.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# Deployment
+docker>=6.1.0
+boto3>=1.28.0  # AWS
+azure-storage-blob>=12.17.0  # Azure
+google-cloud-storage>=2.10.0  # GCP
+
+# Performance
+joblib>=1.3.0  # Parallel processing
+kaleido>=0.2.1  # Plotly static export
+selenium>=4.11.0  # Altair PNG export
+
+# Advanced
+polars>=0.18.0  # Alternative to pandas
+vaex>=4.15.0  # Out-of-core DataFrames
+```
+
+### Package Data
+
+**Files to include in package**:
+- Viewer assets (if bundling)
+- HTML templates (Jinja2)
+- Example datasets (small)
+- Default configuration files
+
+### Environment Variables
+
+**Optional configuration**:
+- `TRELLISCOPE_VIEWER_URL`: Override viewer CDN URL
+- `TRELLISCOPE_DEFAULT_PATH`: Default appdir path
+- `TRELLISCOPE_CACHE_DIR`: Cache directory for panels
 
 ---
 
-## Risk Mitigation
+## Risk Assessment
 
-### Risk 1: Performance overhead
-- **Mitigation:** Profile early and often
-- **Strategy:** Use `__slots__`, cache mold/forge
-- **Fallback:** Direct access to underlying models
+### Risk 1: JSON Schema Compatibility
+- **Description**: displayInfo.json doesn't match TypeScript interfaces, viewer fails to load
+- **Impact**: High - viewer won't work
+- **Probability**: Medium
+- **Mitigation**:
+  - Create JSON schema validation tests
+  - Reference TypeScript interfaces in tests
+  - Test with actual viewer early and often
+  - Validate against reference R-generated displays
+- **Contingency**: Manual JSON inspection, schema comparison tools
 
-### Risk 2: Schema violations
-- **Mitigation:** Runtime validation in development
-- **Strategy:** OutputBuilder helpers
-- **Fallback:** Warning mode
+### Risk 2: Performance with 10k+ Panels
+- **Description**: Panel generation too slow, memory usage too high for large displays
+- **Impact**: High - unusable for large datasets
+- **Probability**: Medium
+- **Mitigation**:
+  - Implement lazy evaluation from Phase 2
+  - Parallel processing for speedup
+  - Streaming writes to avoid memory spikes
+  - Profile early with 1000+ panel tests
+- **Contingency**: Document performance limitations, recommend chunking strategies
 
-### Risk 3: Engine translation bugs
-- **Mitigation:** Extensive parameter mapping tests
-- **Strategy:** Document all translations
-- **Fallback:** Raw engine parameters via `set_engine(**kwargs)`
+### Risk 3: matplotlib/plotly/altair Version Compatibility
+- **Description**: API changes in viz libraries break adapters
+- **Impact**: Medium - specific library support breaks
+- **Probability**: Low-Medium
+- **Mitigation**:
+  - Pin minimum versions in requirements
+  - Use stable APIs (avoid experimental features)
+  - CI tests against multiple versions
+  - Adapter abstraction allows easy updates
+- **Contingency**: Version-specific adapters if needed
+
+### Risk 4: Cross-Platform File Path Issues
+- **Description**: Path handling breaks on Windows or fails with special characters
+- **Impact**: Medium - fails for some users
+- **Probability**: Low-Medium
+- **Mitigation**:
+  - Use pathlib.Path everywhere
+  - Test on Windows, macOS, Linux (CI)
+  - Sanitize all user-provided names
+  - Test with unicode, spaces, special chars
+- **Contingency**: Platform-specific workarounds documented
+
+### Risk 5: Viewer Integration Complexity
+- **Description**: Bundling trelliscopejs-lib more complex than expected
+- **Impact**: Medium - delays Phase 4
+- **Probability**: Low
+- **Mitigation**:
+  - Research integration options thoroughly (P4T01)
+  - CDN fallback if bundling problematic
+  - Reference R package approach
+  - Early proof-of-concept
+- **Contingency**: Use CDN exclusively, simplify integration
+
+### Risk 6: Lazy Panel Memory Leaks
+- **Description**: Figures not properly closed, memory accumulates
+- **Impact**: High - unusable for large displays
+- **Probability**: Medium
+- **Mitigation**:
+  - Explicit figure.close() in adapters
+  - Memory profiling tests
+  - Garbage collection between panels
+  - Clear documentation on cleanup
+- **Contingency**: Manual cleanup utilities, gc.collect() calls
+
+### Risk 7: Parallel Processing Overhead
+- **Description**: Parallel processing slower than sequential for small displays due to overhead
+- **Impact**: Low - minor performance issue
+- **Probability**: High
+- **Mitigation**:
+  - Auto-detect optimal strategy based on panel count
+  - Recommend parallel only for 100+ panels
+  - Benchmark and document trade-offs
+- **Contingency**: Default to sequential, parallel opt-in
+
+### Risk 8: Test Coverage Gaps
+- **Description**: Critical code paths not tested, bugs slip through
+- **Impact**: High - production bugs
+- **Probability**: Low-Medium
+- **Mitigation**:
+  - Strict >90% coverage requirement
+  - Code review at each phase
+  - Integration tests for workflows
+  - CI enforces coverage minimum
+- **Contingency**: Manual testing, beta release for feedback
+
+### Risk 9: Documentation Incompleteness
+- **Description**: Users can't figure out how to use features
+- **Impact**: Medium - poor user experience
+- **Probability**: Low
+- **Mitigation**:
+  - Documentation task in every phase
+  - Tutorial series with real examples
+  - API reference auto-generated
+  - Beta user feedback
+- **Contingency**: FAQ, video tutorials, community support
+
+### Risk 10: PyPI Packaging Issues
+- **Description**: Package fails to install or import on user systems
+- **Impact**: High - unusable
+- **Probability**: Low
+- **Mitigation**:
+  - Test install from TestPyPI first
+  - Test in fresh virtualenvs
+  - Test on multiple platforms
+  - Include all package_data
+- **Contingency**: Quick patch release, installation troubleshooting guide
 
 ---
 
-## Next Steps
+## Quality Gates
 
-1. ✅ Environment setup complete
-2. ✅ Architecture analysis complete
-3. **Now:** Review this plan with user
-4. **Next:** Begin Phase 1 implementation (py-hardhat)
-5. **Then:** Iterate through checkpoints
+### Phase 1 Quality Gate
+**Criteria to proceed to Phase 2**:
+- [ ] All Phase 1 tests passing (100%)
+- [ ] Code coverage >90% for Phase 1 modules
+- [ ] Basic display creation works end-to-end
+- [ ] displayInfo.json validates against schema
+- [ ] 10 matplotlib panels generated correctly
+- [ ] Example notebook executes without errors
+- [ ] Code reviewed and refactored
+- [ ] No critical bugs or TODOs
+
+**Validation**: Run full Phase 1 test suite, manual display creation test
+
+### Phase 2 Quality Gate
+**Criteria to proceed to Phase 3**:
+- [ ] All Phase 2 tests passing (100%)
+- [ ] Code coverage >90% for Phase 2 modules
+- [ ] Lazy panel generation works for 100+ panels
+- [ ] Plotly and altair adapters working
+- [ ] Mixed panel types display correctly
+- [ ] Parallel generation shows speedup (>2x for 100 panels)
+- [ ] Performance benchmarks meet targets
+- [ ] Integration tests pass
+- [ ] Example notebooks execute
+
+**Validation**: Integration tests, performance benchmarks, manual viewer testing
+
+### Phase 3 Quality Gate
+**Criteria to proceed to Phase 4**:
+- [ ] All Phase 3 tests passing (100%)
+- [ ] Code coverage >90% for Phase 3 modules
+- [ ] Filters work in viewer (manual test)
+- [ ] Sorts work correctly (manual test)
+- [ ] Labels display properly (manual test)
+- [ ] Multiple views switchable (manual test)
+- [ ] Complete state serializes to JSON correctly
+- [ ] State validation catches errors
+- [ ] Integration test with full state passes
+- [ ] Example notebooks execute
+
+**Validation**: Integration tests, manual viewer testing with full state
+
+### Phase 4 Quality Gate (Release Readiness)
+**Criteria for 1.0 release**:
+- [ ] All tests passing (100%) across all phases
+- [ ] Overall code coverage >90%
+- [ ] Viewer loads displays correctly (manual test)
+- [ ] Dev server works on all platforms
+- [ ] CLI commands work correctly
+- [ ] Documentation complete (API, tutorials, examples)
+- [ ] Package installs from PyPI
+- [ ] CI/CD pipeline green
+- [ ] Performance benchmarks met:
+  - [ ] 100 panels in <10 seconds
+  - [ ] 1000 panels in <60 seconds with lazy
+  - [ ] 10000 panels in <2 minutes with parallel
+  - [ ] Memory <1GB for 1000 panels
+- [ ] No critical or high-priority bugs
+- [ ] License and legal compliance checked
+- [ ] Release notes and CHANGELOG complete
+
+**Validation**: Full test suite, manual QA checklist, stakeholder approval
 
 ---
 
-**End of Project Plan**
+## Weekly Milestones
+
+### Week 1 (Phase 1)
+- [ ] Display class foundation complete (P1T01)
+- [ ] DataFrame validation utilities (P1T02)
+- [ ] Meta variable base classes (P1T03)
+- [ ] Meta type inference working (P1T04)
+- **Deliverable**: Display can be created with DataFrame, metas inferred
+
+### Week 2 (Phase 1)
+- [ ] set_panel_column method (P1T05)
+- [ ] add_meta_variable method (P1T06)
+- [ ] keysig generation (P1T07)
+- [ ] JSON writer (P1T08)
+- **Deliverable**: displayInfo.json generated correctly
+
+### Week 3 (Phase 1)
+- [ ] File system writer (P1T09)
+- [ ] matplotlib adapter (P1T10)
+- [ ] Panel naming (P1T11)
+- [ ] Panel writer (P1T12)
+- **Deliverable**: Panels written to disk as PNG files
+
+### Week 4 (Phase 1)
+- [ ] Display.write() method complete (P1T13)
+- [ ] End-to-end integration test (P1T14)
+- [ ] Layout and panel options (P1T15, P1T16)
+- [ ] Currency and Href metas (P1T18, P1T19)
+- [ ] Example notebook (P1T17)
+- [ ] Phase 1 review and cleanup (P1T20)
+- **Deliverable**: Phase 1 complete, quality gate passed
+
+### Week 5 (Phase 2)
+- [ ] LazyPanelSource class (P2T01)
+- [ ] Lazy support in writer (P2T02)
+- [ ] Plotly adapter (P2T03)
+- [ ] Altair adapter (P2T04)
+- **Deliverable**: Lazy panels and multiple viz libraries working
+
+### Week 6 (Phase 2)
+- [ ] Multi-library panel writer (P2T05)
+- [ ] HTML panel support (P2T06)
+- [ ] GraphMeta class (P2T07)
+- [ ] PanelSrc/PanelLocal metas (P2T08)
+- **Deliverable**: All panel source types supported
+
+### Week 7 (Phase 2)
+- [ ] Parallel panel generation (P2T09)
+- [ ] Panel caching (P2T10)
+- [ ] Performance benchmarks (P2T14)
+- **Deliverable**: Performance optimization complete
+
+### Week 8 (Phase 2)
+- [ ] Integration tests (P2T11, P2T12)
+- [ ] Update Display.write() (P2T13)
+- [ ] Example notebooks (P2T15, P2T16)
+- [ ] Phase 2 review (P2T17)
+- **Deliverable**: Phase 2 complete, quality gate passed
+
+### Week 9 (Phase 3)
+- [ ] Filter classes (P3T01)
+- [ ] Display.add_filter() (P3T02)
+- [ ] Sort classes (P3T03)
+- [ ] set_default_sort/sorts (P3T04, P3T05)
+- **Deliverable**: Filters and sorts configurable
+
+### Week 10 (Phase 3)
+- [ ] Label system (P3T06)
+- [ ] set_default_labels (P3T07)
+- [ ] set_label_template (P3T08)
+- [ ] View class (P3T09)
+- **Deliverable**: Labels and views working
+
+### Week 11 (Phase 3)
+- [ ] Display.add_view() (P3T10)
+- [ ] JSON writer update (P3T11)
+- [ ] State validation (P3T12)
+- **Deliverable**: Complete state management
+
+### Week 12 (Phase 3)
+- [ ] Integration test (P3T13)
+- [ ] Example notebooks (P3T14, P3T15)
+- [ ] Phase 3 review (P3T16)
+- **Deliverable**: Phase 3 complete, quality gate passed
+
+### Week 13 (Phase 4)
+- [ ] Viewer integration research (P4T01)
+- [ ] HTML index generator (P4T02)
+- [ ] Display list generator (P4T03)
+- [ ] Thumbnail generation (P4T04)
+- **Deliverable**: Viewer integration working
+
+### Week 14 (Phase 4)
+- [ ] Development server (P4T05)
+- [ ] Display.view() method (P4T06)
+- [ ] Static deployment utility (P4T07)
+- [ ] Docker template (P4T08)
+- [ ] CLI implementation (P4T09)
+- **Deliverable**: Server and deployment tools complete
+
+### Week 15 (Phase 4)
+- [ ] API documentation (P4T10)
+- [ ] Tutorial series (P4T11)
+- [ ] Example gallery (P4T12)
+- [ ] Performance optimization (P4T15)
+- [ ] Memory optimization (P4T16)
+- **Deliverable**: Documentation and optimization complete
+
+### Week 16 (Phase 4)
+- [ ] Package build (P4T13)
+- [ ] CI/CD pipeline (P4T14)
+- [ ] Migration guide (P4T17)
+- [ ] Final review (P4T18)
+- [ ] Release to PyPI (P4T19)
+- [ ] Announcement (P4T20)
+- **Deliverable**: 1.0 release published
+
+---
+
+## Definition of Done
+
+### For Each Task
+- [ ] Code written following PEP 8 style guide
+- [ ] Type hints added for all function signatures
+- [ ] Docstrings written in NumPy format
+- [ ] Unit tests written and passing
+- [ ] Integration test (if applicable) passing
+- [ ] Code coverage for module >90%
+- [ ] No TODOs, FIXMEs, or placeholder code
+- [ ] Code reviewed (self or peer)
+- [ ] Manually tested (if UI/integration)
+- [ ] Documentation updated (README, API docs, examples)
+- [ ] CHANGELOG.md entry added (if user-facing change)
+
+### For Each Phase
+- [ ] All phase tasks marked complete
+- [ ] All tests passing (100% pass rate)
+- [ ] Phase coverage target met (>90%)
+- [ ] Integration tests passing
+- [ ] Example notebooks execute without errors
+- [ ] Code formatted with black
+- [ ] No flake8 linting errors
+- [ ] mypy type checking passes
+- [ ] Phase quality gate criteria met
+- [ ] Documentation updated for phase
+- [ ] Code review completed
+- [ ] No critical bugs outstanding
+
+### For Release (1.0)
+- [ ] All phases complete
+- [ ] Overall test coverage >90%
+- [ ] All quality gates passed
+- [ ] Performance benchmarks met
+- [ ] Memory benchmarks met
+- [ ] Complete API documentation
+- [ ] Tutorial series complete
+- [ ] Example gallery complete
+- [ ] Migration guide written
+- [ ] README polished
+- [ ] CHANGELOG complete
+- [ ] LICENSE correct
+- [ ] Package builds successfully
+- [ ] Package installs from PyPI
+- [ ] CI/CD pipeline green
+- [ ] No high-priority bugs
+- [ ] Stakeholder approval obtained
+
+---
+
+## Code Review Checkpoints
+
+### After Each Major Class Implementation
+**Trigger**: After completing Display, Meta hierarchy, Filter/Sort/View classes, Adapters
+
+**Checklist**:
+- [ ] Class design follows OOP principles (encapsulation, SRP)
+- [ ] Method signatures intuitive and consistent
+- [ ] Error handling comprehensive with clear messages
+- [ ] Edge cases handled (None, empty, invalid input)
+- [ ] Type hints accurate and complete
+- [ ] Docstrings complete with examples
+- [ ] Tests cover normal and error cases
+- [ ] No code duplication (DRY principle)
+
+### Before Merging Each Phase
+**Trigger**: All phase tasks complete, ready to merge to main
+
+**Checklist**:
+- [ ] All tests passing on CI
+- [ ] Coverage target met for phase
+- [ ] Code formatted (black --check)
+- [ ] No linting errors (flake8)
+- [ ] Type checking passes (mypy)
+- [ ] Documentation updated
+- [ ] CHANGELOG updated
+- [ ] No merge conflicts
+- [ ] Integration tests pass
+- [ ] Manual QA performed
+- [ ] Phase quality gate met
+
+### Before Performance Optimization (P4T15)
+**Trigger**: Before starting optimization work
+
+**Checklist**:
+- [ ] Baseline benchmarks recorded
+- [ ] Profiling data collected (cProfile, memory_profiler)
+- [ ] Bottlenecks identified
+- [ ] Optimization plan documented
+- [ ] Tests exist to prevent regression
+
+### Before Release (P4T18)
+**Trigger**: Before creating 1.0 release
+
+**Checklist**:
+- [ ] Full codebase review
+- [ ] All quality gates passed
+- [ ] No TODO/FIXME comments
+- [ ] No debug print statements
+- [ ] No commented-out code
+- [ ] Consistent naming throughout
+- [ ] All public APIs documented
+- [ ] All examples working
+- [ ] Package metadata correct
+- [ ] Legal compliance (license, attributions)
+- [ ] Security review (dependencies, inputs)
+- [ ] Final approval from stakeholders
+
+---
+
+## Performance Benchmarks
+
+### Phase 1 Targets
+- **100 panels (matplotlib, sequential)**: <10 seconds
+  - Setup: 100 simple matplotlib line plots
+  - Measure: Time from Display.write() start to completion
+  - Target: <10s on modern laptop (2020+ i5/M1)
+  - Validation: `tests/performance/test_phase1_benchmarks.py`
+
+### Phase 2 Targets
+- **100 panels (parallel, 4 workers)**: <5 seconds
+  - Setup: Same 100 matplotlib plots
+  - Measure: Time with parallel=True, n_jobs=4
+  - Target: >2x speedup over sequential
+  - Validation: `tests/performance/test_parallel_speedup.py`
+
+- **1000 panels (lazy, sequential)**: <60 seconds
+  - Setup: 1000 lazy-generated matplotlib plots
+  - Measure: Time for complete generation
+  - Target: <60s (0.06s per panel)
+  - Validation: `tests/performance/test_lazy_1000.py`
+
+- **1000 panels (lazy, parallel 8 workers)**: <20 seconds
+  - Setup: Same 1000 lazy panels
+  - Measure: Time with parallel processing
+  - Target: >3x speedup over sequential
+  - Validation: `tests/performance/test_lazy_parallel.py`
+
+- **Memory usage (1000 matplotlib panels)**: <1GB peak
+  - Setup: 1000 matplotlib plots
+  - Measure: Peak memory usage during write()
+  - Target: <1GB (proper cleanup between panels)
+  - Validation: `tests/performance/test_memory_1000.py`
+
+### Phase 3 Targets
+- **State configuration operations**: <100ms each
+  - Setup: Display with 100 panels, 10 metas
+  - Measure: Time for add_filter, add_view, etc.
+  - Target: <100ms for each state operation
+  - Validation: `tests/performance/test_state_ops.py`
+
+### Phase 4 Targets
+- **10,000 panels (lazy, parallel)**: <2 minutes
+  - Setup: 10k lazy-generated simple plots
+  - Measure: Full write() time with optimal settings
+  - Target: <2 minutes (0.012s per panel)
+  - Validation: `tests/performance/test_10k_panels.py`
+
+- **JSON serialization (10k panels)**: <5 seconds
+  - Setup: Large displayInfo.json
+  - Measure: Time to serialize and write JSON
+  - Target: <5s (use orjson for speed)
+  - Validation: `tests/performance/test_json_serialization.py`
+
+- **Viewer load time (10k panels)**: <3 seconds
+  - Setup: Display with 10k panels
+  - Measure: Time from HTML load to first render
+  - Target: <3s (viewer optimization, not Python)
+  - Validation: Manual testing with browser DevTools
+
+### Continuous Performance Monitoring
+- CI runs benchmarks on each commit
+- Performance regression triggers warning
+- Benchmark results tracked over time
+- Alerts if any benchmark >20% slower than baseline
+
+---
+
+## Progress Tracking
+
+### Progress Log Template
+
+```markdown
+## Progress Log
+
+### Phase 1: Core Infrastructure
+- [x] P1T01: Display class foundation (2025-10-28, 5 hours) ✓
+- [ ] P1T02: DataFrame validation
+- [ ] P1T03: Meta inference
+...
+
+### Current Task
+**Working on**: P1T02 - DataFrame validation utilities
+**Started**: 2025-10-28
+**Estimated completion**: 2025-10-28 EOD
+**Status**: In progress - validation functions implemented, writing tests
+
+### Blockers
+- None currently
+
+### Notes
+- Using attrs instead of dataclasses for Meta variables (better serialization)
+- Discovered pandas 2.0 has improved dtype system, leveraging for inference
+- Need to discuss keysig algorithm with team (MD5 vs SHA256)
+
+### Weekly Summary (Week 1)
+**Completed**:
+- P1T01: Display class (5 hours)
+- P1T02: Validation utils (3 hours)
+
+**In Progress**:
+- P1T03: Meta classes
+
+**Blocked**: None
+
+**Hours This Week**: 8 / 40 planned
+
+**On Track**: Yes, ahead of schedule
+```
+
+### Task Completion Tracking
+
+| Task ID | Task Name | Status | Estimated | Actual | Completion Date | Notes |
+|---------|-----------|--------|-----------|--------|-----------------|-------|
+| P1T01 | Display class | ✓ | 6h | 5h | 2025-10-28 | Used attrs, faster than expected |
+| P1T02 | Validation utils | ✓ | 3h | 3.5h | 2025-10-28 | Added extra edge case tests |
+| P1T03 | Meta classes | ⏳ | 5h | - | - | In progress |
+| ... | ... | ... | ... | ... | ... | ... |
+
+**Legend**:
+- ✓ Complete
+- ⏳ In Progress
+- ⏸ Blocked
+- ◯ Not Started
+
+### Velocity Tracking
+
+| Week | Planned Hours | Actual Hours | Tasks Completed | Tasks Planned | Velocity |
+|------|---------------|--------------|-----------------|---------------|----------|
+| 1 | 40 | 38 | 5 | 5 | 100% |
+| 2 | 40 | 42 | 6 | 5 | 120% |
+| 3 | 40 | 35 | 4 | 5 | 80% |
+| 4 | 40 | 40 | 5 | 5 | 100% |
+
+**Average Velocity**: 100% (on track)
+
+---
+
+## Current Progress
+
+### Phase 1: Core Infrastructure - ✅ COMPLETE
+
+**Completion Date**: 2025-10-27
+**Status**: All core tasks complete, 246 tests passing, comprehensive documentation delivered
+
+#### Completed Tasks
+
+| Task ID | Task Name | Status | Completion Date | Notes |
+|---------|-----------|--------|-----------------|-------|
+| P1T01-P1T06 | Display class, validation, properties | ✓ | 2025-10-27 | Fluent API with method chaining |
+| P1T07 | Meta variable classes (8 types) | ✓ | 2025-10-27 | Using attrs for clean implementation |
+| P1T08 | Type inference from DataFrame | ✓ | 2025-10-27 | Smart detection of FactorMeta, NumberMeta, DateMeta, TimeMeta |
+| P1T09 | Key signature generation | ✓ | 2025-10-27 | MD5 hash from name, shape, columns, sample rows |
+| P1T10-P1T11 | JSON serialization & validation | ✓ | 2025-10-27 | Compatible with trelliscopejs-lib schema |
+| P1T12-P1T13 | Display.write() implementation | ✓ | 2025-10-27 | Writes displayInfo.json + metadata.csv |
+| P1T14 | Integration tests | ✓ | 2025-10-27 | 13 comprehensive end-to-end tests |
+| P1T17 | Example notebooks | ✓ | 2025-10-27 | Getting started tutorial with 3 examples |
+| P1T20 | Phase 1 documentation | ✓ | 2025-10-27 | README, API reference, architecture guide, contributing guide |
+
+#### Test Coverage Summary
+
+- **Total Tests**: 246 (233 unit + 13 integration)
+- **Pass Rate**: 100% (all tests passing)
+- **Coverage by Module**:
+  - Display: 97%
+  - Meta Variables: 100%
+  - Inference: 98%
+  - Serialization: 97%
+  - Validation: 95%
+- **Overall Coverage**: 95%+
+
+#### Deliverables
+
+✅ **Code**:
+- `trelliscope/display.py` - 500+ lines, fully tested
+- `trelliscope/meta_variables.py` - 8 meta variable classes
+- `trelliscope/inference.py` - Type inference engine
+- `trelliscope/serialization.py` - JSON serialization
+- `trelliscope/validation.py` - Validation utilities
+
+✅ **Tests**:
+- `tests/unit/` - 233 unit tests
+- `tests/integration/` - 13 integration tests
+- Test execution time: <1 second
+
+✅ **Documentation**:
+- `README.md` - Complete project documentation
+- `docs/api.md` - Comprehensive API reference
+- `docs/architecture.md` - Architecture guide
+- `CONTRIBUTING.md` - Contribution guidelines
+- `examples/01_getting_started.ipynb` - Tutorial notebook
+
+#### Key Achievements
+
+1. **Fluent API**: Clean, intuitive method chaining interface
+2. **Type Safety**: Comprehensive type hints throughout
+3. **Smart Inference**: Automatic meta type detection from pandas dtypes
+4. **JSON Specification**: Schema-compliant output for JavaScript viewer
+5. **Comprehensive Testing**: 95%+ coverage, 246 tests passing
+6. **Production Ready**: All quality gates met
+
+#### Design Decisions
+
+- **attrs over dataclasses**: More powerful, better serialization
+- **Conservative inference**: Only infer when confident, allow explicit override
+- **Separate metadata.csv**: Efficient format, universal compatibility
+- **MD5 for keysig**: Fast, sufficient for uniqueness
+- **Force flag for overwrites**: Prevent accidental data loss
+
+### Outstanding Phase 1 Items
+
+- **P1T18-P1T19**: Advanced meta features (locale-specific CurrencyMeta, HrefMeta validation)
+  - Status: Deferred (not critical for core functionality)
+  - Can be added in future minor version
+
+### Phase 2: Panel Rendering - ✅ COMPLETE
+
+**Completion Date**: 2025-10-27
+**Status**: Core panel rendering MVP delivered, all tests passing
+
+#### Completed Tasks
+
+| Task ID | Task Name | Status | Completion Date | Notes |
+|---------|-----------|--------|-----------------|-------|
+| P2T01 | Design panel rendering architecture | ✓ | 2025-10-27 | Adapter pattern with PanelRenderer base |
+| P2T02 | MatplotlibAdapter implementation | ✓ | 2025-10-27 | PNG, JPEG, SVG, PDF support |
+| P2T03 | PlotlyAdapter implementation | ✓ | 2025-10-27 | Interactive HTML export |
+| P2T04 | PanelManager coordinator | ✓ | 2025-10-27 | Auto-detection and adapter selection |
+| P2T05 | Display.write() integration | ✓ | 2025-10-27 | Added render_panels parameter |
+| P2T06 | Lazy evaluation support | ✓ | 2025-10-27 | Callables executed on-demand |
+| P2T07 | Unit tests for adapters | ✓ | 2025-10-27 | 16 tests for MatplotlibAdapter |
+| P2T08 | Integration tests | ✓ | 2025-10-27 | 7 end-to-end workflow tests |
+| P2T09 | Example notebook | ✓ | 2025-10-27 | 02_panel_rendering.ipynb |
+| P2T10 | Documentation updates | ✓ | 2025-10-27 | README, design doc |
+
+#### Test Coverage Summary
+
+- **Total Tests**: 269 (246 Phase 1 + 23 Phase 2)
+- **Pass Rate**: 100% (all tests passing)
+- **New Tests**:
+  - MatplotlibAdapter: 16 unit tests
+  - Panel rendering: 7 integration tests
+- **Coverage**: 95%+ maintained
+
+#### Deliverables
+
+✅ **Code**:
+- `trelliscope/panels/__init__.py` - PanelRenderer base class
+- `trelliscope/panels/matplotlib_adapter.py` - Matplotlib support
+- `trelliscope/panels/plotly_adapter.py` - Plotly support
+- `trelliscope/panels/manager.py` - PanelManager coordinator
+- Updated `Display.write()` with panel rendering
+
+✅ **Tests**:
+- `tests/unit/test_matplotlib_adapter.py` - 16 unit tests
+- `tests/integration/test_panel_rendering.py` - 7 integration tests
+
+✅ **Documentation**:
+- `docs/phase2_panel_rendering_design.md` - Architecture design
+- `examples/02_panel_rendering.ipynb` - Comprehensive tutorial
+- Updated README.md with panel rendering examples
+
+#### Key Features Delivered
+
+1. **Multi-Library Support**: Matplotlib and Plotly with automatic detection
+2. **Multiple Formats**: PNG, JPEG, SVG, PDF (matplotlib), HTML (plotly)
+3. **Lazy Evaluation**: Callables for memory-efficient rendering
+4. **Error Resilience**: Continues rendering if individual panels fail
+5. **Extensible Architecture**: Easy to add custom adapters
+6. **Clean Integration**: Seamless integration with existing Display API
+
+#### Design Decisions
+
+- **Adapter Pattern**: Clean separation of concerns, extensible
+- **PanelManager**: Centralized coordinator for adapter selection
+- **Lazy by Default**: Callables automatically detected and executed
+- **Error Handling**: Log errors but continue rendering remaining panels
+- **Index-Based Naming**: Panel files named by DataFrame index (0, 1, 2, ...)
+
+### Future Enhancements (Not Critical for MVP)
+
+**Deferred to Future Versions**:
+- Altair adapter (lower priority, plotly covers interactive needs)
+- Parallel rendering with multiprocessing
+- Panel caching for iterative development
+- Progress bars with tqdm
+- Custom DPI/size options in Display.write()
+- Panel validation and optimization
+
+### Next Phase: Phase 3 - Viewer Integration
+
+**Timeline**: To be scheduled
+**Prerequisites**: Phase 1 & 2 complete ✓
+
+**Planned Work**:
+- JavaScript viewer integration
+- Development server for local viewing
+- Static deployment utilities
+- Interactive filtering and sorting
+
+---
+
+## Next Actions
+
+### Immediate Next Steps
+
+1. **Set up py-trelliscope virtual environment**
+   ```bash
+   cd /Users/matthewdeane/Documents/Data\ Science/python/_projects/py-trelliscope2
+   python -m venv py-trelliscope
+   source py-trelliscope/bin/activate
+   pip install --upgrade pip setuptools wheel
+   ```
+
+2. **Install core dependencies**
+   ```bash
+   pip install pandas numpy matplotlib attrs orjson
+   pip install pytest pytest-cov black flake8 mypy
+   ```
+
+3. **Create initial package structure**
+   ```bash
+   mkdir -p trelliscope/{core,panels,writers,utils,integrations,server}
+   touch trelliscope/__init__.py
+   touch trelliscope/{core,panels,writers,utils,integrations,server}/__init__.py
+   mkdir -p tests/{unit,integration,performance}
+   mkdir -p examples
+   ```
+
+4. **Begin P1T01: Display class foundation**
+   - Create `trelliscope/display.py`
+   - Implement Display.__init__
+   - Add basic validation
+   - Write initial tests in `tests/test_display.py`
+
+### First Week Goals
+
+**By End of Week 1**:
+- Display class foundation complete (P1T01)
+- DataFrame validation utilities (P1T02)
+- Meta variable base classes (P1T03)
+- Meta type inference (P1T04)
+- All tests passing, coverage >90%
+
+**Daily Targets**:
+- Day 1: P1T01 complete
+- Day 2: P1T02 complete, P1T03 started
+- Day 3: P1T03 complete
+- Day 4-5: P1T04 complete, testing and review
+
+### Setup Checklist
+
+- [ ] Virtual environment created and activated
+- [ ] Core dependencies installed
+- [ ] Package structure created
+- [ ] Git repository initialized (if not already)
+- [ ] .gitignore configured
+- [ ] Initial commit made
+- [ ] Development branch created (phase-1)
+- [ ] IDE configured (VSCode with Python extension)
+- [ ] Jupyter kernel registered
+- [ ] README.md created with project overview
+
+### Communication & Reporting
+
+**Progress Updates**: Update this plan weekly
+**Location**: `.claude_plans/projectplan.md`
+**Format**: Mark completed tasks with [x], update progress log
+
+**Blockers**: Document immediately in progress log
+**Questions**: Add to notes section for discussion
+
+---
+
+## Appendix: Reference Materials
+
+### Must-Read Before Starting
+1. `.claude/prompt.md` - Complete project specifications
+2. `.claude/CLAUDE.md` - Implementation directives
+3. `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` - Architecture analysis
+
+### Key Sections in Technical Analysis
+- **Section 1**: Architecture Deep Dive
+- **Section 2**: Core Concepts (panel-centric data model)
+- **Section 4**: JSON Specification Format (critical for compliance)
+- **Section 6**: Implementation Insights for Python Port
+- **Section 12**: Python Implementation Roadmap (15-22 weeks)
+
+### External Resources
+- Trelliscope R package: https://github.com/trelliscope/trelliscope
+- trelliscopejs-lib viewer: https://github.com/trelliscope/trelliscopejs-lib
+- TypeScript interfaces: (in trelliscopejs-lib repo)
+- Trelliscope.org documentation: https://trelliscope.org
+
+### Comparison Reference
+- R trelliscope examples for behavior validation
+- JSON schema examples from R-generated displays
+- Viewer expected inputs (from JS lib)
+
+---
+
+**END OF PROJECT PLAN**
+
+**Version**: 1.0
+**Status**: Planning Complete
+**Next Update**: End of Week 1 (progress log)
+**Maintainer**: Claude + Matthew Deane
+**Last Updated**: 2025-10-27
+
+
+---
+
+## Progress Log
+
+### Week 1 - Day 1 (2025-10-27)
+
+#### Completed Tasks
+- [x] **Environment Setup**: Created py-trelliscope virtual environment
+  - Python 3.10.14 on macOS ARM64
+  - Installed: pandas 2.3.3, numpy 2.2.6, attrs 25.4.0, pytest 8.4.2, pytest-cov 7.0.0
+  - Created requirements.txt
+
+- [x] **Package Structure**: Created initial directory structure
+  - trelliscope/{core,panels,writers,utils,integrations,server}
+  - tests/{unit,integration,performance}
+  - .gitignore configured
+
+- [x] **P1T01: Display Class Foundation** ✅ COMPLETE
+  - Implemented complete Display class (trelliscope/display.py)
+  - Features:
+    - __init__ with full validation (DataFrame, name, description, keysig, path)
+    - set_panel_column() with column existence validation
+    - set_default_layout() with parameter validation
+    - set_panel_options() for width/height/aspect configuration
+    - set_default_labels() with column validation
+    - _generate_keysig() for MD5-based unique identification
+    - Method chaining (builder pattern)
+    - Comprehensive __repr__ for display
+  - Tests: 35 tests, 100% coverage on display.py
+  - Time: 6 hours
+  - All success criteria met
+
+#### Current Status
+- **Phase**: 1 (Core Infrastructure)
+- **Week**: 1 of 4
+- **Progress**: 1/20 tasks complete (5%)
+- **Next Task**: P1T02 - DataFrame validation utilities
+
+#### Blockers
+- None
+
+#### Notes
+- Display class exceeds requirements with comprehensive validation
+- Method chaining works perfectly for fluent API
+- Test coverage at 100% for all Display methods
+- Keysig generation produces consistent MD5 hashes
+
+
+---
+
+## 🎉 VIEWER INTEGRATION COMPLETED - 2025-10-28
+
+### Major Achievement
+
+**Viewer Integration (Phase 4 Component) Successfully Delivered!**
+
+The trelliscope viewer is now **fully functional** and integrated with the Python backend. Users can generate displays and view them in a browser with full interactivity.
+
+### What Was Delivered
+
+#### 1. Core Viewer Functionality ✅
+- **File**: `trelliscope/viewer.py`
+- **Capabilities**:
+  - Generate HTML with embedded viewer
+  - ESM module loading with esm.sh bundling
+  - Correct API call pattern: `Trelliscope(id, config)`
+  - CSS and JavaScript dependency management
+
+#### 2. Panel-Data Integration ✅
+- **File**: `trelliscope/display.py` (line 761-777)
+- **Fix**: metadata.csv now includes panel column
+- **Result**: Viewer correctly maps data rows to panel images
+
+#### 3. Complete Test Suite ✅
+- **File**: `tests/unit/test_viewer.py`
+- **Coverage**: 33 tests covering HTML generation, module loading, API calls
+- **Status**: All tests passing
+
+#### 4. Comprehensive Documentation ✅
+- **[Complete Fix Summary](./.claude_plans/VIEWER_FIX_SUMMARY.md)**: Technical implementation details
+- **[Quick Start Guide](./.claude_plans/VIEWER_QUICKSTART.md)**: User-facing documentation with examples
+
+### Technical Implementation
+
+#### Architecture Decision: ESM with esm.sh Bundling
+
+**Problem**: UMD build didn't work with `<script>` tags due to module resolution failures
+
+**Solution**: Use ES modules with esm.sh CDN bundling
+```javascript
+const { Trelliscope } = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+Trelliscope('trelliscope-root', {
+    displayListPath: "./my_display/displayInfo.json",
+    spa: false
+});
+```
+
+**Benefits**:
+- Automatically bundles all dependencies (React, ReactDOM, Redux, etc.)
+- Works natively in modern browsers
+- No shims or workarounds needed
+- Clean, maintainable code
+
+#### API Research
+
+Through web research and R package source code analysis:
+- Discovered correct API: `trelliscopeApp(id, config)` (R package)
+- Maps to: `Trelliscope(id, config)` (JavaScript export)
+- Element ID is first parameter (string)
+- Configuration object is second parameter
+
+### User Impact
+
+#### Before (Non-functional)
+```python
+display.write()  # Generated files but viewer didn't work
+# User saw blank page with JavaScript errors
+```
+
+#### After (Fully Functional)
+```python
+from trelliscope import Display
+from trelliscope.viewer import generate_viewer_html, write_index_html
+
+# Create display
+display = Display(df, name='my_display', path='./output')
+display.set_panel_column('panel')
+display.infer_metas()
+display.write()
+
+# Generate viewer
+html = generate_viewer_html('my_display')
+write_index_html('./output/index.html', html)
+
+# Start server and view
+# cd output && python -m http.server 8000
+# Open: http://localhost:8000/index.html
+# ✅ WORKS! Interactive viewer with panels, filtering, sorting
+```
+
+### Verification
+
+#### Test Results
+```bash
+$ pytest tests/unit/test_viewer.py -v
+================================= 33 passed in 0.46s =================================
+```
+
+#### Live Demo
+```bash
+$ cd examples/output
+$ python regenerate.py
+Rendering 20 panels...
+✅ Display created successfully!
+
+$ python -m http.server 9000
+$ open http://localhost:9000/index.html
+✅ Viewer loads with 20 interactive panels
+```
+
+### Files Changed
+
+1. **`trelliscope/viewer.py`**
+   - Line 57: Changed to esm.sh URL
+   - Lines 59-79: Restructured config handling
+   - Lines 106-120: Updated JavaScript initialization
+
+2. **`trelliscope/display.py`**
+   - Lines 767-771: Added panel column to metadata.csv
+
+3. **`tests/unit/test_viewer.py`**
+   - Updated 15+ tests to match new API
+   - All tests passing
+
+4. **New Documentation**
+   - VIEWER_FIX_SUMMARY.md (comprehensive technical guide)
+   - VIEWER_QUICKSTART.md (user quick start guide)
+
+### Examples Added
+
+1. **Basic Bar Charts** - Simple matplotlib example
+2. **Time Series Plots** - Advanced matplotlib with dates
+3. **Plotly Interactive** - Plotly figure support
+4. **Regenerate Script** - Complete workflow example
+
+### Known Working Features
+
+✅ Panel rendering (matplotlib, plotly)
+✅ Metadata inference
+✅ Display configuration
+✅ JSON serialization
+✅ Viewer HTML generation
+✅ Local server deployment
+✅ Panel filtering/sorting
+✅ Interactive navigation
+✅ Layout customization
+
+### Phase 4 Status Update
+
+**Original Phase 4 Goals**:
+- [x] Bundle or reference trelliscopejs-lib ✅ **DONE**
+- [x] HTML index generation ✅ **DONE**
+- [x] Local server for development ✅ **DONE**
+- [ ] Deployment utilities (static export, server deployment) - Partially done (local works)
+- [x] Documentation and examples ✅ **DONE**
+
+**Phase 4 Progress**: ~80% complete (core viewer working, production deployment tools pending)
+
+### Next Steps (Optional Enhancements)
+
+While the viewer is fully functional, potential future enhancements:
+
+1. **Production Deployment Tools**
+   - One-command export for GitHub Pages
+   - Netlify/Vercel configuration generators
+   - AWS S3 upload utilities
+
+2. **Advanced Features**
+   - Lazy panel loading for 100k+ datasets
+   - WebSocket streaming panels
+   - Custom view templates
+   - Panel caching strategies
+
+3. **Developer Experience**
+   - Auto-reload during development
+   - display.view() method to auto-launch browser
+   - Interactive Jupyter widget
+
+### Conclusion
+
+**The viewer integration is complete and working!** Users can now:
+1. Create displays with pandas DataFrames
+2. Generate matplotlib/plotly panels
+3. Write display files
+4. View interactive displays in browser
+5. Filter, sort, and navigate panels
+
+This represents a **major milestone** for the py-trelliscope project. The core value proposition — interactive exploration of large panel collections — is now fully realized.
+
+---
+
+**Updated**: 2025-10-28 15:30
+**Session**: Viewer Integration Debugging & Implementation
+**Result**: SUCCESS ✅
+

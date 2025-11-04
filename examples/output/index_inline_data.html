@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - Inline Data Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== INLINE DATA TEST ===');
+
+        // Load the display info and metadata
+        console.log('1. Loading display configuration...');
+        const displayInfoResponse = await fetch('./basic_viewer_demo/displayInfo.json');
+        const displayInfo = await displayInfoResponse.json();
+        console.log('   Display info loaded:', displayInfo.name);
+
+        console.log('2. Loading metadata CSV...');
+        const metadataResponse = await fetch('./basic_viewer_demo/metadata.csv');
+        const metadataText = await metadataResponse.text();
+        console.log('   Metadata loaded:', metadataText.split('\n').length - 1, 'rows');
+
+        // Parse CSV
+        const lines = metadataText.trim().split('\n');
+        const headers = lines[0].split(',');
+        const data = lines.slice(1).map(line => {
+            const values = line.split(',');
+            const row = {};
+            headers.forEach((header, i) => {
+                row[header] = values[i];
+            });
+            return row;
+        });
+        console.log('   Parsed data rows:', data.length);
+        console.log('   First row:', data[0]);
+
+        // Create config object with embedded data
+        const config = {
+            display: displayInfo,
+            metadata: data
+        };
+
+        console.log('3. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        console.log('   Module loaded');
+
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('4. Trying different initialization patterns...');
+
+        // Pattern 1: Just the path (current approach)
+        console.log('   Pattern 1: path only');
+        console.log('   Calling: trelliscopeApp("trelliscope-root", "./basic_viewer_demo/displayInfo.json")');
+        const result1 = initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+        console.log('   Result:', result1);
+
+        setTimeout(() => {
+            const root = document.getElementById('trelliscope-root');
+            const images = root.querySelectorAll('img');
+            console.log('5. After 2s - Images found:', images.length);
+
+            if (images.length === 0) {
+                console.log('   Pattern 1 failed. Checking what viewer is doing...');
+                console.log('   Root HTML:', root.innerHTML.substring(0, 500));
+            } else {
+                console.log('   ✓ SUCCESS! Images loaded');
+                images.forEach((img, i) => {
+                    console.log(`   Image ${i}: ${img.src}`);
+                });
+            }
+        }, 2000);
+
+        setTimeout(() => {
+            // Check network requests made by viewer
+            console.log('6. Checking if viewer made any data requests...');
+            console.log('   (Check Network tab for metadata.csv, displayInfo.json requests after initialization)');
+        }, 3000);
+    </script>
+</body>
+</html>

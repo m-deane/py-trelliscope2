@@ -2,22 +2,30 @@
 
 ## Project Overview
 
-This repository is a Python implementation of the R tidymodels ecosystem for time series modeling. The primary focus is on the `py-modeltime-resample` package located in `reference/py-modeltime-resample/`, which provides time series cross-validation, resampling, model fitting, and evaluation capabilities.
+**Project**: py-trelliscope - Python port of R's trelliscope package for interactive, large-scale faceted visualizations
+**Technology Stack**: Python (backend), JSON (specification), JavaScript/React (viewer - reuse existing)
+**Architecture**: 3-Tier Hybrid (Python backend → JSON spec → JS viewer)
 
-The `reference/` directory contains source code from various R tidymodels packages (broom, recipes, workflows, parsnip, yardstick, etc.) that serve as reference implementations for Python ports.
+### Core Purpose
+Enable interactive exploration of large collections of plots (hundreds to millions) through:
+- Automatic faceting with intelligent panel layouts
+- Rich filtering/sorting via "cognostics" (metadata/meta variables)
+- Self-contained HTML viewer with React/Redux frontend
+- Language-agnostic JSON specification format
 
-**Technology Stack**: [Python]
-**Architecture**: [Monolith]
+### Key Innovation
+**Hybrid Implementation Strategy**: Build Python API to generate JSON specification compatible with existing trelliscopejs-lib viewer, avoiding need to reimplement sophisticated React/Redux frontend.
 
 ## WORKFLOW - Core guidelines
 
-- Never use mock data, results or workarounds 
+- Never use mock data, results or workarounds
 - Implement tests after every checkpoint and then check that all tests are passing even if this takes longer to run
 - Only update progress and create progress .md files and project plans in the ".claude_plans" directory
 - Update the projectplan.md after each step and stage
 - Write all tests to the "tests/" folder
 - Do not leave files in the root directory - everything should be saved and sorted into the appropriate folder location in the folder structure, regular check and clean up orphan, old or unnneeded files
-- Create a new python environment called "py-tidymodels2" and manage the dependencies in this environment as you progress
+- Create a new python environment called "py-trelliscope" and manage the dependencies in this environment as you progress
+- Reference `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` for architecture details and implementation guidance
 
 ## SYSTEM-LEVEL OPERATING PRINCIPLES
 
@@ -90,36 +98,76 @@ Eliminate patterns that consume tokens without advancing implementation:
 
 ### File Structure & Boundaries
 **SAFE TO MODIFY**:
-- `/src/` - Application source code
-- `/components/` - Reusable components
-- `/pages/` or `/routes/` - Application routes
-- `/utils/` - Utility functions
-- `/config/` - Configuration files
-- `/tests/` - Test files
+- `/trelliscope/` - Core Python package source code
+  - `/core/` - Core abstractions (Display, Panel, Meta)
+  - `/panels/` - Panel source implementations (file, lazy, etc.)
+  - `/writers/` - JSON serialization and file writing
+  - `/utils/` - Utility functions
+  - `/integrations/` - matplotlib, plotly, altair adapters
+- `/tests/` - Test files mirroring package structure
+- `/examples/` - Demo scripts and example datasets
+- `/docs/` - Documentation and tutorials
 
 **NEVER MODIFY**:
-- `/node_modules/` - Dependencies
+- `/reference/` - R trelliscope package source (reference only)
 - `/.git/` - Version control
-- `/dist/` or `/build/` - Build outputs
-- `/vendor/` - Third-party libraries
-- `/.env` files - Environment variables (reference only)
+- `/.claude_research/` - Research artifacts (reference only)
+- `/py-trelliscope/` - Virtual environment directory
+- Output directories created by trelliscope (appdir paths)
+
+**OUTPUT STRUCTURE** (Created by Package):
+```
+{appdir}/
+├── displays/
+│   └── {display_name}/
+│       ├── displayInfo.json      # Display configuration
+│       ├── panels/               # Panel images/HTML
+│       │   ├── panel_1.png
+│       │   └── panel_2.png
+│       └── metaData.json         # Optional metadata
+└── index.html                     # Viewer entry point
+```
 
 ### Code Style & Architecture Standards
-**Naming Conventions**:
-- Variables: camelCase
-- Functions: camelCase with descriptive verbs
-- Classes: PascalCase
-- Constants: SCREAMING_SNAKE_CASE
-- Files: kebab-case or camelCase (specify your preference)
 
-**Architecture Patterns**:
-- [Your preferred patterns: MVC, Clean Architecture, etc.]
-- [Component organization strategy]
-- [State management approach]
-- [Error handling patterns]
+**Naming Conventions (Python)**:
+- Variables: `snake_case`
+- Functions: `snake_case` with descriptive verbs (e.g., `create_display`, `add_panel`)
+- Classes: `PascalCase` (e.g., `Display`, `PanelColumn`, `FactorMeta`)
+- Constants: `SCREAMING_SNAKE_CASE` (e.g., `DEFAULT_LAYOUT`, `META_TYPES`)
+- Modules/Files: `snake_case.py` (e.g., `display.py`, `meta_variable.py`)
+- Package: `trelliscope` (not py-trelliscope or py_trelliscope)
 
-**Framework-Specific Guidelines**:
-[Include your framework's specific conventions and patterns]
+**Python Best Practices**:
+- Use type hints for all function signatures: `def add_panel(self, data: pd.DataFrame) -> Display:`
+- Follow PEP 8 style guide
+- Use dataclasses or attrs for data structures
+- Prefer composition over inheritance
+- Use pathlib.Path for file paths
+- Document all public APIs with NumPy-style docstrings
+
+**Architecture Patterns (Trelliscope-Specific)**:
+- **Panel-Centric Data Model**: Each row in DataFrame = one panel + cognostics
+- **Meta Variable Type System**: Strong typing with 9 meta types (factor, number, currency, date, time, href, graph, panel_local, panel_src)
+- **Lazy Evaluation**: Panels can be pre-generated or computed on-demand
+- **Separation of Concerns**: Data preparation (Python) separate from visualization (JS)
+- **Builder Pattern**: Fluent API with method chaining for Display configuration
+  ```python
+  display = (
+      Display(data, name="my_display")
+      .set_panel_column("plot")
+      .add_meta_variable("score", desc="Quality score", type="number")
+      .set_default_layout(ncol=4)
+      .write()
+  )
+  ```
+
+**Error Handling**:
+- Validate DataFrame structure early (required columns, panel column existence)
+- Check panel source compatibility (file paths exist, dimensions valid)
+- Verify meta variable types match data
+- Provide actionable error messages for configuration issues
+- Fail fast on JSON serialization errors
 
 ## TOOL CALL OPTIMIZATION
 
@@ -210,7 +258,222 @@ Generic responses not tailored to project context
 - User feedback collection
 - System health verification
 
-## CUSTOM PROJECT INSTRUCTIONS - [Add your specific project requirements, unique constraints, business logic, or special considerations here]
+## TRELLISCOPE-SPECIFIC REQUIREMENTS
+
+### Three-Tier Architecture
+
+**Tier 1: Python Backend (Build This)**
+- Core abstractions: `Display`, `Panel`, `Meta` classes
+- DataFrame integration with pandas
+- Panel generation from matplotlib, plotly, altair
+- JSON specification writer
+- File system management
+- State configuration (layout, filters, sorts, labels)
+
+**Tier 2: File System (Generate This)**
+- `displayInfo.json` - Complete display configuration matching TypeScript interfaces
+- Panel assets - Images (PNG/JPEG) or HTML files organized in directories
+- Metadata files - Optional supplementary data
+- Index HTML - Entry point loading viewer + display spec
+
+**Tier 3: JavaScript Viewer (Reuse Existing)**
+- trelliscopejs-lib - React/Redux viewer application
+- DO NOT reimplement - generate compatible JSON and use existing viewer
+- Package as npm dependency or bundle with Python package
+
+### Critical Concepts
+
+**1. Panels**
+- Core unit: Each panel is one plot/visualization
+- Sources: Pre-generated files, lazy functions, URLs, WebSocket streams
+- Types: Images (PNG/JPEG) or HTML (htmlwidgets, plotly JSON)
+- Storage: Organized by display name in appdir
+
+**2. Cognostics (Meta Variables)**
+- Metadata about each panel enabling filtering/sorting
+- 9 Types:
+  - `factor` - Categorical with levels
+  - `number` - Numeric continuous
+  - `currency` - Formatted monetary values
+  - `date` - Date values
+  - `time` - Datetime/timestamp values
+  - `href` - Hyperlinks with labels
+  - `graph` - Sparklines/micro-visualizations
+  - `panel_local` - Panel-specific URLs
+  - `panel_src` - Panel image sources
+- Auto-inference from DataFrame dtypes with override capability
+
+**3. Display Configuration**
+- Name, description, keySig (unique identifier)
+- Panel options: width, height, aspect ratio
+- Layout: nrow, ncol, page size, arrangement
+- Default state: filters, sorts, labels, active view
+- Multiple views per display
+
+**4. State Management**
+- Complete UI state serializable to JSON
+- Filter specifications per meta variable
+- Sort definitions with precedence
+- Label templates using meta variables
+- View configurations for different explorations
+
+### Integration Requirements
+
+**DataFrame Structure**:
+```python
+# Required: One column designated as panel column
+# Each other column becomes a cognostic (meta variable)
+df = pd.DataFrame({
+    'plot': [plot1, plot2, plot3],     # Panel column (figures or paths)
+    'country': ['USA', 'UK', 'FR'],    # Factor cognostic
+    'gdp': [21e12, 2.8e12, 2.7e12],   # Number cognostic
+    'date': [date1, date2, date3],     # Date cognostic
+})
+
+display = Display(df, name="countries").set_panel_column("plot")
+```
+
+**Visualization Library Support**:
+- **matplotlib**: Save figure to PNG, store path
+- **plotly**: Export to HTML or static image
+- **altair**: Export to HTML via vega-embed
+- **Custom**: Any function returning image bytes or HTML string
+
+**Panel Column Types**:
+1. Pre-generated file paths (str): `"/path/to/plot.png"`
+2. Figure objects: matplotlib Figure, plotly Figure, altair Chart
+3. Lazy callables: `lambda: generate_plot()` - called on-demand
+4. HTML strings: Raw HTML content
+
+### JSON Specification Format
+
+**displayInfo.json Structure** (Must match TypeScript interfaces):
+```json
+{
+  "name": "display_name",
+  "description": "Display description",
+  "keySig": "unique_key_signature",
+  "metas": [
+    {
+      "varname": "country",
+      "label": "Country",
+      "type": "factor",
+      "levels": ["USA", "UK", "FR"]
+    },
+    {
+      "varname": "gdp",
+      "label": "GDP",
+      "type": "number",
+      "digits": 2,
+      "locale": true
+    }
+  ],
+  "panelInterface": {
+    "type": "file",
+    "extension": "png"
+  },
+  "state": {
+    "layout": {
+      "ncol": 4,
+      "page": 1,
+      "arrangement": "row"
+    },
+    "labels": ["country", "gdp"],
+    "filters": [],
+    "sorts": [{"varname": "gdp", "dir": "desc"}]
+  }
+}
+```
+
+### Performance Considerations
+
+**Scalability Targets**:
+- Support 100,000+ panels efficiently
+- Lazy loading for large datasets
+- Thumbnail generation with quality/size trade-offs
+- Pagination in viewer (configurable page size)
+- Async panel generation for long-running computations
+
+**Memory Management**:
+- Stream panel generation to avoid loading all in memory
+- Configurable caching strategies
+- Disk-based temporary storage for intermediate panels
+- Cleanup utilities for old appdir contents
+
+**Optimization Strategies**:
+- Parallel panel generation using multiprocessing/joblib
+- Vectorized operations for meta variable inference
+- Efficient JSON serialization (orjson if needed)
+- Incremental writes for large displays
+
+### Implementation Phases
+
+**Phase 1: Core Infrastructure (Weeks 1-4)**
+- Display, Panel, Meta class hierarchy
+- Basic panel sources (file paths, pre-generated)
+- JSON writer matching displayInfo.json spec
+- DataFrame integration and validation
+- Simple matplotlib/plotly integration
+
+**Phase 2: Advanced Panel Sources (Weeks 5-8)**
+- Lazy panel generation
+- Figure object handling (matplotlib, plotly, altair)
+- HTML panel support
+- REST and WebSocket panel sources
+- Thumbnail generation utilities
+
+**Phase 3: State Management & Configuration (Weeks 9-12)**
+- Filter specifications per meta type
+- Sort configurations
+- Label templates
+- Multiple views per display
+- Default state management
+
+**Phase 4: Viewer Integration & Polish (Weeks 13-16)**
+- Bundle or reference trelliscopejs-lib
+- HTML index generation
+- Local server for development
+- Deployment utilities (static export, server deployment)
+- Documentation and examples
+
+### Testing Strategy
+
+**Unit Tests**:
+- Meta variable type inference
+- JSON serialization/deserialization
+- Panel source abstractions
+- DataFrame validation
+- File path handling
+
+**Integration Tests**:
+- End-to-end display creation
+- Multi-panel generation
+- Viewer compatibility (JSON schema validation)
+- Each visualization library integration
+
+**Performance Tests**:
+- 10k panel generation benchmark
+- 100k panel lazy loading
+- Memory usage profiling
+- Parallel generation speedup
+
+**Visual Tests**:
+- Generate known displays
+- Verify viewer loads correctly
+- Screenshot comparison (optional)
+
+### Reference Materials
+
+**CRITICAL - Always Consult**:
+- `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` - Complete architecture analysis
+- `.claude_research/TRELLISCOPE_RESEARCH.json` - Structured technical data
+- `reference/trelliscope/` - R package source code (reference for behavior)
+
+**Key Sections in Technical Analysis**:
+- Section 3: Core Concepts (Panel model, Meta types, State management)
+- Section 4: API Design (R patterns to adapt for Python)
+- Section 7: Python Implementation Guide (Class structures, examples)
+- Section 11: TypeScript Interfaces (JSON schema requirements)
 
 ---
 

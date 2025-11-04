@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Callback Fire Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 300px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 300px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ CALLBACK FIRE TRACKING ═══<br></div>
+
+    <script>
+        window.metaData = [
+          {"id": 0, "value": 0, "category": "A", "panel": "0.png"},
+          {"id": 1, "value": 10, "category": "B", "panel": "1.png"},
+          {"id": 2, "value": 20, "category": "C", "panel": "2.png"}
+        ];
+    </script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('✓ metaData defined: ' + window.metaData.length + ' rows');
+
+        // Wrap callbacks to log when they're called
+        const callbackLog = [];
+
+        function wrapCallback(name) {
+            const interval = setInterval(() => {
+                if (window[name]) {
+                    const original = window[name];
+                    window[name] = function(data) {
+                        log('→ ' + name + ' called!');
+                        if (data) {
+                            if (data.name) log('  data.name = ' + data.name);
+                            if (data.id) log('  data.id = ' + data.id);
+                            if (Array.isArray(data)) log('  data.length = ' + data.length);
+                        }
+                        callbackLog.push(name);
+                        return original.call(this, data);
+                    };
+                    clearInterval(interval);
+                    log('✓ Wrapped: ' + name);
+                }
+            }, 100);
+
+            setTimeout(() => clearInterval(interval), 5000);
+        }
+    </script>
+
+    <script type="module">
+        log('\n1. Loading viewer...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing (callbacks will be registered)...');
+        initFunc('trelliscope_root', './config.json');
+
+        // Wait for callbacks to be registered
+        await new Promise(r => setTimeout(r, 500));
+
+        log('\n3. Wrapping callbacks to track calls...');
+        wrapCallback('__loadAppConfig__trelliscope_root');
+        wrapCallback('__loadDisplayList__trelliscope_root');
+        wrapCallback('__loadDisplayInfo__trelliscope_root');
+
+        await new Promise(r => setTimeout(r, 3500));
+
+        log('\n═══ RESULT ═══');
+        log('Callbacks fired: ' + callbackLog.join(', '));
+
+        const viewerDiv = document.getElementById('trelliscope_root');
+        const text = viewerDiv ? viewerDiv.textContent : '';
+
+        if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+            log('✓ Viewer shows "1 - 3 of 3"');
+        } else if (text.includes('0 of 0')) {
+            log('✗ Shows "0 of 0"');
+            log('\nPossible reasons:');
+            log('  - JSONP callbacks not firing');
+            log('  - displayInfo not loaded');
+            log('  - metaData not accessible');
+        }
+    </script>
+</body>
+</html>

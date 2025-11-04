@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Test Different Viewer Versions</title>
+    <style>
+        body { margin: 20px; background: #1a1a1a; color: #0f0; font-family: monospace; }
+        .test { margin: 20px 0; padding: 10px; border: 1px solid #0f0; }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+    </style>
+</head>
+<body>
+    <h1>Testing Different Viewer Versions</h1>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+
+        function testVersion(version, url) {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            testDiv.innerHTML = `<h3>Testing ${version}</h3><div id="${version}_log">Loading...</div>`;
+            results.appendChild(testDiv);
+
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = () => {
+                const logDiv = document.getElementById(`${version}_log`);
+                const checks = {
+                    'trelliscopeApp': typeof window.trelliscopeApp,
+                    'TrelliscopeApp': typeof window.TrelliscopeApp,
+                    'Trelliscope': typeof window.Trelliscope,
+                    'trelliscope': typeof window.trelliscope
+                };
+
+                let html = '';
+                for (const [name, type] of Object.entries(checks)) {
+                    const found = type !== 'undefined';
+                    const className = found ? 'success' : '';
+                    html += `<div class="${className}">${name}: ${type}</div>`;
+                }
+
+                // Check all window properties with 'trell'
+                const trellProps = Object.keys(window).filter(k => k.toLowerCase().includes('trell'));
+                if (trellProps.length > 4) {
+                    html += '<div>Other trell* properties: ' + trellProps.join(', ') + '</div>';
+                }
+
+                logDiv.innerHTML = html;
+            };
+            script.onerror = () => {
+                document.getElementById(`${version}_log`).innerHTML = '<div class="error">Failed to load</div>';
+            };
+            document.body.appendChild(script);
+        }
+
+        // Test various versions
+        testVersion('v0.3.0', 'https://unpkg.com/trelliscopejs-lib@0.3.0/dist/trelliscopejs-lib.js');
+
+        setTimeout(() => {
+            testVersion('v0.3.2', 'https://unpkg.com/trelliscopejs-lib@0.3.2/dist/trelliscopejs-lib.js');
+        }, 1000);
+
+        setTimeout(() => {
+            testVersion('v0.4.0', 'https://unpkg.com/trelliscopejs-lib@0.4.0/dist/trelliscopejs-lib.js');
+        }, 2000);
+
+        setTimeout(() => {
+            testVersion('v0.5.0', 'https://unpkg.com/trelliscopejs-lib@0.5.0/dist/assets/index.js');
+        }, 3000);
+    </script>
+</body>
+</html>

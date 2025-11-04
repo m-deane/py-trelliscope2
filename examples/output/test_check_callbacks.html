@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Check Callbacks</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; font-family: monospace; }
+        #log { padding: 20px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div id="log">═══ CHECKING FOR CALLBACKS ═══<br><br></div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script src="./minimal_manual/metaData.js"></script>
+
+    <script type="module">
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+        }
+
+        log('1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Before init - checking for callback functions:');
+        const callbacks = Object.keys(window).filter(k => k.includes('load') || k.includes('Load'));
+        callbacks.forEach(cb => {
+            log('   ' + cb + ' = ' + typeof window[cb]);
+        });
+
+        log('\n3. Initializing viewer...');
+        const result = initFunc('trelliscope-root', './minimal_manual/displayInfo.json');
+
+        log('4. After init - checking for NEW callback functions:');
+        const callbacksAfter = Object.keys(window).filter(k => k.includes('load') || k.includes('Load'));
+        callbacksAfter.forEach(cb => {
+            if (!callbacks.includes(cb)) {
+                log('   NEW: ' + cb + ' = ' + typeof window[cb]);
+            }
+        });
+
+        // Check for metaData callbacks specifically
+        log('\n5. Checking for metaData callbacks:');
+        const metaCallbacks = Object.keys(window).filter(k =>
+            k.toLowerCase().includes('meta') && typeof window[k] === 'function'
+        );
+        metaCallbacks.forEach(cb => {
+            log('   ' + cb + ' = function');
+        });
+
+        // Check with display name
+        log('\n6. Checking callbacks with display name pattern:');
+        ['minimal_manual', 'trelliscope-root'].forEach(id => {
+            const keys = [
+                `__loadMetaData__${id}`,
+                `__loadAppConfig__${id}`,
+                `__loadDisplayInfo__${id}`
+            ];
+            keys.forEach(key => {
+                if (window[key]) {
+                    log('   ✓ Found: ' + key + ' = ' + typeof window[key]);
+
+                    // Try calling it with metaData!
+                    if (key.includes('MetaData') && window.metaData) {
+                        log('     Attempting to call with metaData...');
+                        try {
+                            window[key](window.metaData);
+                            log('     ✓ Called successfully!');
+                        } catch (e) {
+                            log('     ✗ Error: ' + e.message);
+                        }
+                    }
+                } else {
+                    log('   ✗ Not found: ' + key);
+                }
+            });
+        });
+
+        setTimeout(() => {
+            const text = document.body.textContent;
+            log('\n7. Result:');
+            if (text.includes('of 3')) {
+                log('   ✓✓✓ SUCCESS! Viewer shows 3 panels!');
+            } else {
+                log('   ❌ Still shows "0 of 0"');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

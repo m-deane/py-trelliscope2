@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - debug_test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            color: #00ff00;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow: auto;
+            z-index: 10000;
+            border-top: 2px solid #00ff00;
+        }
+        .debug-success { color: #00ff00; font-weight: bold; }
+        .debug-error { color: #ff0000; font-weight: bold; }
+        .debug-info { color: #00bfff; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="debug-console">
+        <div style="font-weight: bold; margin-bottom: 5px;">Debug Console</div>
+        <div id="debug-log"></div>
+    </div>
+
+    <script>
+        const debugLog = document.getElementById('debug-log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'debug-success' : type === 'error' ? 'debug-error' : 'debug-info';
+            debugLog.innerHTML += `<div class="${className}">${msg}</div>`;
+            debugLog.parentElement.scrollTop = debugLog.parentElement.scrollHeight;
+        }
+
+        // Intercept fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const url = args[0];
+            log(`FETCH: ${url}`, 'info');
+            const response = await originalFetch(...args);
+
+            if (response.ok) {
+                log(`  ✓ ${response.status} ${response.statusText}`, 'success');
+            } else {
+                log(`  ✗ ${response.status} ${response.statusText}`, 'error');
+            }
+
+            return response;
+        };
+
+        // Track image loading
+        let imageCount = 0;
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const originalSrcSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    imageCount++;
+                    log(`IMAGE #${imageCount}: ${value}`, 'success');
+                    originalSrcSet.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+            return img;
+        };
+
+        log('✓ Debug interceptors active', 'success');
+    </script>
+
+    <script type="module">
+        try {
+            log('Loading viewer module...', 'info');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                log('✓ Viewer loaded', 'success');
+                log('Initializing display...', 'info');
+                initFunc('trelliscope-root', './displayInfo.json');
+
+                // Monitor for panel loading
+                setTimeout(() => {
+                    const root = document.getElementById('trelliscope-root');
+                    const text = root ? root.textContent : '';
+
+                    if (text.match(/\d+\s*-\s*\d+\s+of\s+\d+/)) {
+                        log('✓ Display loaded with panels', 'success');
+                    } else if (text.includes('0 of 0')) {
+                        log('✗ No panels loaded (0 of 0)', 'error');
+                    }
+
+                    const imgs = root ? root.querySelectorAll('img') : [];
+                    log(`Total images in DOM: ${imgs.length}`, imgs.length > 0 ? 'success' : 'info');
+                }, 3000);
+            } else {
+                log('✗ Viewer function not found!', 'error');
+                log('Available: ' + Object.keys(module).join(', '), 'info');
+            }
+        } catch (error) {
+            log(`✗ Error: ${error.message}`, 'error');
+        }
+    </script>
+</body>
+</html>

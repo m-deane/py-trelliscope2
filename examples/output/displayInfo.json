@@ -1,0 +1,60 @@
+{
+  "name": "basic_viewer_demo",
+  "description": "",
+  "keysig": "734ac3cd7cbfc27298e6687b7ac104c8",
+  "metas": [
+    {
+      "varname": "category",
+      "label": "category",
+      "type": "factor",
+      "levels": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "varname": "id",
+      "label": "id",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    },
+    {
+      "varname": "score",
+      "label": "score",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    },
+    {
+      "varname": "value",
+      "label": "value",
+      "type": "number",
+      "digits": 2,
+      "locale": false,
+      "log": false
+    }
+  ],
+  "state": {
+    "layout": {
+      "ncol": 3,
+      "nrow": 2,
+      "page": 1,
+      "arrangement": "row"
+    },
+    "labels": [],
+    "sort": [],
+    "filter": []
+  },
+  "views": [],
+  "dataSource": "./metadata.csv",
+  "panelInterface": {
+    "type": "panel_local",
+    "panelCol": "panel",
+    "format": "png",
+    "base": "./panels"
+  }
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Load Order Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 200px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ LOAD ORDER TEST ═══<br></div>
+
+    <!-- DO NOT load metaData.js here! -->
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        log('Starting (metaData.js NOT loaded yet)');
+    </script>
+
+    <script type="module">
+        log('1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing viewer FIRST...');
+        initFunc('trelliscope-root', './config.json');
+
+        // Wait for callbacks to be registered
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        log('3. Checking for callbacks...');
+        if (window.__loadDisplayInfo__) {
+            log('  ✓ __loadDisplayInfo__ exists (no ID suffix)');
+        }
+        const callbacks = Object.keys(window).filter(k => k.startsWith('__load'));
+        callbacks.forEach(cb => log('  ' + cb));
+
+        log('4. NOW loading metaData.js...');
+        const script = document.createElement('script');
+        script.onload = () => {
+            log('5. ✓ metaData.js loaded!');
+            log('   window.metaData = ' + (window.metaData ? window.metaData.length + ' rows' : 'MISSING'));
+
+            setTimeout(() => {
+                log('\n═══ AFTER 3 MORE SECONDS ═══');
+                const text = document.body.textContent;
+                const imgs = document.querySelectorAll('img');
+
+                if (text.includes('of 3')) {
+                    log('✓ Shows "of 3"');
+                } else if (text.includes('0 of 0')) {
+                    log('✗ Shows "0 of 0"');
+                }
+
+                log('Images in DOM: ' + imgs.length);
+                if (imgs.length > 0) {
+                    log('✓✓✓ SUCCESS! Images are rendering!');
+                    imgs.forEach((img, i) => {
+                        log('  img[' + i + ']: ' + img.src.substring(img.src.lastIndexOf('/') + 1));
+                    });
+                } else {
+                    log('✗ Still no images');
+                }
+            }, 3000);
+        };
+        script.src = './displays/minimal_manual/metaData.js';
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

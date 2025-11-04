@@ -1,0 +1,41 @@
+--- a/src/types/configs.d.ts
++++ b/src/types/configs.d.ts
+@@ -407,18 +407,29 @@ interface IJSPanelSource extends IPanelSource {
+   function?: PanelFunction;
+ }
+
++interface IFilePanelSource extends IPanelSource {
++  type: 'file';
++}
++
+ interface IPanelSource {
+   type: PanelSourceType;
+   isLocal: boolean;
+   port: number;
+ }
+
+ interface IPanelMeta extends IMeta {
+   paneltype: PanelType;
+-  // format?: PanelFormat;
+   aspect: number;
+-  source: IJSPanelSource;
++  // Updated to support multiple panel source types
++  source: IJSPanelSource | IRESTPanelSource | IFilePanelSource;
+ }
+
+-// interface IFilePanelSource extends IPanelSource {
+-// }
++// Helper type guard functions for panel sources
++export function isRESTPanel(source: IPanelMeta['source']): source is IRESTPanelSource {
++  return source.type === 'REST';
++}
++
++export function isJSPanel(source: IPanelMeta['source']): source is IJSPanelSource {
++  return source.type === 'JS';
++}
++
++export function isFilePanel(source: IPanelMeta['source']): source is IFilePanelSource {
++  return source.type === 'file';
++}
+
+ interface IRESTPanelSource extends IPanelSource {

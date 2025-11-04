@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test with ID</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script src="./basic_viewer_demo/metaData.js"></script>
+
+    <script>
+        // The R code suggests the viewer might look for metaData by display ID
+        // Set it with the display name as the key
+        if (!window.trelliscope) window.trelliscope = {};
+        window.trelliscope.basic_viewer_demo = {
+            metaData: window.metaData
+        };
+
+        console.log('Set window.trelliscope.basic_viewer_demo.metaData');
+        console.log('  Rows:', window.trelliscope.basic_viewer_demo.metaData.length);
+    </script>
+
+    <script type="module">
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('Initializing...');
+        initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+
+        setTimeout(() => {
+            const text = document.body.textContent;
+            if (text.includes('20')) {
+                console.log('✓ Found 20!');
+            } else {
+                console.log('Still 0 of 0');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Direct Simple Static Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope_root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('Loading viewer...');
+        const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        if (typeof initFunc === 'function') {
+            console.log('Initializing with displays/simple_static...');
+
+            // Load simple_static directly (not through config.json)
+            initFunc('trelliscope_root', 'displays/simple_static');
+
+            console.log('✓ Initialized');
+        } else {
+            console.error('trelliscopeApp not found');
+        }
+    </script>
+</body>
+</html>

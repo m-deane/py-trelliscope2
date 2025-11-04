@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minimal Embedded Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('=== MINIMAL EMBEDDED TEST ===');
+
+        // Create a minimal config with just 2 panels, embedded inline
+        const minimalConfig = {
+            name: "minimal_test",
+            description: "Minimal 2-panel test",
+            keysig: "test123",
+            n: 2,
+            metas: [
+                {
+                    varname: "id",
+                    label: "ID",
+                    type: "number"
+                }
+            ],
+            panelInterface: {
+                type: "panel_local",
+                panelCol: "panel",
+                format: "png",
+                base: "./basic_viewer_demo/panels"
+            },
+            state: {
+                layout: { ncol: 2, nrow: 1, page: 1, arrangement: "row" },
+                labels: [],
+                sort: [],
+                filter: []
+            },
+            views: [],
+            // Embedded data
+            cogData: [
+                { id: 0, panel: 0 },
+                { id: 1, panel: 1 }
+            ]
+        };
+
+        console.log('1. Minimal config created:', minimalConfig);
+        console.log('2. Panels:', minimalConfig.n);
+        console.log('3. Data rows:', minimalConfig.cogData.length);
+
+        // Load viewer
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        console.log('4. Trying with inline config object...');
+
+        // Create a blob URL for the config
+        const configBlob = new Blob([JSON.stringify(minimalConfig)], { type: 'application/json' });
+        const configUrl = URL.createObjectURL(configBlob);
+
+        console.log('5. Config blob URL:', configUrl);
+
+        try {
+            // Try passing the blob URL
+            const result = initFunc('trelliscope-root', configUrl);
+            console.log('6. Init result:', typeof result);
+        } catch (err) {
+            console.error('6. Init error:', err.message);
+        }
+
+        setTimeout(() => {
+            const imgs = document.querySelectorAll('img');
+            console.log(`7. After 3s - Images: ${imgs.length}`);
+
+            if (imgs.length > 0) {
+                console.log('✓✓✓ SUCCESS with minimal embedded config!');
+            } else {
+                console.log('Still no images. Checking viewer state...');
+
+                // Log what the viewer created
+                const root = document.getElementById('trelliscope-root');
+                console.log('Root HTML preview:', root.innerHTML.substring(0, 300));
+
+                // Check for any text that might indicate the problem
+                const bodyText = document.body.textContent;
+                if (bodyText.includes('0 of 0')) {
+                    console.log('❌ Viewer shows "0 of 0" - not finding data');
+                } else if (bodyText.includes('of 2')) {
+                    console.log('✓ Viewer found 2 panels! But not rendering images');
+                }
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

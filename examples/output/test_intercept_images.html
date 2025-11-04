@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Intercept Image Loads</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; }
+        #trelliscope-root { width: 100vw; height: 100vh; }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.9); color: lime;
+            padding: 10px; font-family: monospace; font-size: 11px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">Intercepting image loads...</div>
+
+    <script src="./basic_viewer_demo/metaData.js"></script>
+
+    <script type="module">
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += '<br>' + msg;
+        }
+
+        // Intercept ALL image creations to see what the viewer tries to load
+        const imageAttempts = [];
+
+        // Override Image constructor
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+
+            // Track when src is set
+            Object.defineProperty(img, 'src', {
+                get: function() {
+                    return this._src;
+                },
+                set: function(value) {
+                    log(`[IMG ATTEMPT] ${value}`);
+                    imageAttempts.push({ src: value, timestamp: Date.now() });
+
+                    this._src = value;
+
+                    // Add load/error handlers to track success
+                    img.addEventListener('load', () => {
+                        log(`  ✓ LOADED: ${value.split('/').pop()}`);
+                    });
+
+                    img.addEventListener('error', () => {
+                        log(`  ✗ FAILED: ${value}`);
+
+                        // Try to suggest correct path
+                        const filename = value.split('/').pop();
+                        const correctPath = `./basic_viewer_demo/panels/${filename}`;
+                        log(`    Should be: ${correctPath}`);
+                    });
+
+                    // Set on actual img element
+                    OriginalImage.prototype.__lookupSetter__('src').call(this, value);
+                }
+            });
+
+            return img;
+        };
+
+        log('✓ Image interceptor active');
+        log('✓ metaData loaded: ' + window.metaData.length + ' rows');
+
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('Initializing viewer...');
+        initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
+
+        setTimeout(() => {
+            log('\n=== SUMMARY ===');
+            log(`Image load attempts: ${imageAttempts.length}`);
+            if (imageAttempts.length > 0) {
+                log('Attempted paths:');
+                imageAttempts.forEach((attempt, i) => {
+                    log(`  ${i + 1}. ${attempt.src}`);
+                });
+            } else {
+                log('NO IMAGE LOAD ATTEMPTS! Viewer not trying to load images.');
+            }
+        }, 4000);
+    </script>
+</body>
+</html>

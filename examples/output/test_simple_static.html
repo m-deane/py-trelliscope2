@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test Simple Static</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; font-family: monospace; }
+        #trelliscope_root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        console.log('[1] Loading trelliscopejs-lib module...');
+
+        try {
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+            console.log('[2] Module loaded successfully');
+
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                console.log('[3] trelliscopeApp function found');
+                console.log('[4] Calling with config.json...');
+
+                // Use config.json which should load simple_static (order: 0)
+                initFunc('trelliscope_root', './config.json');
+
+                console.log('[5] Init function called');
+                console.log('[6] Check if simple_static loads (order: 0 means it should be default)');
+
+                // Debug after 2 seconds
+                setTimeout(() => {
+                    const root = document.getElementById('trelliscope_root');
+                    console.log('[DEBUG] Root innerHTML length:', root.innerHTML.length);
+                    console.log('[DEBUG] Text content preview:', root.textContent.substring(0, 100));
+
+                    // Try to find display name
+                    const text = root.textContent;
+                    if (text.includes('simple_static') || text.includes('Simple Static')) {
+                        console.log('[SUCCESS] simple_static display detected!');
+                    } else if (text.includes('minimal_manual')) {
+                        console.log('[ISSUE] minimal_manual is showing instead - click to switch');
+                    } else {
+                        console.log('[ERROR] No display loaded');
+                    }
+                }, 2000);
+
+            } else {
+                console.error('[ERROR] trelliscopeApp function not found');
+                console.log('Available exports:', Object.keys(module));
+            }
+        } catch (error) {
+            console.error('[ERROR] Failed to load or initialize:', error);
+        }
+    </script>
+</body>
+</html>

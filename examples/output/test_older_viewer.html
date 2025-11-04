@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Older Viewer Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.3.0/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 200px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.98); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 11px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+            border-top: 3px solid #0f0;
+        }
+        .success { color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ OLDER VIEWER TEST (v0.3.0) ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : '';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span><br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept Image creation
+        let imageCount = 0;
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const id = imageCount++;
+            log(`[IMG ${id}] Created`, 'success');
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log(`[IMG ${id}] src: ${value}`, 'success');
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+            img.addEventListener('load', function() {
+                log(`  ✓ [IMG ${id}] LOADED ${this.naturalWidth}x${this.naturalHeight}`, 'success');
+            });
+            img.addEventListener('error', function() {
+                log(`  ✗ [IMG ${id}] FAILED`);
+            });
+            return img;
+        };
+        log('✓ Image interceptor active\n');
+    </script>
+
+    <script type="module">
+        log('Loading trelliscopejs-lib v0.3.0...');
+        try {
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.3.0/dist/index.js');
+            log('Module loaded, checking exports...');
+            log('Available exports: ' + Object.keys(module).join(', '));
+
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp || module.default;
+
+            if (typeof initFunc === 'function') {
+                log('Initializing with config.json...\n');
+                initFunc('trelliscope_root', './config.json');
+            } else {
+                log('ERROR: No trelliscopeApp function found');
+            }
+        } catch (err) {
+            log('ERROR loading module: ' + err.message);
+            log('Trying v0.1.0 instead...');
+
+            // Fallback to even older version
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.1.0/dist/index.js');
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp || module.default;
+            if (typeof initFunc === 'function') {
+                initFunc('trelliscope_root', './config.json');
+            }
+        }
+
+        setTimeout(() => {
+            log('\n═══ 5 SECOND CHECK ═══');
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Shows "1 - 3 of 3"', 'success');
+            }
+
+            const imgs = viewerDiv ? viewerDiv.querySelectorAll('img') : [];
+            log(`Images: ${imgs.length}`, imgs.length > 0 ? 'success' : '');
+
+            if (imgs.length > 0) {
+                log('\n🎉 IMAGES RENDERING!', 'success');
+            } else if (imageCount > 0) {
+                log(`\nImage() called ${imageCount} times but no DOM elements`);
+            } else {
+                log('\nNo images created - trying different viewer version');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

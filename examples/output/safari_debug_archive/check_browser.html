@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Browser Check</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .info { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .good { color: green; }
+        .bad { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Browser Compatibility Check</h1>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function add(label, value, isGood) {
+            const color = isGood ? 'good' : 'bad';
+            output.innerHTML += `<div class="info"><strong>${label}:</strong> <span class="${color}">${value}</span></div>`;
+        }
+
+        // Browser info
+        add('Browser', navigator.userAgent, true);
+        add('JavaScript', 'Working ✓', true);
+
+        // Check ES6+ features
+        try {
+            eval('const x = 1');
+            add('const/let support', 'Yes ✓', true);
+        } catch(e) {
+            add('const/let support', 'No ✗', false);
+        }
+
+        try {
+            eval('() => {}');
+            add('Arrow functions', 'Yes ✓', true);
+        } catch(e) {
+            add('Arrow functions', 'No ✗', false);
+        }
+
+        // Check async/await
+        try {
+            eval('async function test() { await Promise.resolve(); }');
+            add('async/await', 'Yes ✓', true);
+        } catch(e) {
+            add('async/await', 'No ✗', false);
+        }
+
+        // Check dynamic import (the key one)
+        add('import() syntax', typeof eval('import') === 'function' ? 'Yes ✓' : 'No ✗', typeof eval('import') === 'function');
+
+        output.innerHTML += '<hr><h2>Recommendation:</h2>';
+
+        if (typeof eval('import') !== 'function') {
+            output.innerHTML += '<p class="bad">❌ Your browser does not support ES modules. You need Safari 11.1+ or Chrome 63+</p>';
+            output.innerHTML += '<p><strong>Options:</strong></p>';
+            output.innerHTML += '<ol><li>Update Safari to version 15+ (recommended)</li>';
+            output.innerHTML += '<li>Use Chrome or Firefox instead</li>';
+            output.innerHTML += '<li>I can create a legacy version that works with older browsers</li></ol>';
+        } else {
+            output.innerHTML += '<p class="good">✓ Your browser should support ES modules. The issue might be with the CDN or network.</p>';
+        }
+    </script>
+</body>
+</html>

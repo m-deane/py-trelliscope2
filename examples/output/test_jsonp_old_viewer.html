@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSONP Test - Older Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.3.2/dist/trelliscopejs-lib.css">
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a1a; color: #0f0; }
+        #trelliscope_root { width: 100vw; height: calc(100vh - 350px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.98); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 11px;
+            max-height: 350px; overflow: auto; z-index: 10000;
+            border-top: 3px solid #0f0;
+        }
+        .success { color: #00ff00; font-weight: bold; }
+        .error { color: #ff0000; font-weight: bold; }
+        .info { color: #00bfff; }
+    </style>
+</head>
+<body>
+    <div id="trelliscope_root" class="trelliscope-spa-container"></div>
+    <div id="log">═══ JSONP MODE TEST - VIEWER v0.3.2 ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'info' ? 'info' : '';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span><br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Track JSONP callbacks
+        window.__loadDisplayList__ = function(data) {
+            log('✓ JSONP __loadDisplayList__ called', 'success');
+            log('  displays: ' + data.displays.length);
+            log('  first display: ' + data.displays[0].name);
+            window.__trelliscopeDisplayList__ = data;
+        };
+
+        window.__loadDisplayObj__ = function(data) {
+            log('✓ JSONP __loadDisplayObj__ called', 'success');
+            log('  name: ' + data.name);
+            log('  n: ' + data.n);
+            log('  panelInterface: ' + JSON.stringify(data.panelInterface));
+            window.__trelliscopeDisplayObj__ = data;
+        };
+
+        window.__loadCogData__ = function(data) {
+            log('✓ JSONP __loadCogData__ called', 'success');
+            log('  rows: ' + data.length);
+            if (data.length > 0) {
+                log('  first panel: ' + data[0].panel);
+            }
+            window.__trelliscopeCogData__ = data;
+        };
+
+        // Intercept Image constructor
+        const OriginalImage = window.Image;
+        let imageCount = 0;
+        window.Image = function() {
+            imageCount++;
+            log(`IMAGE CREATED #${imageCount}`, 'success');
+            const img = new OriginalImage();
+            const originalSrcSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log(`  → src set to: ${value}`, 'info');
+                    originalSrcSet.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+            return img;
+        };
+
+        log('✓ JSONP callback interceptors active');
+        log('✓ Image constructor interceptor active\n');
+    </script>
+
+    <script src="https://unpkg.com/trelliscopejs-lib@0.3.2/dist/trelliscopejs-lib.js"></script>
+
+    <script>
+        log('Viewer library loaded');
+        log('Available: ' + (typeof window.trelliscopeApp !== 'undefined' ? 'trelliscopeApp' : 'NONE'),
+            typeof window.trelliscopeApp !== 'undefined' ? 'success' : 'error');
+
+        if (typeof window.trelliscopeApp === 'function') {
+            log('Initializing with config.jsonp...\n');
+            window.trelliscopeApp('trelliscope_root', './config.jsonp');
+        } else {
+            log('ERROR: trelliscopeApp not found!', 'error');
+        }
+
+        setTimeout(() => {
+            log('\n═══ 5 SECOND CHECK ═══');
+            const viewerDiv = document.getElementById('trelliscope_root');
+            const text = viewerDiv ? viewerDiv.textContent : '';
+
+            if (text.match(/\d+\s*-\s*\d+\s+of\s+3/)) {
+                log('✓ Shows panel count', 'success');
+            } else {
+                log('Panel count text: ' + text.substring(0, 100));
+            }
+
+            const imgs = viewerDiv ? viewerDiv.querySelectorAll('img') : [];
+            log(`Images in DOM: ${imgs.length}`, imgs.length > 0 ? 'success' : 'error');
+
+            if (imgs.length > 0) {
+                imgs.forEach((img, i) => {
+                    log(`  img[${i}].src = ${img.src}`, 'info');
+                });
+            }
+
+            log(`Total Image() constructor calls: ${imageCount}`, imageCount > 0 ? 'success' : 'error');
+        }, 5000);
+    </script>
+</body>
+</html>

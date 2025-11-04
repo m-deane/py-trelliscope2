@@ -1,0 +1,17 @@
+__loadDisplayList__({
+  "name": "Trelliscope App",
+  "datatype": "jsonp",
+  "id": "trelliscope_root",
+  "display_base": "displays",
+  "displays": [
+    {
+      "name": "minimal_manual",
+      "group": "common",
+      "description": "Minimal manual example",
+      "n": 3,
+      "height": 500,
+      "width": 500,
+      "updated": "2025-11-02"
+    }
+  ]
+})

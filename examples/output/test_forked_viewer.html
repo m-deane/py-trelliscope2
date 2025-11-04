@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forked Viewer Test - REST Panels</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header .status {
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .test-info {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .test-info h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .test-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .test-info li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .test-info li:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-pending {
+            background: #f39c12;
+        }
+
+        .status-success {
+            background: #27ae60;
+        }
+
+        .status-error {
+            background: #e74c3c;
+        }
+
+        #viewer-container {
+            padding: 20px;
+        }
+
+        .viewer-frame {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Forked Viewer Integration Test</h1>
+        <div class="status">Testing trelliscopejs-lib fork with REST panel support</div>
+    </div>
+
+    <div class="test-info">
+        <h2>Test Configuration</h2>
+        <ul>
+            <li><span class="status-indicator status-success"></span> <strong>Fork Build:</strong> v0.7.14 with REST panel support</li>
+            <li><span class="status-indicator status-success"></span> <strong>Panel Server:</strong> http://localhost:5001</li>
+            <li><span class="status-indicator status-success"></span> <strong>Display:</strong> minimal_manual (3 panels)</li>
+            <li><span class="status-indicator status-pending"></span> <strong>Panel Type:</strong> REST API</li>
+            <li><span class="status-indicator status-pending"></span> <strong>Expected:</strong> All 3 panels should render via REST calls</li>
+        </ul>
+        <br>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Open browser DevTools (F12)</li>
+            <li>Go to Network tab, filter by "api/panels"</li>
+            <li>Refresh page if needed</li>
+            <li>You should see successful requests to /api/panels/minimal_manual/0, /1, /2</li>
+            <li>All requests should return 200 OK with image/png</li>
+        </ol>
+    </div>
+
+    <div id="viewer-container">
+        <iframe
+            class="viewer-frame"
+            src="http://localhost:5001/minimal_viewer.html"
+            title="Trelliscope Viewer">
+        </iframe>
+    </div>
+
+    <script>
+        console.log('='.repeat(60));
+        console.log('FORKED VIEWER TEST - REST PANELS');
+        console.log('='.repeat(60));
+        console.log('Fork Version: trelliscopejs-lib v0.7.14 + REST support');
+        console.log('Panel Server: http://localhost:5001');
+        console.log('Display: minimal_manual (3 panels)');
+        console.log('Panel Type: REST');
+        console.log('');
+        console.log('Expected Behavior:');
+        console.log('- Viewer loads without errors');
+        console.log('- 3 network requests to /api/panels/minimal_manual/{0,1,2}');
+        console.log('- All requests return 200 OK');
+        console.log('- 3 panels visible in viewer');
+        console.log('='.repeat(60));
+
+        // Test panel server health
+        fetch('http://localhost:5001/api/health')
+            .then(res => res.json())
+            .then(data => {
+                console.log('✓ Panel server health check passed');
+                console.log('  Output dir:', data.output_dir);
+                console.log('  Displays dir exists:', data.displays_dir_exists);
+            })
+            .catch(err => {
+                console.error('✗ Panel server health check failed:', err);
+            });
+
+        // Test individual panel
+        fetch('http://localhost:5001/api/panels/minimal_manual/0')
+            .then(res => {
+                console.log('✓ Panel 0 endpoint check:',res.status, res.statusText);
+                console.log('  Content-Type:', res.headers.get('Content-Type'));
+                return res.blob();
+            })
+            .then(blob => {
+                console.log('  Size:', blob.size, 'bytes');
+            })
+            .catch(err => {
+                console.error('✗ Panel 0 endpoint failed:', err);
+            });
+    </script>
+</body>
+</html>

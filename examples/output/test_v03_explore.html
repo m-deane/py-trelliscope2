@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Explore v0.3 API</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.3.2/dist/trelliscopejs-lib.css">
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a1a; color: #0f0; font-family: monospace; }
+        #log { padding: 20px; white-space: pre-wrap; }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+    </style>
+</head>
+<body>
+    <div id="log">═══ EXPLORING v0.3.2 API ═══\n\n</div>
+
+    <script src="https://unpkg.com/trelliscopejs-lib@0.3.2/dist/trelliscopejs-lib.js"></script>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg, type = 'info') {
+            console.log(msg);
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            logDiv.innerHTML += `<span class="${className}">${msg}</span>\n`;
+        }
+
+        log('Library loaded. Checking window object...\n');
+
+        // List all properties on window that might be from trelliscope
+        const trelliscopeProps = Object.keys(window).filter(key =>
+            key.toLowerCase().includes('trell') ||
+            key.toLowerCase().includes('scope') ||
+            key.startsWith('__')
+        );
+
+        log('Properties containing "trell" or "scope":');
+        trelliscopeProps.forEach(prop => {
+            log(`  ${prop} = ${typeof window[prop]}`);
+        });
+
+        log('\nAll window properties starting with lowercase letter or __:');
+        const potentialExports = Object.keys(window).filter(key =>
+            (key[0] === key[0].toLowerCase() || key.startsWith('__')) &&
+            !['length', 'name', 'parent', 'self', 'top', 'window', 'document', 'location', 'history', 'navigator', 'screen', 'frames', 'localStorage', 'sessionStorage'].includes(key)
+        );
+
+        potentialExports.slice(0, 50).forEach(prop => {
+            const val = window[prop];
+            const type = typeof val;
+            if (type === 'function' || type === 'object') {
+                log(`  ${prop}: ${type}`);
+            }
+        });
+
+        log('\n\nChecking specific names:');
+        const checkNames = [
+            'trelliscopeApp',
+            'TrelliscopeApp',
+            'Trelliscope',
+            'trelliscope',
+            'trelliscopejs',
+            'TrelliscopeJS',
+            '__trelliscope__',
+            'renderTrelliscope'
+        ];
+
+        checkNames.forEach(name => {
+            log(`  ${name}: ${typeof window[name]}`, window[name] ? 'success' : 'error');
+        });
+
+        log('\n\nChecking for React/Redux (older viewer might use globals):');
+        log(`  React: ${typeof window.React}`);
+        log(`  ReactDOM: ${typeof window.ReactDOM}`);
+        log(`  Redux: ${typeof window.Redux}`);
+    </script>
+</body>
+</html>

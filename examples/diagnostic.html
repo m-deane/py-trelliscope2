@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope Diagnostic</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ccc;
+        }
+        .pass { border-left-color: green; }
+        .fail { border-left-color: red; }
+        .info { border-left-color: blue; }
+        h3 { margin-top: 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Trelliscope Viewer Diagnostic</h1>
+
+    <div id="tests"></div>
+
+    <script>
+        const tests = document.getElementById('tests');
+
+        function addTest(title, status, message, data) {
+            const div = document.createElement('div');
+            div.className = `test ${status}`;
+            div.innerHTML = `
+                <h3>${status === 'pass' ? '✅' : status === 'fail' ? '❌' : 'ℹ️'} ${title}</h3>
+                <p>${message}</p>
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+            tests.appendChild(div);
+        }
+
+        // Test 1: Basic page load
+        addTest('Page Load', 'pass', 'This HTML file loaded successfully');
+
+        // Test 2: Try to load CDN CSS
+        const cssLink = document.createElement('link');
+        cssLink.rel = 'stylesheet';
+        cssLink.href = 'https://unpkg.com/trelliscopejs-lib/dist/assets/index.css';
+        cssLink.onload = () => {
+            addTest('CDN CSS', 'pass', 'CSS loaded from unpkg.com successfully');
+        };
+        cssLink.onerror = () => {
+            addTest('CDN CSS', 'fail', 'Failed to load CSS from CDN. Check internet connection.');
+        };
+        document.head.appendChild(cssLink);
+
+        // Test 3: Try to load CDN JavaScript (UMD build)
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/trelliscopejs-lib@0.7.16/dist/trelliscope-viewer.umd.cjs';
+        script.onload = () => {
+            addTest('CDN JavaScript', 'pass', 'JavaScript (UMD build) loaded from unpkg.com successfully');
+
+            // Test 4: Check if TrelliscopeApp exists
+            setTimeout(() => {
+                if (typeof TrelliscopeApp !== 'undefined') {
+                    addTest('TrelliscopeApp', 'pass', 'TrelliscopeApp object is available', {
+                        functions: Object.keys(TrelliscopeApp)
+                    });
+
+                    // Test 5: Try to load displayInfo.json
+                    fetch('./basic_viewer_demo/displayInfo.json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            addTest('displayInfo.json', 'pass', 'Display configuration loaded', {
+                                name: data.name,
+                                metas: data.metas.length,
+                                panelInterface: data.panelInterface
+                            });
+
+                            // Test 6: Check panelInterface
+                            if (data.panelInterface && data.panelInterface.format && data.panelInterface.base) {
+                                addTest('Panel Configuration', 'pass', 'Panel interface has required fields', data.panelInterface);
+
+                                // Test 7: Try to load a panel image
+                                const testImg = new Image();
+                                testImg.src = `./basic_viewer_demo/panels/0.png`;
+                                testImg.onload = () => {
+                                    addTest('Panel Image', 'pass', 'Panel image 0.png loaded successfully', {
+                                        width: testImg.width,
+                                        height: testImg.height,
+                                        src: testImg.src
+                                    });
+
+                                    // Test 8: Try to initialize viewer
+                                    addTest('Ready to Initialize', 'info', 'All checks passed! Viewer should work.', {
+                                        recommendation: 'If viewer still shows blank, check browser console for JavaScript errors'
+                                    });
+                                };
+                                testImg.onerror = () => {
+                                    addTest('Panel Image', 'fail', 'Panel image 0.png failed to load. Check if panels were rendered.');
+                                };
+                            } else {
+                                addTest('Panel Configuration', 'fail', 'Panel interface missing required fields (format, base)', data.panelInterface);
+                            }
+                        })
+                        .catch(error => {
+                            addTest('displayInfo.json', 'fail', `Failed to load displayInfo.json: ${error.message}`);
+                        });
+
+                } else {
+                    addTest('TrelliscopeApp', 'fail', 'TrelliscopeApp is undefined. CDN loaded but object not created.');
+                }
+            }, 500);
+        };
+        script.onerror = () => {
+            addTest('CDN JavaScript', 'fail', 'Failed to load JavaScript from CDN. Check internet connection or firewall.');
+        };
+        document.head.appendChild(script);
+
+        // Test 9: Log all errors to page
+        window.addEventListener('error', (e) => {
+            addTest('JavaScript Error', 'fail', e.message, {
+                file: e.filename,
+                line: e.lineno,
+                col: e.colno,
+                error: e.error ? e.error.toString() : 'Unknown'
+            });
+        });
+
+        // Test 10: Show browser info
+        addTest('Browser Information', 'info', 'User agent and window details', {
+            userAgent: navigator.userAgent,
+            windowSize: `${window.innerWidth}x${window.innerHeight}`,
+            location: window.location.href
+        });
+    </script>
+</body>
+</html>

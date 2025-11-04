@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - demo_display</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        // Load module with esm.sh bundling (includes all dependencies)
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+
+        // Get the initialization function - try multiple possibilities
+        // The library creates window.trelliscopeApp which is the main entry point
+        let initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        if (typeof initFunc === 'function') {
+            console.log('Initializing Trelliscope viewer...');
+            // R API pattern: trelliscopeApp(id, config_path)
+            // Note: Pass path to displayInfo.json, not the config object
+            initFunc('trelliscope-root', './demo_display/displayInfo.json');
+        } else {
+            console.error('trelliscopeApp function not found!');
+            console.error('window.trelliscopeApp:', typeof window.trelliscopeApp);
+            console.error('module.trelliscopeApp:', typeof module.trelliscopeApp);
+            console.error('Available module exports:', Object.keys(module));
+        }
+    </script>
+</body>
+</html>

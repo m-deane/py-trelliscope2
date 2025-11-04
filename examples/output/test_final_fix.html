@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Final Fix Test</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.css">
+    <style>
+        body { margin: 0; padding: 0; background: #000; color: #0f0; }
+        #trelliscope-root { width: 100vw; height: calc(100vh - 200px); }
+        #log {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.95); color: #0f0;
+            padding: 15px; font-family: monospace; font-size: 10px;
+            max-height: 200px; overflow: auto; z-index: 10000;
+            border-top: 2px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+    <div id="log">═══ FINAL FIX - PANEL META ADDED ═══<br></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        function log(msg) {
+            console.log(msg);
+            logDiv.innerHTML += msg + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Intercept Image creation
+        let imageCount = 0;
+        const OriginalImage = window.Image;
+        window.Image = function() {
+            const img = new OriginalImage();
+            const id = imageCount++;
+
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            Object.defineProperty(img, 'src', {
+                set: function(value) {
+                    log('[IMG ' + id + '] Creating with src: ' + value);
+                    originalSetSrc.call(this, value);
+                },
+                get: function() {
+                    return this.getAttribute('src');
+                }
+            });
+
+            img.addEventListener('load', function() {
+                log('  ✓✓✓ [IMG ' + id + '] LOADED SUCCESSFULLY!');
+            });
+            img.addEventListener('error', function() {
+                log('  ✗✗✗ [IMG ' + id + '] FAILED: ' + this.src);
+            });
+
+            return img;
+        };
+
+        log('✓ Image interceptor active');
+    </script>
+
+    <script type="module">
+        const ts = Date.now();
+        log('\n1. Loading viewer module...');
+        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+        log('2. Initializing viewer with cache-busted config...');
+        // Use inline fetch to force reload displayInfo.json
+        const configResp = await fetch('./config.json?v=' + ts);
+        const config = await configResp.json();
+        log('   Config loaded: id=' + config.id);
+
+        initFunc('trelliscope-root', './config.json?v=' + ts);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        log('3. Loading metaData.js...');
+        const script = document.createElement('script');
+        script.onload = () => {
+            log('✓ metaData loaded: ' + window.metaData.length + ' rows');
+            window.metaData.forEach((row, i) => {
+                log('  row[' + i + '].panel = "' + row.panel + '"');
+            });
+
+            setTimeout(() => {
+                log('\n═══ AFTER 3 SECONDS ═══');
+                const text = document.body.textContent;
+                const imgs = document.querySelectorAll('img');
+
+                log('Viewer state: ' + (text.includes('of 3') ? '"1 - 3 of 3"' : '"0 of 0"'));
+                log('Images in DOM: ' + imgs.length);
+
+                if (imgs.length > 0) {
+                    log('\n🎉🎉🎉 SUCCESS! IMAGES ARE RENDERING! 🎉🎉🎉');
+                    imgs.forEach((img, i) => {
+                        const shortSrc = img.src.substring(img.src.indexOf('displays/'));
+                        log('  img[' + i + ']: ' + shortSrc);
+                        log('           complete=' + img.complete + ', width=' + img.naturalWidth);
+                    });
+                } else {
+                    log('\n✗ Still no images created');
+                }
+            }, 3000);
+        };
+        script.src = './displays/minimal_manual/metaData.js?v=' + ts;
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

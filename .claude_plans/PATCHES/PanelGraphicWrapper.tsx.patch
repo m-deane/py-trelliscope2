@@ -1,0 +1,42 @@
+--- a/src/components/Panel/PanelGraphicWrapper.tsx
++++ b/src/components/Panel/PanelGraphicWrapper.tsx
+@@ -41,15 +41,25 @@ const PanelGraphicWrapper: React.FC<PanelGraphicProps> = ({
+     }
+   }, [meta, data]);
+
++  // Build panel source URL based on source type
++  const getPanelSrc = (): string | React.ReactElement => {
++    // JavaScript-based panels (existing)
++    if (meta?.source?.type === 'JS' && meta?.source?.function) {
++      return panelSrc;
++    }
++
++    // REST API panels (NEW - Python package support)
++    if (meta?.source?.type === 'REST') {
++      const restSource = meta.source as IRESTPanelSource;
++      return `${restSource.url}/${fileName}`;
++    }
++
++    // Non-local panels (URL provided directly)
++    if (meta?.source?.isLocal === false) {
++      return fileName.toString();
++    }
++
++    // Local file panels (default)
++    return panelSrcGetter(basePath, fileName as string, snakeCase(displayName)).toString();
++  };
++
+   return (
+     <PanelGraphic
+       type={meta?.paneltype}
+-      src={
+-        meta?.source?.type === 'JS' && meta?.source?.function
+-          ? panelSrc
+-          : meta?.source?.isLocal === false
+-            ? fileName.toString()
+-            : panelSrcGetter(basePath, fileName as string, snakeCase(displayName)).toString()
+-      }
++      src={getPanelSrc()}
+       alt={alt}
+       aspectRatio={meta?.aspect}
+       imageWidth={imageWidth}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel Load Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        img { border: 2px solid #ccc; margin: 10px; max-width: 300px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Panel Image Load Test</h1>
+    <div id="results"></div>
+    <hr>
+    <h2>Panel Images:</h2>
+    <div id="images"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        const images = document.getElementById('images');
+
+        // Test different path patterns
+        const testPaths = [
+            './basic_viewer_demo/panels/0.png',
+            './basic_viewer_demo/panels/1.png',
+            './basic_viewer_demo/panels/2.png',
+            'basic_viewer_demo/panels/0.png',
+            '/basic_viewer_demo/panels/0.png',
+        ];
+
+        results.innerHTML = '<h3>Testing panel image paths:</h3>';
+
+        testPaths.forEach((path, index) => {
+            const img = new Image();
+            const startTime = Date.now();
+
+            img.onload = () => {
+                const loadTime = Date.now() - startTime;
+                results.innerHTML += `<div class="success">✓ ${path} (${loadTime}ms)</div>`;
+
+                // Display the image
+                const displayImg = document.createElement('img');
+                displayImg.src = path;
+                displayImg.title = path;
+                images.appendChild(displayImg);
+            };
+
+            img.onerror = () => {
+                results.innerHTML += `<div class="error">✗ ${path} - Failed to load</div>`;
+            };
+
+            img.src = path;
+        });
+
+        // Also test fetching the metadata
+        fetch('./basic_viewer_demo/metadata.csv')
+            .then(r => r.text())
+            .then(data => {
+                results.innerHTML += '<div class="success">✓ metadata.csv loaded</div>';
+                results.innerHTML += '<pre>' + data.split('\n').slice(0, 5).join('\n') + '</pre>';
+            })
+            .catch(err => {
+                results.innerHTML += '<div class="error">✗ metadata.csv failed: ' + err.message + '</div>';
+            });
+
+        // Test fetching displayInfo.json
+        fetch('./basic_viewer_demo/displayInfo.json')
+            .then(r => r.json())
+            .then(data => {
+                results.innerHTML += '<div class="success">✓ displayInfo.json loaded</div>';
+                results.innerHTML += '<pre>' + JSON.stringify(data.panelInterface, null, 2) + '</pre>';
+            })
+            .catch(err => {
+                results.innerHTML += '<div class="error">✗ displayInfo.json failed: ' + err.message + '</div>';
+            });
+    </script>
+</body>
+</html>
