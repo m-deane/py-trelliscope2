@@ -1,0 +1,1817 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Display API &mdash; py-trelliscope 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Meta Variables API" href="meta.html" />
+    <link rel="prev" title="Examples" href="../user_guide/examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            py-trelliscope
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#with-visualization-libraries">With Visualization Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#development-installation">Development Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#core-concepts">Core Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#display">Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#panels">Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/getting_started.html#cognostics-meta-variables">Cognostics (Meta Variables)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#quick-example">Quick Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#what-s-happening">What’s Happening</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#fluent-api">Fluent API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#output-structure">Output Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/getting_started.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/creating_displays.html">Creating Displays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#basic-display-creation">Basic Display Creation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#minimum-requirements">Minimum Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#with-description">With Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#custom-output-path">Custom Output Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#layout-configuration">Layout Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#default-layout">Default Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#page-size">Page Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#arrangement">Arrangement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#labels-configuration">Labels Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#default-labels">Default Labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#no-labels">No Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#filtering-configuration">Filtering Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#number-range-filters">Number Range Filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#category-filters">Category Filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#multiple-filters">Multiple Filters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#sorting-configuration">Sorting Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#single-sort">Single Sort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#multiple-sorts">Multiple Sorts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#panel-options">Panel Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#panel-dimensions">Panel Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#aspect-ratio">Aspect Ratio</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#create-named-views">Create Named Views</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#multiple-views">Multiple Views</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#writing-and-viewing">Writing and Viewing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#write-to-disk">Write to Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#view-in-browser">View in Browser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/creating_displays.html#write-and-view">Write and View</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/creating_displays.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/meta_variables.html">Meta Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#what-are-meta-variables">What are Meta Variables?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#type-system">Type System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#automatic-inference">Automatic Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#basic-inference">Basic Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#inference-rules">Inference Rules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#manual-definition">Manual Definition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#factor-meta">Factor Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#number-meta">Number Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#currency-meta">Currency Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#date-meta">Date Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#time-meta">Time Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#href-meta">Href Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#graph-meta">Graph Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#mixed-approach">Mixed Approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#advanced-usage">Advanced Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#excluding-columns">Excluding Columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#custom-labels">Custom Labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#conditional-formatting">Conditional Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#meta-variable-properties">Meta Variable Properties</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#varname">varname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#label">label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#desc">desc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#type-specific-properties">Type-Specific Properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#e-commerce-display">E-commerce Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#time-series-display">Time Series Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/meta_variables.html#geographic-display">Geographic Display</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/meta_variables.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/panel_types.html">Panel Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#id1">Panel Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#panel-sources">Panel Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#matplotlib-panels-png">Matplotlib Panels (PNG)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#panel-configuration">Panel Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#output-format">Output Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#advanced-matplotlib">Advanced Matplotlib</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#plotly-panels-html">Plotly Panels (HTML)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#id2">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#interactive-features">Interactive Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#fixed-vs-responsive">Fixed vs Responsive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#id3">Output Format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#file-path-panels">File Path Panels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#pre-generated-images">Pre-generated Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#html-files">HTML Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#custom-html-panels">Custom HTML Panels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#inline-html">Inline HTML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#with-d3-js">With D3.js</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#mixed-panel-types">Mixed Panel Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#performance-comparison">Performance Comparison</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#file-sizes">File Sizes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#loading-speed">Loading Speed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#when-to-use-each-type">When to Use Each Type</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#use-png-matplotlib-when">Use PNG (matplotlib) When:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#use-html-plotly-when">Use HTML (Plotly) When:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#use-custom-html-when">Use Custom HTML When:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#complete-matplotlib-example">Complete Matplotlib Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user_guide/panel_types.html#complete-plotly-example">Complete Plotly Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/panel_types.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#time-series-analysis">Time Series Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#geographic-analysis">Geographic Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#model-performance-comparison">Model Performance Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#distribution-analysis">Distribution Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#image-gallery">Image Gallery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/examples.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Display API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#display-class">Display Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trelliscope.Display"><code class="docutils literal notranslate"><span class="pre">Display</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.data"><code class="docutils literal notranslate"><span class="pre">Display.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.name"><code class="docutils literal notranslate"><span class="pre">Display.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.description"><code class="docutils literal notranslate"><span class="pre">Display.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.keysig"><code class="docutils literal notranslate"><span class="pre">Display.keysig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.path"><code class="docutils literal notranslate"><span class="pre">Display.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.panel_column"><code class="docutils literal notranslate"><span class="pre">Display.panel_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.metas"><code class="docutils literal notranslate"><span class="pre">Display.metas</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.state"><code class="docutils literal notranslate"><span class="pre">Display.state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.views"><code class="docutils literal notranslate"><span class="pre">Display.views</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.panel_options"><code class="docutils literal notranslate"><span class="pre">Display.panel_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.__init__"><code class="docutils literal notranslate"><span class="pre">Display.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_panel_column"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_default_layout"><code class="docutils literal notranslate"><span class="pre">Display.set_default_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_panel_options"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_options()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_panel_interface"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_interface()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_default_labels"><code class="docutils literal notranslate"><span class="pre">Display.set_default_labels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.add_meta_variable"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_variable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.add_meta_def"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_def()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.infer_metas"><code class="docutils literal notranslate"><span class="pre">Display.infer_metas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.get_meta_variable"><code class="docutils literal notranslate"><span class="pre">Display.get_meta_variable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.get_all_meta_variables"><code class="docutils literal notranslate"><span class="pre">Display.get_all_meta_variables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.list_meta_variables"><code class="docutils literal notranslate"><span class="pre">Display.list_meta_variables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.write"><code class="docutils literal notranslate"><span class="pre">Display.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.set_viewer_config"><code class="docutils literal notranslate"><span class="pre">Display.set_viewer_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.view"><code class="docutils literal notranslate"><span class="pre">Display.view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trelliscope.Display.__repr__"><code class="docutils literal notranslate"><span class="pre">Display.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#core-methods">Core Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-displays">Creating Displays</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">Display.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">Display.set_default_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">Display.set_default_labels()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#meta-variables">Meta Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_def()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">Display.infer_metas()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#views">Views</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output">Output</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">Display.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">Display.view()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#panel-options">Panel Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_options()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-display">Basic Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fluent-api">Fluent API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-custom-metas">With Custom Metas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-views">With Views</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="meta.html">Meta Variables API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#base-class">Base Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#trelliscope.MetaVariable"><code class="docutils literal notranslate"><span class="pre">MetaVariable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.varname"><code class="docutils literal notranslate"><span class="pre">MetaVariable.varname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.label"><code class="docutils literal notranslate"><span class="pre">MetaVariable.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.desc"><code class="docutils literal notranslate"><span class="pre">MetaVariable.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.type"><code class="docutils literal notranslate"><span class="pre">MetaVariable.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#id0"><code class="docutils literal notranslate"><span class="pre">MetaVariable.varname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#id1"><code class="docutils literal notranslate"><span class="pre">MetaVariable.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#id2"><code class="docutils literal notranslate"><span class="pre">MetaVariable.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#id3"><code class="docutils literal notranslate"><span class="pre">MetaVariable.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.__attrs_post_init__"><code class="docutils literal notranslate"><span class="pre">MetaVariable.__attrs_post_init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.to_dict"><code class="docutils literal notranslate"><span class="pre">MetaVariable.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.from_series"><code class="docutils literal notranslate"><span class="pre">MetaVariable.from_series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.MetaVariable.__init__"><code class="docutils literal notranslate"><span class="pre">MetaVariable.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#meta-variable-types">Meta Variable Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#factormeta">FactorMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.FactorMeta"><code class="docutils literal notranslate"><span class="pre">FactorMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#numbermeta">NumberMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.NumberMeta"><code class="docutils literal notranslate"><span class="pre">NumberMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#currencymeta">CurrencyMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.CurrencyMeta"><code class="docutils literal notranslate"><span class="pre">CurrencyMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#datemeta">DateMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.DateMeta"><code class="docutils literal notranslate"><span class="pre">DateMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#timemeta">TimeMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.TimeMeta"><code class="docutils literal notranslate"><span class="pre">TimeMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#hrefmeta">HrefMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.HrefMeta"><code class="docutils literal notranslate"><span class="pre">HrefMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#graphmeta">GraphMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="meta.html#trelliscope.GraphMeta"><code class="docutils literal notranslate"><span class="pre">GraphMeta</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#type-inference">Type Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#trelliscope.infer_meta_from_series"><code class="docutils literal notranslate"><span class="pre">infer_meta_from_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#trelliscope.infer_meta_dict"><code class="docutils literal notranslate"><span class="pre">infer_meta_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#creating-meta-variables">Creating Meta Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#auto-inference">Auto-Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#manual-override">Manual Override</a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#currency-formatting">Currency Formatting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="meta.html#hyperlinks">Hyperlinks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#type-mapping">Type Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meta.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="panels.html">Panels API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#panel-manager">Panel Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#panel-renderer">Panel Renderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#trelliscope.panels.PanelRenderer"><code class="docutils literal notranslate"><span class="pre">PanelRenderer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.panels.PanelRenderer.detect"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.detect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.panels.PanelRenderer.save"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.panels.PanelRenderer.get_interface_type"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.get_interface_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.panels.PanelRenderer.get_format"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.get_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#visualization-adapters">Visualization Adapters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#matplotlib-adapter">Matplotlib Adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#plotly-adapter">Plotly Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#panel-interfaces">Panel Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#trelliscope.PanelInterface"><code class="docutils literal notranslate"><span class="pre">PanelInterface</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.PanelInterface.to_dict"><code class="docutils literal notranslate"><span class="pre">PanelInterface.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.PanelInterface.__init__"><code class="docutils literal notranslate"><span class="pre">PanelInterface.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#localpanelinterface">LocalPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.LocalPanelInterface"><code class="docutils literal notranslate"><span class="pre">LocalPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#restpanelinterface">RESTPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.RESTPanelInterface"><code class="docutils literal notranslate"><span class="pre">RESTPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#websocketpanelinterface">WebSocketPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.WebSocketPanelInterface"><code class="docutils literal notranslate"><span class="pre">WebSocketPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#factory-function">Factory Function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="panels.html#trelliscope.create_panel_interface"><code class="docutils literal notranslate"><span class="pre">create_panel_interface()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#matplotlib-panels">Matplotlib Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#plotly-panels">Plotly Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#file-paths">File Paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#custom-panel-interface">Custom Panel Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#supported-panel-types">Supported Panel Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#static-images">Static Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="panels.html#interactive-html">Interactive HTML</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#panel-sources">Panel Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="panels.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="serialization.html">Serialization API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="serialization.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#display-info">Display Info</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="serialization.html#trelliscope.serialize_display_info"><code class="docutils literal notranslate"><span class="pre">serialize_display_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="serialization.html#trelliscope.write_display_info"><code class="docutils literal notranslate"><span class="pre">write_display_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#metadata-files">Metadata Files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="serialization.html#trelliscope.serialization.write_metadata_json"><code class="docutils literal notranslate"><span class="pre">write_metadata_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="serialization.html#trelliscope.serialization.write_metadata_js"><code class="docutils literal notranslate"><span class="pre">write_metadata_js()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#utilities">Utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="serialization.html#trelliscope.serialize_to_json_string"><code class="docutils literal notranslate"><span class="pre">serialize_to_json_string()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="serialization.html#json-schema">JSON Schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#displayinfo-json-structure">displayInfo.json Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#metadata-json-structure">metaData.json Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#metadata-js-structure">metaData.js Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="serialization.html#panel-interface-types">Panel Interface Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#file-based-panels">File-Based Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#iframe-panels-html">Iframe Panels (HTML)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#rest-api-panels">REST API Panels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="serialization.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#custom-serialization">Custom Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#direct-json-output">Direct JSON Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="serialization.html#validation">Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="serialization.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="inference.html">Type Inference API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#trelliscope.infer_meta_from_series"><code class="docutils literal notranslate"><span class="pre">infer_meta_from_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#trelliscope.infer_meta_dict"><code class="docutils literal notranslate"><span class="pre">infer_meta_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#inference-rules">Inference Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#pandas-dtype-mapping">Pandas dtype Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#categorical-inference">Categorical Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#numeric-inference">Numeric Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#date-time-inference">Date/Time Inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#automatic-inference">Automatic Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#single-column-inference">Single Column Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#override-inference">Override Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#selective-inference">Selective Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#custom-labels">Custom Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#edge-cases">Edge Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#mixed-object-columns">Mixed Object Columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#high-cardinality">High Cardinality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#date-formats">Date Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="inference.html#inference-parameters">Inference Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="inference.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">Export API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="export.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="export.html#static-export">Static Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="export.html#trelliscope.export_static"><code class="docutils literal notranslate"><span class="pre">export_static()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="export.html#trelliscope.export_static_from_display"><code class="docutils literal notranslate"><span class="pre">export_static_from_display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="export.html#validation">Validation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="export.html#trelliscope.validate_export"><code class="docutils literal notranslate"><span class="pre">validate_export()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="export.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="export.html#basic-export">Basic Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="export.html#export-from-display">Export from Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="export.html#id1">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="export.html#multiple-displays">Multiple Displays</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="export.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Server API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="server.html#displayserver">DisplayServer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="server.html#trelliscope.DisplayServer"><code class="docutils literal notranslate"><span class="pre">DisplayServer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.display_dir"><code class="docutils literal notranslate"><span class="pre">DisplayServer.display_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.port"><code class="docutils literal notranslate"><span class="pre">DisplayServer.port</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.httpd"><code class="docutils literal notranslate"><span class="pre">DisplayServer.httpd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.thread"><code class="docutils literal notranslate"><span class="pre">DisplayServer.thread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.__init__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.start"><code class="docutils literal notranslate"><span class="pre">DisplayServer.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.stop"><code class="docutils literal notranslate"><span class="pre">DisplayServer.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.is_running"><code class="docutils literal notranslate"><span class="pre">DisplayServer.is_running()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.get_url"><code class="docutils literal notranslate"><span class="pre">DisplayServer.get_url()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.__enter__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__enter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.__exit__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__exit__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="server.html#trelliscope.DisplayServer.__repr__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="server.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="server.html#basic-server">Basic Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="server.html#with-display-creation">With Display Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="server.html#multiple-displays">Multiple Displays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="server.html#custom-configuration">Custom Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="server.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#architecture-layers">Architecture Layers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#python-backend">Python Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#core-components">Core Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#display-class">Display Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#meta-variable-system">Meta Variable System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#panel-management">Panel Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#serialization">Serialization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#file-system-layer">File System Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#json-specifications">JSON Specifications</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#displayinfo-json">displayInfo.json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#metadata-json">metaData.json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../advanced/architecture.html#metadata-js">metaData.js</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#javascript-viewer">JavaScript Viewer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#technology-stack">Technology Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#viewer-features">Viewer Features</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#data-flow">Data Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#display-creation-flow">Display Creation Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#viewer-loading-flow">Viewer Loading Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#panel-interfaces">Panel Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#file-based-local">File-Based (Local)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#rest-api">REST API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#websocket">WebSocket</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#design-patterns">Design Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#adapter-pattern">Adapter Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#builder-pattern">Builder Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#strategy-pattern">Strategy Pattern</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#scalability">Scalability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#memory-management">Memory Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#file-size-optimization">File Size Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#extension-points">Extension Points</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#custom-meta-types">Custom Meta Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#custom-panel-adapters">Custom Panel Adapters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../advanced/architecture.html#custom-panel-interfaces">Custom Panel Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced/architecture.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py-trelliscope</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Display API</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/your-username/py-trelliscope2/blob/main/docs/api/display.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="display-api">
+<h1>Display API<a class="headerlink" href="#display-api" title="Link to this heading"></a></h1>
+<p>The <a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display"><code class="xref py py-class docutils literal notranslate"><span class="pre">Display</span></code></a> class is the main entry point for creating interactive trelliscope displays.</p>
+<section id="display-class">
+<h2>Display Class<a class="headerlink" href="#display-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="trelliscope.Display">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trelliscope.</span></span><span class="sig-name descname"><span class="pre">Display</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Interactive visualization display for exploring collections of plots.</p>
+<p>Each row in the input DataFrame represents one panel with associated
+metadata (cognostics) for filtering and sorting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – DataFrame where one column contains panels (plots/figures) and
+other columns contain cognostics (metadata).</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Unique identifier for this display. Must be non-empty.</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Human-readable description of the display.</p></li>
+<li><p><strong>keysig</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Unique key signature for the display. Auto-generated from data
+if not provided.</p></li>
+<li><p><strong>path</strong> (<em>Path</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output directory path. Defaults to ‘./trelliscope_output’.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#trelliscope.Display.data" title="Link to this definition"></a></dt>
+<dd><p>Input DataFrame with panels and cognostics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#trelliscope.Display.name" title="Link to this definition"></a></dt>
+<dd><p>Display identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#trelliscope.Display.description" title="Link to this definition"></a></dt>
+<dd><p>Display description.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.keysig">
+<span class="sig-name descname"><span class="pre">keysig</span></span><a class="headerlink" href="#trelliscope.Display.keysig" title="Link to this definition"></a></dt>
+<dd><p>Unique key signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.path">
+<span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#trelliscope.Display.path" title="Link to this definition"></a></dt>
+<dd><p>Output directory path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.panel_column">
+<span class="sig-name descname"><span class="pre">panel_column</span></span><a class="headerlink" href="#trelliscope.Display.panel_column" title="Link to this definition"></a></dt>
+<dd><p>Column name containing panel data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.metas">
+<span class="sig-name descname"><span class="pre">metas</span></span><a class="headerlink" href="#trelliscope.Display.metas" title="Link to this definition"></a></dt>
+<dd><p>Meta variable configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.state">
+<span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#trelliscope.Display.state" title="Link to this definition"></a></dt>
+<dd><p>Display state (layout, filters, sorts, labels).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.views">
+<span class="sig-name descname"><span class="pre">views</span></span><a class="headerlink" href="#trelliscope.Display.views" title="Link to this definition"></a></dt>
+<dd><p>Named view configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="trelliscope.Display.panel_options">
+<span class="sig-name descname"><span class="pre">panel_options</span></span><a class="headerlink" href="#trelliscope.Display.panel_options" title="Link to this definition"></a></dt>
+<dd><p>Panel dimension options (width, height, aspect).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_display&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If data is not a pandas DataFrame.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If name is empty or not a string.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_panel_column">
+<span class="sig-name descname"><span class="pre">set_panel_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_panel_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_panel_column" title="Link to this definition"></a></dt>
+<dd><p>Specify which column contains panel data (plots/figures).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name containing panels.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If column does not exist in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_default_layout">
+<span class="sig-name descname"><span class="pre">set_default_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrangement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'row'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_default_layout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_default_layout" title="Link to this definition"></a></dt>
+<dd><p>Configure default grid layout for panels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ncol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=4</em>) – Number of columns in the grid.</p></li>
+<li><p><strong>nrow</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rows in the grid. If None, calculated automatically.</p></li>
+<li><p><strong>page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=1</em>) – Starting page number.</p></li>
+<li><p><strong>arrangement</strong> (<em>{&quot;row&quot;</em><em>, </em><em>&quot;col&quot;}</em><em>, </em><em>default=&quot;row&quot;</em>) – Panel arrangement order (“row” for row-major, “col” for column-major).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If ncol &lt; 1, page &lt; 1, or arrangement not in {“row”, “col”}.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_default_layout</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nrow</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">arrangement</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_panel_options">
+<span class="sig-name descname"><span class="pre">set_panel_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_panel_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_panel_options" title="Link to this definition"></a></dt>
+<dd><p>Configure panel dimensions and sizing behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Panel width in pixels.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Panel height in pixels. Ignored if aspect is specified.</p></li>
+<li><p><strong>aspect</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Aspect ratio (width/height). Overrides height if specified.</p></li>
+<li><p><strong>force_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – Force exact dimensions regardless of content.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If width or height &lt; 1, or aspect &lt;= 0.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_options</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_options</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># 800x533</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_panel_interface">
+<span class="sig-name descname"><span class="pre">set_panel_interface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_panel_interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_panel_interface" title="Link to this definition"></a></dt>
+<dd><p>Configure how panels are loaded in the viewer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interface</strong> (<a class="reference internal" href="panels.html#trelliscope.PanelInterface" title="trelliscope.PanelInterface"><em>PanelInterface</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, or </em><em>None</em>) – Panel interface configuration. Can be:
+- PanelInterface instance (LocalPanelInterface, RESTPanelInterface, etc.)
+- String type: “local”, “rest”, or “websocket” (creates interface with <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)
+- None: Uses default LocalPanelInterface</p></li>
+<li><p><strong>**kwargs</strong> – Parameters passed to interface constructor if interface is a string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If interface is not a valid type.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If interface configuration is invalid.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span><span class="p">,</span> <span class="n">RESTPanelInterface</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using interface object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interface</span> <span class="o">=</span> <span class="n">RESTPanelInterface</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">base</span><span class="o">=</span><span class="s2">&quot;http://localhost:5001/api/panels/my_display&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_interface</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using string shorthand</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_interface</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s2">&quot;rest&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">base</span><span class="o">=</span><span class="s2">&quot;http://localhost:5001/api/panels/my_display&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Default local panels</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_interface</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_default_labels">
+<span class="sig-name descname"><span class="pre">set_default_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_default_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_default_labels" title="Link to this definition"></a></dt>
+<dd><p>Set which meta variables to show as panel labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column names to display as labels.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If any label column does not exist in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_default_labels</span><span class="p">([</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.add_meta_variable">
+<span class="sig-name descname"><span class="pre">add_meta_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.add_meta_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.add_meta_variable" title="Link to this definition"></a></dt>
+<dd><p>Add a meta variable (cognostic) to the display.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta</strong> (<a class="reference internal" href="meta.html#trelliscope.MetaVariable" title="trelliscope.MetaVariable"><em>MetaVariable</em></a>) – Meta variable instance to add.</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, replace existing meta with same varname.
+If False, raise error if meta exists.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If meta is not a MetaVariable instance.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If meta.varname not in DataFrame columns, or if meta
+    already exists and replace=False.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">FactorMeta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">meta</span> <span class="o">=</span> <span class="n">FactorMeta</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">add_meta_variable</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.add_meta_def">
+<span class="sig-name descname"><span class="pre">add_meta_def</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.add_meta_def"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.add_meta_def" title="Link to this definition"></a></dt>
+<dd><p>Define and add a meta variable inline using type and parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>varname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for meta variable.</p></li>
+<li><p><strong>meta_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Meta type: “factor”, “number”, “date”, “time”, “currency”, “href”, “graph”.</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, replace existing meta with same varname.</p></li>
+<li><p><strong>**kwargs</strong> – Additional parameters for the meta type constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If meta_type is unknown or varname not in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;factor&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.infer_metas">
+<span class="sig-name descname"><span class="pre">infer_metas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.infer_metas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.infer_metas" title="Link to this definition"></a></dt>
+<dd><p>Automatically infer and add meta variables from DataFrame columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Columns to infer meta for. Defaults to all columns.</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, replace existing metas for these columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Infer all columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">infer_metas</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Infer specific columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">infer_metas</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.get_meta_variable">
+<span class="sig-name descname"><span class="pre">get_meta_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.get_meta_variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.get_meta_variable" title="Link to this definition"></a></dt>
+<dd><p>Retrieve a specific meta variable by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>varname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Meta variable name to retrieve.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The meta variable instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="meta.html#trelliscope.MetaVariable" title="trelliscope.MetaVariable">MetaVariable</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – If meta variable not found.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">get_meta_variable</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<span class="go">&#39;factor&#39;</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.get_all_meta_variables">
+<span class="sig-name descname"><span class="pre">get_all_meta_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.get_all_meta_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.get_all_meta_variables" title="Link to this definition"></a></dt>
+<dd><p>Get all meta variables as a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary mapping varnames to MetaVariable instances.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">metas</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">get_all_meta_variables</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">varname</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">metas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">varname</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">meta</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.list_meta_variables">
+<span class="sig-name descname"><span class="pre">list_meta_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.list_meta_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.list_meta_variables" title="Link to this definition"></a></dt>
+<dd><p>List all meta variable names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sorted list of meta variable names.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">list_meta_variables</span><span class="p">()</span>
+<span class="go">[&#39;category&#39;, &#39;date&#39;, &#39;value&#39;]</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_panels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">viewer_debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_multi_display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.write" title="Link to this definition"></a></dt>
+<dd><p>Write display to disk as JSON specification and render panels.</p>
+<p>Creates output directory, renders panel files, and writes displayInfo.json,
+metaData.json, metaData.js, metadata.csv, and index.html files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>Path</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output directory path. Uses display.path if not provided.</p></li>
+<li><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, overwrite existing output directory.
+If False, raise error if directory exists.</p></li>
+<li><p><strong>render_panels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, render panel objects to files (PNG, HTML, etc.).
+If False, only write JSON/CSV files without rendering panels.</p></li>
+<li><p><strong>create_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, automatically generate index.html viewer file.
+If False, skip index.html generation.</p></li>
+<li><p><strong>viewer_debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, include debug console in index.html for troubleshooting.
+Only used when create_index=True.</p></li>
+<li><p><strong>use_multi_display</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, use multi-display structure with config.json and displays/
+subdirectory. If False, use single-display structure (EXPERIMENTAL).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to output directory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If output directory exists and force=False, or if panel_column
+    is not set (currently required).</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><strong>OSError</strong></a> – If directory cannot be created or files cannot be written.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create figures</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">fig</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span><span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">infer_metas</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Write with panel rendering</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+<span class="go">./trelliscope_output/example</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Panels saved to:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/0.png</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/1.png</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/2.png</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.set_viewer_config">
+<span class="sig-name descname"><span class="pre">set_viewer_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_viewer_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.set_viewer_config" title="Link to this definition"></a></dt>
+<dd><p>Set viewer configuration for display.</p>
+<p>Configure viewer appearance and behavior including theme, initial sort/filter,
+and display options.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>ViewerConfig</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Viewer configuration. Can be ViewerConfig object or dictionary with
+configuration options.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope.config</span> <span class="kn">import</span> <span class="n">ViewerConfig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;panel&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">],</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s1">&#39;panel&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using ViewerConfig object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">ViewerConfig</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="s2">&quot;dark&quot;</span><span class="p">,</span> <span class="n">show_info</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_viewer_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using dictionary</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_viewer_config</span><span class="p">({</span><span class="s2">&quot;theme&quot;</span><span class="p">:</span> <span class="s2">&quot;light&quot;</span><span class="p">,</span> <span class="s2">&quot;show_labels&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using preset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_viewer_config</span><span class="p">(</span><span class="n">ViewerConfig</span><span class="o">.</span><span class="n">dark_theme</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># With chaining</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span><span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s1">&#39;panel&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_viewer_config</span><span class="p">(</span><span class="n">ViewerConfig</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="s2">&quot;dark&quot;</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">view</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">ViewerConfig</span></code></dt><dd><p>Configuration class with presets and validation</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.view">
+<span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_browser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">viewer_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'latest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_write</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.view" title="Link to this definition"></a></dt>
+<dd><p>Launch interactive viewer for this display in a web browser.</p>
+<p>Starts a local HTTP server and opens the display in a web browser for
+interactive exploration. The server serves the display files along with
+the trelliscopejs viewer loaded from CDN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=8000</em>) – Port number for the development server.</p></li>
+<li><p><strong>open_browser</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, automatically open the display in the default web browser.
+If False, just start the server and print the URL.</p></li>
+<li><p><strong>blocking</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, block execution until server is stopped (Ctrl+C).
+If False, run server in background thread and return immediately.</p></li>
+<li><p><strong>viewer_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;latest&quot;</em>) – Version of trelliscopejs-lib to use. Can be “latest” or specific
+version like “2.0.0”.</p></li>
+<li><p><strong>force_write</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, force rewriting the display even if it exists.
+If False, only write if not already written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL where the display is being served.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If panel_column is not set.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><strong>OSError</strong></a> – If server cannot start (e.g., port in use).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create and write display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span><span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_display&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">infer_metas</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># View in browser (non-blocking)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+<span class="go">Display written to: ./trelliscope_output/my_display</span>
+<span class="go">Display available at: http://localhost:8000/index.html</span>
+<span class="go">Server running in background</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Browser opens automatically, continue working...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Do other work while server runs</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Or run in blocking mode (Ctrl+C to stop):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Serving display at http://localhost:8000/index.html</span>
+<span class="go">Press Ctrl+C to stop</span>
+<span class="go">^C</span>
+<span class="go">Shutting down server...</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<ul class="simple">
+<li><p>The server runs on localhost only (not accessible from other machines)</p></li>
+<li><p>In non-blocking mode, the server runs in a background thread</p></li>
+<li><p>Requires internet connection to load trelliscopejs-lib from CDN</p></li>
+<li><p>Multiple displays can be viewed simultaneously on different ports</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trelliscope.Display.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#trelliscope.Display.__repr__" title="Link to this definition"></a></dt>
+<dd><p>Return string representation of Display.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="core-methods">
+<h2>Core Methods<a class="headerlink" href="#core-methods" title="Link to this heading"></a></h2>
+<section id="creating-displays">
+<h3>Creating Displays<a class="headerlink" href="#creating-displays" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+</dl>
+</dd></dl>
+
+</section>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">set_panel_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_panel_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Specify which column contains panel data (plots/figures).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name containing panels.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If column does not exist in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">set_default_layout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrangement</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'row'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_default_layout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Configure default grid layout for panels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ncol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=4</em>) – Number of columns in the grid.</p></li>
+<li><p><strong>nrow</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rows in the grid. If None, calculated automatically.</p></li>
+<li><p><strong>page</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=1</em>) – Starting page number.</p></li>
+<li><p><strong>arrangement</strong> (<em>{&quot;row&quot;</em><em>, </em><em>&quot;col&quot;}</em><em>, </em><em>default=&quot;row&quot;</em>) – Panel arrangement order (“row” for row-major, “col” for column-major).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If ncol &lt; 1, page &lt; 1, or arrangement not in {“row”, “col”}.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_default_layout</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nrow</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">arrangement</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">set_default_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_default_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Set which meta variables to show as panel labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>labels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column names to display as labels.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If any label column does not exist in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_default_labels</span><span class="p">([</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="meta-variables">
+<h3>Meta Variables<a class="headerlink" href="#meta-variables" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">add_meta_def</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">varname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.add_meta_def"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>Define and add a meta variable inline using type and parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>varname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name for meta variable.</p></li>
+<li><p><strong>meta_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Meta type: “factor”, “number”, “date”, “time”, “currency”, “href”, “graph”.</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, replace existing meta with same varname.</p></li>
+<li><p><strong>**kwargs</strong> – Additional parameters for the meta type constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If meta_type is unknown or varname not in DataFrame.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;factor&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">infer_metas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.infer_metas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Automatically infer and add meta variables from DataFrame columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Columns to infer meta for. Defaults to all columns.</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, replace existing metas for these columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Infer all columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">infer_metas</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Infer specific columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">infer_metas</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+<section id="views">
+<h3>Views<a class="headerlink" href="#views" title="Link to this heading"></a></h3>
+</section>
+<section id="output">
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_panels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">viewer_debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_multi_display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Write display to disk as JSON specification and render panels.</p>
+<p>Creates output directory, renders panel files, and writes displayInfo.json,
+metaData.json, metaData.js, metadata.csv, and index.html files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_path</strong> (<em>Path</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Output directory path. Uses display.path if not provided.</p></li>
+<li><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, overwrite existing output directory.
+If False, raise error if directory exists.</p></li>
+<li><p><strong>render_panels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, render panel objects to files (PNG, HTML, etc.).
+If False, only write JSON/CSV files without rendering panels.</p></li>
+<li><p><strong>create_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, automatically generate index.html viewer file.
+If False, skip index.html generation.</p></li>
+<li><p><strong>viewer_debug</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, include debug console in index.html for troubleshooting.
+Only used when create_index=True.</p></li>
+<li><p><strong>use_multi_display</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, use multi-display structure with config.json and displays/
+subdirectory. If False, use single-display structure (EXPERIMENTAL).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to output directory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If output directory exists and force=False, or if panel_column
+    is not set (currently required).</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><strong>OSError</strong></a> – If directory cannot be created or files cannot be written.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create figures</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">fig</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span><span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">infer_metas</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Write with panel rendering</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_dir</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+<span class="go">./trelliscope_output/example</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Panels saved to:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/0.png</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/1.png</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># ./trelliscope_output/example/panels/2.png</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_browser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blocking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">viewer_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'latest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_write</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Launch interactive viewer for this display in a web browser.</p>
+<p>Starts a local HTTP server and opens the display in a web browser for
+interactive exploration. The server serves the display files along with
+the trelliscopejs viewer loaded from CDN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=8000</em>) – Port number for the development server.</p></li>
+<li><p><strong>open_browser</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If True, automatically open the display in the default web browser.
+If False, just start the server and print the URL.</p></li>
+<li><p><strong>blocking</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, block execution until server is stopped (Ctrl+C).
+If False, run server in background thread and return immediately.</p></li>
+<li><p><strong>viewer_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;latest&quot;</em>) – Version of trelliscopejs-lib to use. Can be “latest” or specific
+version like “2.0.0”.</p></li>
+<li><p><strong>force_write</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – If True, force rewriting the display even if it exists.
+If False, only write if not already written.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>URL where the display is being served.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If panel_column is not set.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><strong>OSError</strong></a> – If server cannot start (e.g., port in use).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create and write display</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">make_plot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span><span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_display&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="o">.</span><span class="n">infer_metas</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># View in browser (non-blocking)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">view</span><span class="p">()</span>
+<span class="go">Display written to: ./trelliscope_output/my_display</span>
+<span class="go">Display available at: http://localhost:8000/index.html</span>
+<span class="go">Server running in background</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Browser opens automatically, continue working...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Do other work while server runs</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Or run in blocking mode (Ctrl+C to stop):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Serving display at http://localhost:8000/index.html</span>
+<span class="go">Press Ctrl+C to stop</span>
+<span class="go">^C</span>
+<span class="go">Shutting down server...</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<ul class="simple">
+<li><p>The server runs on localhost only (not accessible from other machines)</p></li>
+<li><p>In non-blocking mode, the server runs in a background thread</p></li>
+<li><p>Requires internet connection to load trelliscopejs-lib from CDN</p></li>
+<li><p>Multiple displays can be viewed simultaneously on different ports</p></li>
+</ul>
+</div>
+</dd></dl>
+
+</section>
+<section id="panel-options">
+<h3>Panel Options<a class="headerlink" href="#panel-options" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-prename descclassname"><span class="pre">Display.</span></span><span class="sig-name descname"><span class="pre">set_panel_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/trelliscope/display.html#Display.set_panel_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd><p>Configure panel dimensions and sizing behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Panel width in pixels.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Panel height in pixels. Ignored if aspect is specified.</p></li>
+<li><p><strong>aspect</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Aspect ratio (width/height). Overrides height if specified.</p></li>
+<li><p><strong>force_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=False</em>) – Force exact dimensions regardless of content.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Self for method chaining.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#trelliscope.Display" title="trelliscope.Display">Display</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If width or height &lt; 1, or aspect &lt;= 0.</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_options</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span><span class="o">.</span><span class="n">set_panel_options</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># 800x533</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="basic-display">
+<h3>Basic Display<a class="headerlink" href="#basic-display" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">],</span>
+    <span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;basic_example&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="fluent-api">
+<h3>Fluent API<a class="headerlink" href="#fluent-api" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fluent_example&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_default_layout</span><span class="p">(</span><span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nrow</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_default_labels</span><span class="p">([</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">infer_metas</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="with-custom-metas">
+<h3>With Custom Metas<a class="headerlink" href="#with-custom-metas" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">trelliscope</span> <span class="kn">import</span> <span class="n">Display</span><span class="p">,</span> <span class="n">NumberMeta</span><span class="p">,</span> <span class="n">FactorMeta</span>
+
+<span class="n">display</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom_meta_example&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="n">FactorMeta</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">]))</span>
+    <span class="o">.</span><span class="n">add_meta_def</span><span class="p">(</span><span class="n">NumberMeta</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="with-views">
+<h3>With Views<a class="headerlink" href="#with-views" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Display</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;views_example&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">set_panel_column</span><span class="p">(</span><span class="s2">&quot;plot&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">add_view</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;high_values&quot;</span><span class="p">,</span>
+        <span class="n">filter_list</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;range&quot;</span><span class="p">,</span> <span class="s2">&quot;varname&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}],</span>
+        <span class="n">sort_list</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;varname&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="s2">&quot;desc&quot;</span><span class="p">}]</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="meta.html"><span class="doc">Meta Variables API</span></a> - Meta variable types and inference</p></li>
+<li><p><a class="reference internal" href="panels.html"><span class="doc">Panels API</span></a> - Panel rendering and management</p></li>
+<li><p><a class="reference internal" href="serialization.html"><span class="doc">Serialization API</span></a> - JSON output format</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user_guide/examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="meta.html" class="btn btn-neutral float-right" title="Meta Variables API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, py-trelliscope contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

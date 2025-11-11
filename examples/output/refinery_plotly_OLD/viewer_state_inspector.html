@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Viewer State Inspector</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        .section { margin: 20px 0; padding: 15px; background: #2d2d2d; border-left: 3px solid #007acc; }
+        .ok { color: #4ec9b0; }
+        .error { color: #f48771; }
+        .warn { color: #dcdcaa; }
+        h2 { color: #569cd6; }
+        pre { background: #1e1e1e; padding: 10px; overflow-x: auto; }
+        button { background: #007acc; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 10px 5px; }
+        button:hover { background: #005a9e; }
+    </style>
+</head>
+<body>
+    <h1>Trelliscope Viewer State Inspector</h1>
+    <p>This tool inspects the viewer's internal state to understand how factor metadata is being processed.</p>
+
+    <button onclick="inspectViewer()">Inspect Viewer State</button>
+    <button onclick="inspectReduxStore()">Inspect Redux Store</button>
+    <button onclick="inspectFilters()">Inspect Filter UI</button>
+
+    <div id="output"></div>
+
+    <!-- Load the actual viewer -->
+    <div id="trelliscope-root" class="trelliscope-not-spa" style="display: none;"></div>
+
+    <script type="module">
+        window.viewerModule = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+        window.initFunc = window.trelliscopeApp || window.viewerModule.trelliscopeApp;
+
+        if (typeof window.initFunc === 'function') {
+            console.log('Viewer loaded, initializing...');
+            window.initFunc('trelliscope-root', './config.json');
+
+            // Wait a bit for initialization
+            setTimeout(() => {
+                console.log('Viewer should be initialized');
+                appendOutput('✓ Viewer module loaded successfully', 'ok');
+            }, 2000);
+        } else {
+            console.error('Failed to load viewer');
+            appendOutput('✗ Failed to load viewer module', 'error');
+        }
+    </script>
+
+    <script>
+        function appendOutput(html, className = '') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = 'section ' + className;
+            div.innerHTML = html;
+            output.appendChild(div);
+        }
+
+        async function inspectViewer() {
+            appendOutput('<h2>Viewer Module Inspection</h2>', '');
+
+            const checks = {
+                'window.trelliscopeApp': typeof window.trelliscopeApp,
+                'window.viewerModule': typeof window.viewerModule,
+                'window.initFunc': typeof window.initFunc
+            };
+
+            let html = '<pre>' + JSON.stringify(checks, null, 2) + '</pre>';
+
+            // Check if there's a React root
+            const root = document.getElementById('trelliscope-root');
+            if (root) {
+                html += '<p>Root element found</p>';
+                html += `<p>Root children: ${root.children.length}</p>`;
+                html += `<p>Root innerHTML length: ${root.innerHTML.length}</p>`;
+            }
+
+            appendOutput(html, '');
+        }
+
+        async function inspectReduxStore() {
+            appendOutput('<h2>Redux Store Inspection</h2>', '');
+
+            // Try to access Redux DevTools
+            if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+                appendOutput('<p class="ok">✓ Redux DevTools available</p>', '');
+            } else {
+                appendOutput('<p class="warn">⚠ Redux DevTools not available</p>', '');
+            }
+
+            // Try to find the store in the React tree
+            const root = document.getElementById('trelliscope-root');
+            if (root && root._reactRootContainer) {
+                appendOutput('<p class="ok">✓ React root found</p>', '');
+            } else {
+                appendOutput('<p class="warn">⚠ Cannot access React internals</p>', '');
+            }
+
+            // Load and inspect displayInfo directly
+            try {
+                const response = await fetch('./displays/refinery_plotly/displayInfo.json');
+                const displayInfo = await response.json();
+
+                let html = '<h3>Display Info - Country Meta</h3>';
+                const countryMeta = displayInfo.metas.find(m => m.varname === 'country');
+                if (countryMeta) {
+                    html += `<p class="ok">✓ Found in metas</p>`;
+                    html += `<pre>${JSON.stringify(countryMeta, null, 2)}</pre>`;
+                } else {
+                    html += `<p class="error">✗ Not found in metas</p>`;
+                }
+
+                html += '<h3>Display Info - Country CogInfo</h3>';
+                if (displayInfo.cogInfo && displayInfo.cogInfo.country) {
+                    html += `<p class="ok">✓ Found in cogInfo</p>`;
+                    html += `<pre>${JSON.stringify(displayInfo.cogInfo.country, null, 2)}</pre>`;
+                } else {
+                    html += `<p class="error">✗ Not found in cogInfo</p>`;
+                }
+
+                appendOutput(html, '');
+            } catch (e) {
+                appendOutput(`<p class="error">✗ Error loading displayInfo: ${e.message}</p>`, 'error');
+            }
+        }
+
+        async function inspectFilters() {
+            appendOutput('<h2>Filter UI Inspection</h2>', '');
+
+            // Look for filter-related DOM elements
+            const filterElements = document.querySelectorAll('[class*="filter"], [class*="Filter"]');
+            let html = `<p>Found ${filterElements.length} elements with "filter" in class name</p>`;
+
+            if (filterElements.length > 0) {
+                html += '<h3>Filter Elements:</h3><ul>';
+                filterElements.forEach((el, i) => {
+                    html += `<li>Element ${i}: ${el.tagName} - ${el.className}</li>`;
+                    if (el.textContent.includes('[missing]')) {
+                        html += `<li class="error">  ✗ Contains "[missing]" text!</li>`;
+                    }
+                });
+                html += '</ul>';
+            }
+
+            // Look for select/dropdown elements
+            const selects = document.querySelectorAll('select');
+            html += `<p>Found ${selects.length} select elements</p>`;
+
+            if (selects.length > 0) {
+                html += '<h3>Select Elements:</h3><ul>';
+                selects.forEach((sel, i) => {
+                    html += `<li>Select ${i}: ${sel.options.length} options</li>`;
+                    for (let j = 0; j < Math.min(5, sel.options.length); j++) {
+                        html += `<li>  Option ${j}: ${sel.options[j].text}</li>`;
+                    }
+                });
+                html += '</ul>';
+            }
+
+            // Check for React Select components (common in React apps)
+            const reactSelects = document.querySelectorAll('[class*="react-select"], [class*="Select"]');
+            html += `<p>Found ${reactSelects.length} React Select components</p>`;
+
+            appendOutput(html, '');
+        }
+
+        // Automatically run initial inspection after delay
+        setTimeout(() => {
+            appendOutput('<h2>Automatic Initial Inspection</h2>', '');
+            inspectReduxStore();
+        }, 3000);
+    </script>
+</body>
+</html>

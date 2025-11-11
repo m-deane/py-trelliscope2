@@ -1,0 +1,1296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trelliscope.serialization &mdash; py-trelliscope 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            py-trelliscope
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#basic-installation">Basic Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#with-visualization-libraries">With Visualization Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#development-installation">Development Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#core-concepts">Core Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#display">Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#panels">Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/getting_started.html#cognostics-meta-variables">Cognostics (Meta Variables)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#quick-example">Quick Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#what-s-happening">What’s Happening</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#fluent-api">Fluent API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#output-structure">Output Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/getting_started.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/creating_displays.html">Creating Displays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#basic-display-creation">Basic Display Creation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#minimum-requirements">Minimum Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#with-description">With Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#custom-output-path">Custom Output Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#layout-configuration">Layout Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#default-layout">Default Layout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#page-size">Page Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#arrangement">Arrangement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#labels-configuration">Labels Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#default-labels">Default Labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#no-labels">No Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#filtering-configuration">Filtering Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#number-range-filters">Number Range Filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#category-filters">Category Filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#multiple-filters">Multiple Filters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#sorting-configuration">Sorting Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#single-sort">Single Sort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#multiple-sorts">Multiple Sorts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#panel-options">Panel Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#panel-dimensions">Panel Dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#aspect-ratio">Aspect Ratio</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#create-named-views">Create Named Views</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#multiple-views">Multiple Views</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#complete-example">Complete Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#writing-and-viewing">Writing and Viewing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#write-to-disk">Write to Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#view-in-browser">View in Browser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/creating_displays.html#write-and-view">Write and View</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/creating_displays.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/meta_variables.html">Meta Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#what-are-meta-variables">What are Meta Variables?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#type-system">Type System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#automatic-inference">Automatic Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#basic-inference">Basic Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#inference-rules">Inference Rules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#manual-definition">Manual Definition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#factor-meta">Factor Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#number-meta">Number Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#currency-meta">Currency Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#date-meta">Date Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#time-meta">Time Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#href-meta">Href Meta</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#graph-meta">Graph Meta</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#mixed-approach">Mixed Approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#advanced-usage">Advanced Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#excluding-columns">Excluding Columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#custom-labels">Custom Labels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#conditional-formatting">Conditional Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#meta-variable-properties">Meta Variable Properties</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#varname">varname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#label">label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#desc">desc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#type-specific-properties">Type-Specific Properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#e-commerce-display">E-commerce Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#time-series-display">Time Series Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/meta_variables.html#geographic-display">Geographic Display</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/meta_variables.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/panel_types.html">Panel Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#id1">Panel Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#panel-sources">Panel Sources</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#matplotlib-panels-png">Matplotlib Panels (PNG)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#panel-configuration">Panel Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#output-format">Output Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#advanced-matplotlib">Advanced Matplotlib</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#plotly-panels-html">Plotly Panels (HTML)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#id2">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#interactive-features">Interactive Features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#fixed-vs-responsive">Fixed vs Responsive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#id3">Output Format</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#file-path-panels">File Path Panels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#pre-generated-images">Pre-generated Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#html-files">HTML Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#custom-html-panels">Custom HTML Panels</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#inline-html">Inline HTML</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#with-d3-js">With D3.js</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#mixed-panel-types">Mixed Panel Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#performance-comparison">Performance Comparison</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#file-sizes">File Sizes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#loading-speed">Loading Speed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#when-to-use-each-type">When to Use Each Type</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#use-png-matplotlib-when">Use PNG (matplotlib) When:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#use-html-plotly-when">Use HTML (Plotly) When:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#use-custom-html-when">Use Custom HTML When:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#complete-matplotlib-example">Complete Matplotlib Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../user_guide/panel_types.html#complete-plotly-example">Complete Plotly Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/panel_types.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#time-series-analysis">Time Series Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#geographic-analysis">Geographic Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#model-performance-comparison">Model Performance Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#distribution-analysis">Distribution Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#image-gallery">Image Gallery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../user_guide/examples.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/display.html">Display API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/display.html#display-class">Display Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#trelliscope.Display"><code class="docutils literal notranslate"><span class="pre">Display</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.data"><code class="docutils literal notranslate"><span class="pre">Display.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.name"><code class="docutils literal notranslate"><span class="pre">Display.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.description"><code class="docutils literal notranslate"><span class="pre">Display.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.keysig"><code class="docutils literal notranslate"><span class="pre">Display.keysig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.path"><code class="docutils literal notranslate"><span class="pre">Display.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.panel_column"><code class="docutils literal notranslate"><span class="pre">Display.panel_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.metas"><code class="docutils literal notranslate"><span class="pre">Display.metas</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.state"><code class="docutils literal notranslate"><span class="pre">Display.state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.views"><code class="docutils literal notranslate"><span class="pre">Display.views</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.panel_options"><code class="docutils literal notranslate"><span class="pre">Display.panel_options</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.__init__"><code class="docutils literal notranslate"><span class="pre">Display.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_panel_column"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_default_layout"><code class="docutils literal notranslate"><span class="pre">Display.set_default_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_panel_options"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_options()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_panel_interface"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_interface()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_default_labels"><code class="docutils literal notranslate"><span class="pre">Display.set_default_labels()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.add_meta_variable"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_variable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.add_meta_def"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_def()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.infer_metas"><code class="docutils literal notranslate"><span class="pre">Display.infer_metas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.get_meta_variable"><code class="docutils literal notranslate"><span class="pre">Display.get_meta_variable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.get_all_meta_variables"><code class="docutils literal notranslate"><span class="pre">Display.get_all_meta_variables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.list_meta_variables"><code class="docutils literal notranslate"><span class="pre">Display.list_meta_variables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.write"><code class="docutils literal notranslate"><span class="pre">Display.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.set_viewer_config"><code class="docutils literal notranslate"><span class="pre">Display.set_viewer_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.view"><code class="docutils literal notranslate"><span class="pre">Display.view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#trelliscope.Display.__repr__"><code class="docutils literal notranslate"><span class="pre">Display.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/display.html#core-methods">Core Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#creating-displays">Creating Displays</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id0"><code class="docutils literal notranslate"><span class="pre">Display.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#configuration">Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id3"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id4"><code class="docutils literal notranslate"><span class="pre">Display.set_default_layout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id5"><code class="docutils literal notranslate"><span class="pre">Display.set_default_labels()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#meta-variables">Meta Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id6"><code class="docutils literal notranslate"><span class="pre">Display.add_meta_def()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id7"><code class="docutils literal notranslate"><span class="pre">Display.infer_metas()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#views">Views</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#output">Output</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id8"><code class="docutils literal notranslate"><span class="pre">Display.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id9"><code class="docutils literal notranslate"><span class="pre">Display.view()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#panel-options">Panel Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/display.html#id10"><code class="docutils literal notranslate"><span class="pre">Display.set_panel_options()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/display.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#basic-display">Basic Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#fluent-api">Fluent API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#with-custom-metas">With Custom Metas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/display.html#with-views">With Views</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/display.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/meta.html">Meta Variables API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#base-class">Base Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable"><code class="docutils literal notranslate"><span class="pre">MetaVariable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.varname"><code class="docutils literal notranslate"><span class="pre">MetaVariable.varname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.label"><code class="docutils literal notranslate"><span class="pre">MetaVariable.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.desc"><code class="docutils literal notranslate"><span class="pre">MetaVariable.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.type"><code class="docutils literal notranslate"><span class="pre">MetaVariable.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#id0"><code class="docutils literal notranslate"><span class="pre">MetaVariable.varname</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#id1"><code class="docutils literal notranslate"><span class="pre">MetaVariable.label</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#id2"><code class="docutils literal notranslate"><span class="pre">MetaVariable.desc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#id3"><code class="docutils literal notranslate"><span class="pre">MetaVariable.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.__attrs_post_init__"><code class="docutils literal notranslate"><span class="pre">MetaVariable.__attrs_post_init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.to_dict"><code class="docutils literal notranslate"><span class="pre">MetaVariable.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.from_series"><code class="docutils literal notranslate"><span class="pre">MetaVariable.from_series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.MetaVariable.__init__"><code class="docutils literal notranslate"><span class="pre">MetaVariable.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#meta-variable-types">Meta Variable Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#factormeta">FactorMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.FactorMeta"><code class="docutils literal notranslate"><span class="pre">FactorMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#numbermeta">NumberMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.NumberMeta"><code class="docutils literal notranslate"><span class="pre">NumberMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#currencymeta">CurrencyMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.CurrencyMeta"><code class="docutils literal notranslate"><span class="pre">CurrencyMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#datemeta">DateMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.DateMeta"><code class="docutils literal notranslate"><span class="pre">DateMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#timemeta">TimeMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.TimeMeta"><code class="docutils literal notranslate"><span class="pre">TimeMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#hrefmeta">HrefMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.HrefMeta"><code class="docutils literal notranslate"><span class="pre">HrefMeta</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#graphmeta">GraphMeta</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/meta.html#trelliscope.GraphMeta"><code class="docutils literal notranslate"><span class="pre">GraphMeta</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#type-inference">Type Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#trelliscope.infer_meta_from_series"><code class="docutils literal notranslate"><span class="pre">infer_meta_from_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#trelliscope.infer_meta_dict"><code class="docutils literal notranslate"><span class="pre">infer_meta_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#creating-meta-variables">Creating Meta Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#auto-inference">Auto-Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#manual-override">Manual Override</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#currency-formatting">Currency Formatting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/meta.html#hyperlinks">Hyperlinks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#type-mapping">Type Mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/meta.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/panels.html">Panels API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#panel-manager">Panel Manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#panel-renderer">Panel Renderer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#trelliscope.panels.PanelRenderer"><code class="docutils literal notranslate"><span class="pre">PanelRenderer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.panels.PanelRenderer.detect"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.detect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.panels.PanelRenderer.save"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.panels.PanelRenderer.get_interface_type"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.get_interface_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.panels.PanelRenderer.get_format"><code class="docutils literal notranslate"><span class="pre">PanelRenderer.get_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#visualization-adapters">Visualization Adapters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#matplotlib-adapter">Matplotlib Adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#plotly-adapter">Plotly Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#panel-interfaces">Panel Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#trelliscope.PanelInterface"><code class="docutils literal notranslate"><span class="pre">PanelInterface</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.PanelInterface.to_dict"><code class="docutils literal notranslate"><span class="pre">PanelInterface.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.PanelInterface.__init__"><code class="docutils literal notranslate"><span class="pre">PanelInterface.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#localpanelinterface">LocalPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.LocalPanelInterface"><code class="docutils literal notranslate"><span class="pre">LocalPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#restpanelinterface">RESTPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.RESTPanelInterface"><code class="docutils literal notranslate"><span class="pre">RESTPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#websocketpanelinterface">WebSocketPanelInterface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.WebSocketPanelInterface"><code class="docutils literal notranslate"><span class="pre">WebSocketPanelInterface</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#factory-function">Factory Function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/panels.html#trelliscope.create_panel_interface"><code class="docutils literal notranslate"><span class="pre">create_panel_interface()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#matplotlib-panels">Matplotlib Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#plotly-panels">Plotly Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#file-paths">File Paths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#custom-panel-interface">Custom Panel Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#supported-panel-types">Supported Panel Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#static-images">Static Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/panels.html#interactive-html">Interactive HTML</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#panel-sources">Panel Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/panels.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/serialization.html">Serialization API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/serialization.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#display-info">Display Info</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/serialization.html#trelliscope.serialize_display_info"><code class="docutils literal notranslate"><span class="pre">serialize_display_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/serialization.html#trelliscope.write_display_info"><code class="docutils literal notranslate"><span class="pre">write_display_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#metadata-files">Metadata Files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/serialization.html#trelliscope.serialization.write_metadata_json"><code class="docutils literal notranslate"><span class="pre">write_metadata_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/serialization.html#trelliscope.serialization.write_metadata_js"><code class="docutils literal notranslate"><span class="pre">write_metadata_js()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#utilities">Utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/serialization.html#trelliscope.serialize_to_json_string"><code class="docutils literal notranslate"><span class="pre">serialize_to_json_string()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/serialization.html#json-schema">JSON Schema</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#displayinfo-json-structure">displayInfo.json Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#metadata-json-structure">metaData.json Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#metadata-js-structure">metaData.js Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/serialization.html#panel-interface-types">Panel Interface Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#file-based-panels">File-Based Panels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#iframe-panels-html">Iframe Panels (HTML)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#rest-api-panels">REST API Panels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/serialization.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#custom-serialization">Custom Serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#direct-json-output">Direct JSON Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/serialization.html#validation">Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/serialization.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/inference.html">Type Inference API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#trelliscope.infer_meta_from_series"><code class="docutils literal notranslate"><span class="pre">infer_meta_from_series()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#trelliscope.infer_meta_dict"><code class="docutils literal notranslate"><span class="pre">infer_meta_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#inference-rules">Inference Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#pandas-dtype-mapping">Pandas dtype Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#categorical-inference">Categorical Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#numeric-inference">Numeric Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#date-time-inference">Date/Time Inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#automatic-inference">Automatic Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#single-column-inference">Single Column Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#override-inference">Override Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#selective-inference">Selective Inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#custom-labels">Custom Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#edge-cases">Edge Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#mixed-object-columns">Mixed Object Columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#high-cardinality">High Cardinality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#date-formats">Date Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/inference.html#inference-parameters">Inference Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/inference.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/export.html">Export API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/export.html#core-functions">Core Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#static-export">Static Export</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/export.html#trelliscope.export_static"><code class="docutils literal notranslate"><span class="pre">export_static()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/export.html#trelliscope.export_static_from_display"><code class="docutils literal notranslate"><span class="pre">export_static_from_display()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#validation">Validation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/export.html#trelliscope.validate_export"><code class="docutils literal notranslate"><span class="pre">validate_export()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/export.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#basic-export">Basic Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#export-from-display">Export from Display</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#id1">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/export.html#multiple-displays">Multiple Displays</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/export.html#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/server.html">Server API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/server.html#displayserver">DisplayServer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer"><code class="docutils literal notranslate"><span class="pre">DisplayServer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.display_dir"><code class="docutils literal notranslate"><span class="pre">DisplayServer.display_dir</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.port"><code class="docutils literal notranslate"><span class="pre">DisplayServer.port</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.httpd"><code class="docutils literal notranslate"><span class="pre">DisplayServer.httpd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.thread"><code class="docutils literal notranslate"><span class="pre">DisplayServer.thread</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.__init__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.start"><code class="docutils literal notranslate"><span class="pre">DisplayServer.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.stop"><code class="docutils literal notranslate"><span class="pre">DisplayServer.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.is_running"><code class="docutils literal notranslate"><span class="pre">DisplayServer.is_running()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.get_url"><code class="docutils literal notranslate"><span class="pre">DisplayServer.get_url()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.__enter__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__enter__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.__exit__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__exit__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/server.html#trelliscope.DisplayServer.__repr__"><code class="docutils literal notranslate"><span class="pre">DisplayServer.__repr__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/server.html#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../api/server.html#basic-server">Basic Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/server.html#with-display-creation">With Display Creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/server.html#multiple-displays">Multiple Displays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../api/server.html#custom-configuration">Custom Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/server.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced/architecture.html">Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#architecture-layers">Architecture Layers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#python-backend">Python Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#core-components">Core Components</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#display-class">Display Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#meta-variable-system">Meta Variable System</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#panel-management">Panel Management</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#serialization">Serialization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#file-system-layer">File System Layer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#directory-structure">Directory Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#json-specifications">JSON Specifications</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#displayinfo-json">displayInfo.json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#metadata-json">metaData.json</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../advanced/architecture.html#metadata-js">metaData.js</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#javascript-viewer">JavaScript Viewer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#technology-stack">Technology Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#viewer-features">Viewer Features</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#data-flow">Data Flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#display-creation-flow">Display Creation Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#viewer-loading-flow">Viewer Loading Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#panel-interfaces">Panel Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#file-based-local">File-Based (Local)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#rest-api">REST API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#websocket">WebSocket</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#design-patterns">Design Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#adapter-pattern">Adapter Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#builder-pattern">Builder Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#strategy-pattern">Strategy Pattern</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#scalability">Scalability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#memory-management">Memory Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#file-size-optimization">File Size Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#extension-points">Extension Points</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#custom-meta-types">Custom Meta Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#custom-panel-adapters">Custom Panel Adapters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../advanced/architecture.html#custom-panel-interfaces">Custom Panel Interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/architecture.html#see-also">See Also</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">py-trelliscope</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">trelliscope.serialization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for trelliscope.serialization</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">JSON serialization for trelliscope displays.</span>
+
+<span class="sd">Converts Display objects to displayInfo.json format for the JavaScript viewer.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<div class="viewcode-block" id="serialize_display_info">
+<a class="viewcode-back" href="../../api/serialization.html#trelliscope.serialize_display_info">[docs]</a>
+<span class="k">def</span> <span class="nf">serialize_display_info</span><span class="p">(</span><span class="n">display</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serialize Display to displayInfo.json format.</span>
+
+<span class="sd">    This produces the JSON specification consumed by trelliscopejs-lib viewer.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object to serialize.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary matching displayInfo.json schema.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from trelliscope import Display</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({&quot;value&quot;: [1, 2, 3]})</span>
+<span class="sd">    &gt;&gt;&gt; display = Display(df, name=&quot;example&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; display.infer_metas()</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; info = serialize_display_info(display)</span>
+<span class="sd">    &gt;&gt;&gt; info[&quot;name&quot;]</span>
+<span class="sd">    &#39;example&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">trelliscope.panel_interface</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">RESTPanelInterface</span><span class="p">,</span>
+        <span class="n">LocalPanelInterface</span><span class="p">,</span>
+        <span class="n">PanelInterface</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Serialize meta variables</span>
+    <span class="n">metas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+        <span class="n">meta_dict</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="c1"># Ensure all required fields for viewer compatibility</span>
+        <span class="k">if</span> <span class="s2">&quot;tags&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta_dict</span><span class="p">:</span>
+            <span class="n">meta_dict</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s2">&quot;filterable&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta_dict</span><span class="p">:</span>
+            <span class="n">meta_dict</span><span class="p">[</span><span class="s2">&quot;filterable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;sortable&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta_dict</span><span class="p">:</span>
+            <span class="n">meta_dict</span><span class="p">[</span><span class="s2">&quot;sortable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meta_dict</span><span class="p">)</span>
+
+    <span class="c1"># Add panel column metadata if panel column is set</span>
+    <span class="c1"># The panel meta IS required in metas array for viewer to load panels</span>
+    <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Determine panel source configuration</span>
+        <span class="n">panel_source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Use configured panel interface</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">RESTPanelInterface</span><span class="p">):</span>
+                <span class="c1"># REST panel source</span>
+                <span class="n">panel_source</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">LocalPanelInterface</span><span class="p">):</span>
+                <span class="c1"># Local file panel source</span>
+                <span class="n">panel_source</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;isLocal&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">PanelInterface</span><span class="p">):</span>
+                <span class="c1"># Generic panel interface - get dict representation</span>
+                <span class="n">source_dict</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="c1"># Ensure required fields</span>
+                <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="p">:</span>
+                    <span class="n">source_dict</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
+                <span class="k">if</span> <span class="s2">&quot;isLocal&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="p">:</span>
+                    <span class="n">source_dict</span><span class="p">[</span><span class="s2">&quot;isLocal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">panel_source</span> <span class="o">=</span> <span class="n">source_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Default to local file panels</span>
+            <span class="n">panel_source</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;isLocal&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Detect panel type based on format</span>
+        <span class="n">panel_type</span> <span class="o">=</span> <span class="s2">&quot;img&quot;</span>  <span class="c1"># Default to image panels</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;_panel_format&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">display</span><span class="o">.</span><span class="n">_panel_format</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+            <span class="n">panel_type</span> <span class="o">=</span> <span class="s2">&quot;iframe&quot;</span>  <span class="c1"># HTML panels use iframe</span>
+
+        <span class="c1"># Build panel meta variable</span>
+        <span class="n">panel_meta</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;varname&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;panel&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Panel&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;paneltype&quot;</span><span class="p">:</span> <span class="n">panel_type</span><span class="p">,</span>
+            <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s2">&quot;filterable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;sortable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Add panel aspect ratio if specified</span>
+        <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;aspect&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">panel_meta</span><span class="p">[</span><span class="s2">&quot;aspect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_options</span><span class="p">[</span><span class="s2">&quot;aspect&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">panel_meta</span><span class="p">[</span><span class="s2">&quot;aspect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Default square aspect</span>
+
+        <span class="c1"># Add panel source configuration</span>
+        <span class="n">panel_meta</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel_source</span>
+
+        <span class="c1"># Add panel meta to metas list</span>
+        <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">panel_meta</span><span class="p">)</span>
+
+    <span class="c1"># Build cogInfo structure (detailed metadata for each variable)</span>
+    <span class="n">cog_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+        <span class="n">cog_info</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">varname</span><span class="p">,</span>
+            <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">label</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">varname</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;defLabel&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;defActive&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;filterable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;sortable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># Add type-specific fields</span>
+        <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;factor&quot;</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s1">&#39;levels&#39;</span><span class="p">):</span>
+            <span class="n">cog_info</span><span class="p">[</span><span class="n">varname</span><span class="p">][</span><span class="s2">&quot;levels&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span>
+
+    <span class="c1"># Add panelKey to cogInfo</span>
+    <span class="n">cog_info</span><span class="p">[</span><span class="s2">&quot;panelKey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;panelKey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;panelKey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;panelKey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;defLabel&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;defActive&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;filterable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;sortable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Generate cogData from DataFrame</span>
+    <span class="n">cog_data</span> <span class="o">=</span> <span class="n">_serialize_cog_data</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
+
+    <span class="c1"># Build top-level panelInterface</span>
+    <span class="n">panel_interface_dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">RESTPanelInterface</span><span class="p">):</span>
+            <span class="n">panel_interface_dict</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Detect panel type from rendered files</span>
+            <span class="c1"># Check if panels are HTML (iframe) or images (file)</span>
+            <span class="n">panel_type</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>  <span class="c1"># Default to image files</span>
+            <span class="n">panel_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>  <span class="c1"># Default extension</span>
+
+            <span class="c1"># Check for HTML panels by looking at display attribute</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;_panel_format&#39;</span><span class="p">):</span>
+                <span class="c1"># Use format set by display</span>
+                <span class="n">panel_format</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_panel_format</span>
+                <span class="n">panel_type</span> <span class="o">=</span> <span class="s2">&quot;iframe&quot;</span> <span class="k">if</span> <span class="n">panel_format</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span> <span class="k">else</span> <span class="s2">&quot;file&quot;</span>
+
+            <span class="c1"># File-based panel interface</span>
+            <span class="c1"># CRITICAL: type must be &quot;file&quot; for images, &quot;iframe&quot; for HTML</span>
+            <span class="c1"># base must be &quot;panels&quot;, NOT &quot;./panels&quot;</span>
+            <span class="n">panel_interface_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">panel_type</span><span class="p">,</span>
+                <span class="s2">&quot;panelCol&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">,</span>
+                <span class="s2">&quot;base&quot;</span><span class="p">:</span> <span class="s2">&quot;panels&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Note: width, height, aspect, forceSize are NOT part of panelInterface</span>
+            <span class="c1"># They are in panel_options at display level</span>
+
+    <span class="c1"># Build displayInfo structure with ALL required fields</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;common&quot;</span><span class="p">,</span>  <span class="c1"># Default group</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">&quot;keysig&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">keysig</span><span class="p">,</span>
+        <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">display</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;height&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">500</span><span class="p">,</span>
+        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;width&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">500</span><span class="p">,</span>
+        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;keycols&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;metas&quot;</span><span class="p">:</span> <span class="n">metas</span><span class="p">,</span>
+        <span class="s2">&quot;inputs&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;cogInterface&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="s2">&quot;common&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;JSON&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;cogInfo&quot;</span><span class="p">:</span> <span class="n">cog_info</span><span class="p">,</span>
+        <span class="s2">&quot;cogDistns&quot;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s2">&quot;cogData&quot;</span><span class="p">:</span> <span class="n">cog_data</span><span class="p">,</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;layout&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;layout&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s2">&quot;sort&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;sorts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s2">&quot;filter&quot;</span><span class="p">:</span> <span class="n">display</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;views&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">view</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">views</span><span class="p">],</span>
+        <span class="s2">&quot;imgSrcLookup&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Set primary panel and panelInterface if panel column is set</span>
+    <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">info</span><span class="p">[</span><span class="s2">&quot;primarypanel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span>
+        <span class="k">if</span> <span class="n">panel_interface_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;panelInterface&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel_interface_dict</span>
+
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_serialize_cog_data</span><span class="p">(</span><span class="n">display</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate cogData array from Display&#39;s DataFrame.</span>
+
+<span class="sd">    Converts DataFrame rows to cogData objects with panel references.</span>
+<span class="sd">    For file-based panels, uses relative paths like &quot;panels/0.png&quot;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object with data.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of dict</span>
+<span class="sd">        cogData array with panel references and metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">trelliscope.panel_interface</span> <span class="kn">import</span> <span class="n">RESTPanelInterface</span>
+
+    <span class="n">cog_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="c1"># Build cogData entry for this row</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Add all meta variable values</span>
+        <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+                <span class="c1"># Convert numpy/pandas types to Python native types</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="c1"># Convert pd.Timestamp to ISO format string</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;isoformat&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+                <span class="c1"># CRITICAL: Convert factor indices from 0-based to 1-based (R-style)</span>
+                <span class="c1"># The trelliscopejs viewer expects R-style 1-based factor indexing</span>
+                <span class="c1"># where levels[1-1] = levels[0] = first level</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">meta</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;factor&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span><span class="p">):</span>
+                        <span class="c1"># Numeric categorical code (0, 1, 2...) but not NaN</span>
+                        <span class="c1"># Note: NaN != NaN, so we check for that</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Convert 0-based to 1-based</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s1">&#39;levels&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="p">:</span>
+                        <span class="c1"># String value - look up index in levels and convert to 1-based</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">idx</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Convert to 1-based index</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                            <span class="c1"># Keep string value if not in levels</span>
+                            <span class="k">pass</span>
+                    <span class="c1"># NaN/None values are kept as-is</span>
+
+                <span class="n">entry</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Add panelKey (using index as panel ID)</span>
+        <span class="n">panel_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;panelKey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel_id</span>
+
+        <span class="c1"># Add panel reference</span>
+        <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">RESTPanelInterface</span><span class="p">):</span>
+                <span class="c1"># For REST panels, panel value is the endpoint path</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/panels/</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># For file-based panels, use relative path with correct extension</span>
+                <span class="n">panel_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>  <span class="c1"># Default</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;_panel_format&#39;</span><span class="p">):</span>
+                    <span class="n">panel_format</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_panel_format</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">panel_format</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">cog_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cog_data</span>
+
+
+<div class="viewcode-block" id="write_metadata_json">
+<a class="viewcode-back" href="../../api/serialization.html#trelliscope.write_metadata_json">[docs]</a>
+<span class="k">def</span> <span class="nf">write_metadata_json</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write metaData.json file with cogData array.</span>
+
+<span class="sd">    This file contains the same cogData as embedded in displayInfo.json,</span>
+<span class="sd">    but with relative panel paths like &quot;panels/0.png&quot;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object to serialize.</span>
+<span class="sd">    output_path : Path</span>
+<span class="sd">        Output directory path. File will be written to output_path/metaData.json.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to written metaData.json file.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    OSError</span>
+<span class="sd">        If file cannot be written.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">trelliscope.panel_interface</span> <span class="kn">import</span> <span class="n">RESTPanelInterface</span>
+
+    <span class="c1"># Build metadata array with relative panel paths</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Add all meta variable values</span>
+        <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+                <span class="c1"># Convert numpy/pandas types to Python native types</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="c1"># Convert pd.Timestamp to ISO format string</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;isoformat&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+                <span class="c1"># CRITICAL: Convert factor indices from 0-based to 1-based (R-style)</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">meta</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;factor&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span><span class="p">):</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s1">&#39;levels&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">idx_temp</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">idx_temp</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                            <span class="k">pass</span>
+
+                <span class="n">entry</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Add panelKey</span>
+        <span class="n">panel_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;panelKey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel_id</span>
+
+        <span class="c1"># Add panel reference with RELATIVE path for file-based panels</span>
+        <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">RESTPanelInterface</span><span class="p">):</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/panels/</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use correct extension for file-based panels</span>
+                <span class="n">panel_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>  <span class="c1"># Default</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;_panel_format&#39;</span><span class="p">):</span>
+                    <span class="n">panel_format</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_panel_format</span>
+                <span class="c1"># CRITICAL: Use &quot;panels/{id}.{format}&quot; format for viewer to find files</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;panels/</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">panel_format</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+    <span class="c1"># Write JSON file</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">output_path</span> <span class="o">/</span> <span class="s2">&quot;metaData.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">json_path</span></div>
+
+
+
+<div class="viewcode-block" id="write_metadata_js">
+<a class="viewcode-back" href="../../api/serialization.html#trelliscope.write_metadata_js">[docs]</a>
+<span class="k">def</span> <span class="nf">write_metadata_js</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write metaData.js file with window.metaData wrapper.</span>
+
+<span class="sd">    This file is REQUIRED by trelliscopejs-lib viewer even when cogData</span>
+<span class="sd">    is embedded in displayInfo.json. It must contain:</span>
+<span class="sd">    window.metaData = [...];</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object to serialize.</span>
+<span class="sd">    output_path : Path</span>
+<span class="sd">        Output directory path. File will be written to output_path/metaData.js.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to written metaData.js file.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    OSError</span>
+<span class="sd">        If file cannot be written.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">trelliscope.panel_interface</span> <span class="kn">import</span> <span class="n">RESTPanelInterface</span>
+
+    <span class="c1"># Build metadata array (same as metaData.json)</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Add all meta variable values</span>
+        <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">varname</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span>
+                <span class="c1"># Convert numpy/pandas types to Python native types</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;item&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+                <span class="c1"># Convert pd.Timestamp to ISO format string</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;isoformat&#39;</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+                <span class="c1"># CRITICAL: Convert factor indices from 0-based to 1-based (R-style)</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_meta_vars</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">meta</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;factor&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span><span class="p">):</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="s1">&#39;levels&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">idx_temp</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">idx_temp</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                            <span class="k">pass</span>
+
+                <span class="n">entry</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c1"># Add panelKey</span>
+        <span class="n">panel_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;panelKey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">panel_id</span>
+
+        <span class="c1"># Add panel reference</span>
+        <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">panel_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">panel_interface</span><span class="p">,</span> <span class="n">RESTPanelInterface</span><span class="p">):</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/panels/</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use correct extension for file-based panels</span>
+                <span class="n">panel_format</span> <span class="o">=</span> <span class="s2">&quot;png&quot;</span>  <span class="c1"># Default</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="s1">&#39;_panel_format&#39;</span><span class="p">):</span>
+                    <span class="n">panel_format</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">_panel_format</span>
+                <span class="c1"># CRITICAL: Use &quot;panels/{id}.{format}&quot; format</span>
+                <span class="n">entry</span><span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">panel_column</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;panels/</span><span class="si">{</span><span class="n">panel_id</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">panel_format</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+    <span class="c1"># Convert to JSON string</span>
+    <span class="n">json_str</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Wrap in window.metaData assignment</span>
+    <span class="n">js_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;window.metaData = </span><span class="si">{</span><span class="n">json_str</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Write JavaScript file</span>
+    <span class="n">js_path</span> <span class="o">=</span> <span class="n">output_path</span> <span class="o">/</span> <span class="s2">&quot;metaData.js&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">js_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">js_content</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">js_path</span></div>
+
+
+
+<div class="viewcode-block" id="write_display_info">
+<a class="viewcode-back" href="../../api/serialization.html#trelliscope.write_display_info">[docs]</a>
+<span class="k">def</span> <span class="nf">write_display_info</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write displayInfo.json file for Display.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object to serialize.</span>
+<span class="sd">    output_path : Path</span>
+<span class="sd">        Output directory path. File will be written to output_path/displayInfo.json.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Path to written displayInfo.json file.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    OSError</span>
+<span class="sd">        If directory cannot be created or file cannot be written.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from trelliscope import Display</span>
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; display = Display(df, name=&quot;example&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; output = Path(&quot;./output&quot;)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; json_path = write_display_info(display, output)</span>
+<span class="sd">    &gt;&gt;&gt; print(json_path)</span>
+<span class="sd">    output/displayInfo.json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure output directory exists</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_path</span><span class="p">)</span>
+    <span class="n">output_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Serialize display info</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">serialize_display_info</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
+
+    <span class="c1"># Write JSON file</span>
+    <span class="n">json_path</span> <span class="o">=</span> <span class="n">output_path</span> <span class="o">/</span> <span class="s2">&quot;displayInfo.json&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">json_path</span></div>
+
+
+
+<div class="viewcode-block" id="serialize_to_json_string">
+<a class="viewcode-back" href="../../api/serialization.html#trelliscope.serialize_to_json_string">[docs]</a>
+<span class="k">def</span> <span class="nf">serialize_to_json_string</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serialize Display to JSON string.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    display : Display</span>
+<span class="sd">        Display object to serialize.</span>
+<span class="sd">    indent : int, default=2</span>
+<span class="sd">        JSON indentation level.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        JSON string representation.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; json_str = serialize_to_json_string(display)</span>
+<span class="sd">    &gt;&gt;&gt; print(json_str)</span>
+<span class="sd">    {</span>
+<span class="sd">      &quot;name&quot;: &quot;example&quot;,</span>
+<span class="sd">      ...</span>
+<span class="sd">    }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">serialize_display_info</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">validate_display_info</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate displayInfo dictionary structure.</span>
+
+<span class="sd">    Checks for required fields and correct types.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    info : dict</span>
+<span class="sd">        Display info dictionary to validate.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of str</span>
+<span class="sd">        List of validation error messages. Empty if valid.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; info = serialize_display_info(display)</span>
+<span class="sd">    &gt;&gt;&gt; errors = validate_display_info(info)</span>
+<span class="sd">    &gt;&gt;&gt; if not errors:</span>
+<span class="sd">    ...     print(&quot;Valid!&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Required fields</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;keysig&quot;</span><span class="p">,</span> <span class="s2">&quot;metas&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required field: </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate name</span>
+    <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;name&#39; must be string, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&#39;name&#39; cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate metas</span>
+    <span class="k">if</span> <span class="s2">&quot;metas&quot;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;metas&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;metas&#39; must be list, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;metas&#39;</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;metas&quot;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;metas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] must be dict&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;varname&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;metas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] missing &#39;varname&#39;&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;metas[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] missing &#39;type&#39;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate state</span>
+    <span class="k">if</span> <span class="s2">&quot;state&quot;</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;state&#39; must be dict, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state_required</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;layout&quot;</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">,</span> <span class="s2">&quot;sort&quot;</span><span class="p">,</span> <span class="s2">&quot;filter&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">state_required</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]:</span>
+                    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;state missing required field: </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">errors</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, py-trelliscope contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

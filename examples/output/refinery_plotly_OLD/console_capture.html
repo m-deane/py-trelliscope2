@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Console Capture</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        #console { background: #000; color: #0f0; padding: 10px; height: 400px; overflow-y: auto; }
+        .error { color: #f00; }
+        .warn { color: #ff0; }
+        .log { color: #0f0; }
+    </style>
+</head>
+<body>
+    <h1>Trelliscope Console Capture</h1>
+    <div id="console"></div>
+    <iframe id="viewer" src="./index.html" style="width:100%; height:600px; border:1px solid #ccc;"></iframe>
+
+    <script>
+        const consoleDiv = document.getElementById('console');
+
+        // Capture console messages from iframe
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToConsole(type, ...args) {
+            const msg = args.map(a =>
+                typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+            ).join(' ');
+
+            consoleDiv.innerHTML += `<div class="${type}">[${type.toUpperCase()}] ${msg}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            addToConsole('log', ...args);
+            originalLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            addToConsole('error', ...args);
+            originalError.apply(console, args);
+        };
+
+        console.warn = function(...args) {
+            addToConsole('warn', ...args);
+            originalWarn.apply(console, args);
+        };
+
+        // Listen for iframe errors
+        window.addEventListener('error', (e) => {
+            addToConsole('error', `Error: ${e.message} at ${e.filename}:${e.lineno}`);
+        });
+
+        // Also capture from iframe
+        setTimeout(() => {
+            try {
+                const iframe = document.getElementById('viewer');
+                const iframeWindow = iframe.contentWindow;
+
+                if (iframeWindow) {
+                    const iframeConsole = iframeWindow.console;
+
+                    iframeWindow.console.log = function(...args) {
+                        addToConsole('log', '[IFRAME]', ...args);
+                        originalLog.apply(console, args);
+                    };
+
+                    iframeWindow.console.error = function(...args) {
+                        addToConsole('error', '[IFRAME]', ...args);
+                        originalError.apply(console, args);
+                    };
+
+                    iframeWindow.console.warn = function(...args) {
+                        addToConsole('warn', '[IFRAME]', ...args);
+                        originalWarn.apply(console, args);
+                    };
+                }
+            } catch (e) {
+                addToConsole('error', 'Could not capture iframe console:', e.message);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

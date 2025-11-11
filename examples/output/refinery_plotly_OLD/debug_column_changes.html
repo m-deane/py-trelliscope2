@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Column Change Monitor</title>
+    <style>
+        body {
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+        #viewer-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+        #monitor {
+            height: 200px;
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            overflow-y: auto;
+            border-top: 2px solid #00ff00;
+            font-size: 12px;
+        }
+        .log { margin: 2px 0; }
+        .change { color: #ffff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <iframe id="viewer-frame" src="./index.html"></iframe>
+    <div id="monitor">
+        <div class="log">🔍 Monitoring column changes and panel dimensions...</div>
+        <div class="log">Try changing the number of columns in the viewer above.</div>
+        <div class="log">---</div>
+    </div>
+
+    <script>
+        const monitor = document.getElementById('monitor');
+        const iframe = document.getElementById('viewer-frame');
+
+        function log(msg, isChange = false) {
+            const div = document.createElement('div');
+            div.className = isChange ? 'log change' : 'log';
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            monitor.appendChild(div);
+            monitor.scrollTop = monitor.scrollHeight;
+        }
+
+        let lastNcol = null;
+        let lastGridColumns = null;
+        let lastPanelWidth = null;
+
+        function checkState() {
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+                // Find grid
+                const grid = doc.querySelector('[data-testid="panel-content"]');
+                if (!grid) return;
+
+                const gridStyles = window.getComputedStyle(grid);
+                const gridColumns = gridStyles.gridTemplateColumns;
+
+                // Find first panel
+                const panel = doc.querySelector('[class*="panelGraphic"]');
+                if (!panel) return;
+
+                const panelStyles = window.getComputedStyle(panel);
+                const panelWidth = panelStyles.width;
+                const panelInlineWidth = panel.style.width;
+
+                // Try to extract ncol from grid columns (count the number of column sizes)
+                const columnCount = gridColumns.split(' ').length;
+
+                // Check for changes
+                if (columnCount !== lastNcol && lastNcol !== null) {
+                    log(`🔄 COLUMN COUNT CHANGED: ${lastNcol} → ${columnCount}`, true);
+                }
+
+                if (gridColumns !== lastGridColumns && lastGridColumns !== null) {
+                    log(`📏 Grid columns: ${gridColumns}`, true);
+                }
+
+                if (panelWidth !== lastPanelWidth && lastPanelWidth !== null) {
+                    log(`📦 Panel width changed: ${lastPanelWidth} → ${panelWidth}`, true);
+                    log(`   Inline: ${panelInlineWidth || 'not set'}`, false);
+                }
+
+                // Store current values
+                lastNcol = columnCount;
+                lastGridColumns = gridColumns;
+                lastPanelWidth = panelWidth;
+
+            } catch (error) {
+                // Ignore cross-origin errors
+            }
+        }
+
+        // Wait for iframe to load
+        iframe.onload = () => {
+            log('✅ Viewer loaded. Monitoring started...');
+
+            // Check state every 500ms
+            setInterval(checkState, 500);
+        };
+    </script>
+</body>
+</html>

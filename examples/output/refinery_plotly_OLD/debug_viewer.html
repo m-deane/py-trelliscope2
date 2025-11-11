@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Viewer Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .info { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .ok { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Trelliscope Viewer Debug</h1>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        async function debug() {
+            // Load displayInfo
+            const res = await fetch('./displays/refinery_plotly/displayInfo.json');
+            const displayInfo = await res.json();
+
+            output.innerHTML += '<div class="info">';
+            output.innerHTML += '<h2>Display Info Loaded</h2>';
+            output.innerHTML += `<p>Name: ${displayInfo.name}</p>`;
+            output.innerHTML += `<p>Number of entries: ${displayInfo.cogData?.length || 0}</p>`;
+            output.innerHTML += '</div>';
+
+            // Check country meta
+            const countryMeta = displayInfo.metas.find(m => m.varname === 'country');
+            output.innerHTML += '<div class="info">';
+            output.innerHTML += '<h2>Country Meta Variable</h2>';
+            if (countryMeta) {
+                output.innerHTML += `<p class="ok">✓ Found in metas array</p>`;
+                output.innerHTML += `<p>Type: ${countryMeta.type}</p>`;
+                output.innerHTML += `<p>Label: ${countryMeta.label}</p>`;
+                output.innerHTML += `<p>Filterable: ${countryMeta.filterable}</p>`;
+                output.innerHTML += `<p>Sortable: ${countryMeta.sortable}</p>`;
+                if (countryMeta.levels) {
+                    output.innerHTML += `<p>Levels (${countryMeta.levels.length}): ${countryMeta.levels.join(', ')}</p>`;
+                } else {
+                    output.innerHTML += `<p class="error">✗ NO LEVELS DEFINED</p>`;
+                }
+            } else {
+                output.innerHTML += `<p class="error">✗ NOT found in metas</p>`;
+            }
+            output.innerHTML += '</div>';
+
+            // Check cogInfo
+            output.innerHTML += '<div class="info">';
+            output.innerHTML += '<h2>Country in cogInfo</h2>';
+            if (displayInfo.cogInfo?.country) {
+                output.innerHTML += `<p class="ok">✓ Found in cogInfo</p>`;
+                output.innerHTML += `<p>Type: ${displayInfo.cogInfo.country.type}</p>`;
+                if (displayInfo.cogInfo.country.levels) {
+                    output.innerHTML += `<p>Levels: ${displayInfo.cogInfo.country.levels.join(', ')}</p>`;
+                } else {
+                    output.innerHTML += `<p class="error">✗ NO LEVELS in cogInfo</p>`;
+                }
+            } else {
+                output.innerHTML += `<p class="error">✗ NOT found in cogInfo</p>`;
+            }
+            output.innerHTML += '</div>';
+
+            // Check cogData
+            output.innerHTML += '<div class="info">';
+            output.innerHTML += '<h2>Country in cogData</h2>';
+            if (displayInfo.cogData && displayInfo.cogData.length > 0) {
+                const countries = displayInfo.cogData.map(d => d.country);
+                const uniqueCountries = [...new Set(countries)];
+                output.innerHTML += `<p class="ok">✓ Found in all ${displayInfo.cogData.length} entries</p>`;
+                output.innerHTML += `<p>Unique values: ${uniqueCountries.join(', ')}</p>`;
+
+                // Check data types
+                const firstCountry = displayInfo.cogData[0].country;
+                output.innerHTML += `<p>Data type: ${typeof firstCountry}</p>`;
+                output.innerHTML += `<p>First value: "${firstCountry}"</p>`;
+            } else {
+                output.innerHTML += `<p class="error">✗ NO cogData</p>`;
+            }
+            output.innerHTML += '</div>';
+
+            // Summary
+            output.innerHTML += '<div class="info">';
+            output.innerHTML += '<h2>Summary</h2>';
+            const hasMetaLevels = countryMeta && countryMeta.levels && countryMeta.levels.length > 0;
+            const hasCogInfoLevels = displayInfo.cogInfo?.country?.levels && displayInfo.cogInfo.country.levels.length > 0;
+            const hasCogData = displayInfo.cogData && displayInfo.cogData.length > 0;
+
+            if (hasMetaLevels && hasCogInfoLevels && hasCogData) {
+                output.innerHTML += `<p class="ok">✓ All data structures are correct!</p>`;
+                output.innerHTML += `<p>The viewer SHOULD be able to display the country filter.</p>`;
+                output.innerHTML += `<p class="error">If it still shows [missing], this is a VIEWER BUG.</p>`;
+            } else {
+                output.innerHTML += `<p class="error">✗ Missing data:</p>`;
+                output.innerHTML += `<p>Meta levels: ${hasMetaLevels}</p>`;
+                output.innerHTML += `<p>cogInfo levels: ${hasCogInfoLevels}</p>`;
+                output.innerHTML += `<p>cogData: ${hasCogData}</p>`;
+            }
+            output.innerHTML += '</div>';
+        }
+
+        debug().catch(e => {
+            output.innerHTML += `<div class="info"><p class="error">Error: ${e.message}</p></div>`;
+        });
+    </script>
+</body>
+</html>

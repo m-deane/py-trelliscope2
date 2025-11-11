@@ -1,0 +1,128 @@
+name: Documentation Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/**'
+      - 'trelliscope/**/*.py'
+      - '.github/workflows/docs-build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'trelliscope/**/*.py'
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[all]"
+        pip install -r docs/requirements.txt
+
+    - name: Build Sphinx documentation
+      run: |
+        cd docs
+        make clean
+        make html
+
+    - name: Check for broken links
+      run: |
+        cd docs
+        make linkcheck
+      continue-on-error: true
+
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation-html
+        path: docs/_build/html/
+        retention-days: 30
+
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
+        force_orphan: true
+        commit_message: 'docs: update documentation [skip ci]'
+
+  validate-api-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[all]"
+        pip install sphinx sphinx-autodoc-typehints interrogate
+
+    - name: Check docstring coverage
+      run: |
+        interrogate -v trelliscope/ \
+          --fail-under 80 \
+          --ignore-init-method \
+          --ignore-private \
+          --ignore-magic \
+          --ignore-module \
+          --exclude tests \
+          --generate-badge docs/_static/ || true
+
+    - name: Generate API coverage report
+      run: |
+        python - << 'EOF'
+        import os
+        import ast
+        from pathlib import Path
+
+        def count_docstrings(path):
+            total, documented = 0, 0
+            for py_file in Path(path).rglob("*.py"):
+                if "test" in str(py_file) or "__pycache__" in str(py_file):
+                    continue
+                with open(py_file) as f:
+                    try:
+                        tree = ast.parse(f.read())
+                        for node in ast.walk(tree):
+                            if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                                total += 1
+                                if ast.get_docstring(node):
+                                    documented += 1
+                    except: pass
+            return total, documented
+
+        total, doc = count_docstrings("trelliscope")
+        coverage = (doc / total * 100) if total > 0 else 0
+        print(f"\n📊 API Documentation Coverage:")
+        print(f"   Total functions/classes: {total}")
+        print(f"   Documented: {doc}")
+        print(f"   Coverage: {coverage:.1f}%\n")
+
+        if coverage < 80:
+            print("⚠️  Warning: Documentation coverage below 80%")
+        else:
+            print("✅ Good documentation coverage!")
+        EOF

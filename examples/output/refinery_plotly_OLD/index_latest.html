@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trelliscope - refinery_plotly (@latest test)</title>
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@latest/dist/assets/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        #trelliscope-root {
+            width: 100vw;
+            height: 100vh;
+        }
+        #error-log {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="error-log"></div>
+    <div id="trelliscope-root" class="trelliscope-not-spa"></div>
+
+    <script type="module">
+        const errorLog = document.getElementById('error-log');
+
+        function logError(msg) {
+            console.error(msg);
+            errorLog.textContent = msg;
+            errorLog.style.display = 'block';
+        }
+
+        try {
+            console.log('Loading viewer from: https://unpkg.com/trelliscopejs-lib@latest/dist/assets/index.js');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@latest/dist/assets/index.js');
+
+            console.log('Module loaded:', Object.keys(module));
+            console.log('window.trelliscopeApp:', typeof window.trelliscopeApp);
+            console.log('module.trelliscopeApp:', typeof module.trelliscopeApp);
+
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
+
+            if (typeof initFunc === 'function') {
+                console.log('Initializing Trelliscope viewer (latest)...');
+                initFunc('trelliscope-root', './config.json');
+            } else {
+                logError('ERROR: trelliscopeApp function not found in module!');
+            }
+        } catch (error) {
+            logError(`ERROR loading viewer: ${error.message}`);
+            console.error('Full error:', error);
+        }
+    </script>
+</body>
+</html>

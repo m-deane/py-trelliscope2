@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trelliscope Diagnostic</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .section { margin: 20px 0; padding: 10px; background: #f0f0f0; }
+        .ok { color: green; }
+        .error { color: red; }
+        pre { background: white; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Trelliscope Data Diagnostic</h1>
+
+    <div id="results"></div>
+
+    <script>
+        async function runDiagnostics() {
+            const results = document.getElementById('results');
+
+            try {
+                // Load displayInfo.json
+                results.innerHTML += '<div class="section"><h2>1. Loading displayInfo.json...</h2>';
+                const displayRes = await fetch('./displays/refinery_plotly/displayInfo.json');
+                const displayInfo = await displayRes.json();
+                results.innerHTML += `<span class="ok">✓ Loaded (${displayRes.status})</span>`;
+
+                // Check cogData
+                results.innerHTML += `<p>Number of cogData entries: ${displayInfo.cogData?.length || 0}</p>`;
+                if (displayInfo.cogData && displayInfo.cogData.length > 0) {
+                    results.innerHTML += `<p>First entry keys: ${Object.keys(displayInfo.cogData[0]).join(', ')}</p>`;
+                    results.innerHTML += `<p>First entry country value: "${displayInfo.cogData[0].country}"</p>`;
+                }
+
+                // Check metas
+                const countryMeta = displayInfo.metas?.find(m => m.varname === 'country');
+                if (countryMeta) {
+                    results.innerHTML += `<p class="ok">✓ Country meta found: ${countryMeta.type}</p>`;
+                    results.innerHTML += `<p>Country levels: ${countryMeta.levels?.join(', ')}</p>`;
+                } else {
+                    results.innerHTML += `<p class="error">✗ Country meta NOT found</p>`;
+                }
+
+                // Check cogInfo
+                if (displayInfo.cogInfo?.country) {
+                    results.innerHTML += `<p class="ok">✓ cogInfo.country found</p>`;
+                    results.innerHTML += `<pre>${JSON.stringify(displayInfo.cogInfo.country, null, 2)}</pre>`;
+                } else {
+                    results.innerHTML += `<p class="error">✗ cogInfo.country NOT found</p>`;
+                }
+                results.innerHTML += '</div>';
+
+                // Load metaData.js
+                results.innerHTML += '<div class="section"><h2>2. Loading metaData.js...</h2>';
+                const metaRes = await fetch('./displays/refinery_plotly/metaData.js');
+                const metaText = await metaRes.text();
+                results.innerHTML += `<span class="ok">✓ Loaded (${metaRes.status}, ${metaText.length} bytes)</span>`;
+
+                // Parse window.metaData
+                eval(metaText);  // This will set window.metaData
+                if (window.metaData) {
+                    results.innerHTML += `<p class="ok">✓ window.metaData set (${window.metaData.length} entries)</p>`;
+                    if (window.metaData.length > 0) {
+                        results.innerHTML += `<p>First entry keys: ${Object.keys(window.metaData[0]).join(', ')}</p>`;
+                        results.innerHTML += `<p>First entry country: "${window.metaData[0].country}"</p>`;
+                        results.innerHTML += `<pre>${JSON.stringify(window.metaData[0], null, 2)}</pre>`;
+                    }
+                } else {
+                    results.innerHTML += `<p class="error">✗ window.metaData NOT set</p>`;
+                }
+                results.innerHTML += '</div>';
+
+                // Compare cogData vs metaData
+                results.innerHTML += '<div class="section"><h2>3. Comparing cogData vs metaData...</h2>';
+                if (displayInfo.cogData && window.metaData) {
+                    const cogCountries = displayInfo.cogData.map(d => d.country);
+                    const metaCountries = window.metaData.map(d => d.country);
+
+                    results.innerHTML += `<p>cogData countries: ${cogCountries.join(', ')}</p>`;
+                    results.innerHTML += `<p>metaData countries: ${metaCountries.join(', ')}</p>`;
+
+                    if (JSON.stringify(cogCountries) === JSON.stringify(metaCountries)) {
+                        results.innerHTML += `<p class="ok">✓ Countries match!</p>`;
+                    } else {
+                        results.innerHTML += `<p class="error">✗ Countries DO NOT match</p>`;
+                    }
+                }
+                results.innerHTML += '</div>';
+
+                // Check viewer compatibility
+                results.innerHTML += '<div class="section"><h2>4. Viewer Compatibility Check...</h2>';
+                results.innerHTML += `<p>cogInterface type: ${displayInfo.cogInterface?.type}</p>`;
+                results.innerHTML += `<p>panelInterface type: ${displayInfo.panelInterface?.type}</p>`;
+
+                // Check if data structure matches expected format
+                const hasRequiredFields = displayInfo.cogData?.every(entry =>
+                    entry.hasOwnProperty('country') &&
+                    entry.hasOwnProperty('panelKey') &&
+                    entry.hasOwnProperty('panel')
+                );
+
+                if (hasRequiredFields) {
+                    results.innerHTML += `<p class="ok">✓ All required fields present</p>`;
+                } else {
+                    results.innerHTML += `<p class="error">✗ Missing required fields</p>`;
+                }
+                results.innerHTML += '</div>';
+
+            } catch (error) {
+                results.innerHTML += `<div class="section"><p class="error">Error: ${error.message}</p><pre>${error.stack}</pre></div>`;
+            }
+        }
+
+        runDiagnostics();
+    </script>
+</body>
+</html>

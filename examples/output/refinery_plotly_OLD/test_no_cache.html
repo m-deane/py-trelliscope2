@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>No-Cache Test - Factor Data Verification</title>
+    <style>
+        body {
+            margin: 20px;
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #666;
+        }
+        .pass {
+            border-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        .fail {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+        }
+        .info {
+            border-color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.1);
+        }
+        .raw-data {
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        h1 { color: #4fc3f7; }
+        h2 { color: #ffb74d; }
+        .timestamp { color: #888; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>No-Cache Factor Data Test</h1>
+    <p class="timestamp">Test started: <span id="start-time"></span></p>
+    <div id="output"></div>
+
+    <script type="module">
+        const output = document.getElementById('output');
+        document.getElementById('start-time').textContent = new Date().toISOString();
+
+        function log(title, content, status = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${status}`;
+            div.innerHTML = `<strong>${title}</strong><br>${content}`;
+            output.appendChild(div);
+        }
+
+        function logRaw(title, data) {
+            const div = document.createElement('div');
+            div.className = 'raw-data';
+            div.innerHTML = `<strong>${title}</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            output.appendChild(div);
+        }
+
+        async function runTest() {
+            try {
+                // Step 1: Load displayInfo.json with explicit no-cache
+                const url = './displays/refinery_plotly/displayInfo.json';
+                const timestamp = new Date().getTime();
+                const urlWithBust = `${url}?t=${timestamp}`;
+
+                log('Step 1', `Loading: ${urlWithBust}`, 'info');
+
+                const response = await fetch(urlWithBust, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    cache: 'no-store'
+                });
+
+                log('Response Status', `${response.status} ${response.statusText}`,
+                    response.ok ? 'pass' : 'fail');
+
+                // Check response headers
+                const cacheControl = response.headers.get('cache-control');
+                const etag = response.headers.get('etag');
+                const lastModified = response.headers.get('last-modified');
+
+                log('Response Headers',
+                    `Cache-Control: ${cacheControl || 'none'}<br>` +
+                    `ETag: ${etag || 'none'}<br>` +
+                    `Last-Modified: ${lastModified || 'none'}`,
+                    'info');
+
+                // Parse JSON
+                const data = await response.json();
+                log('JSON Parsed', `Successfully parsed displayInfo.json`, 'pass');
+
+                // Step 2: Check country meta definition
+                const countryMeta = data.metas.find(m => m.varname === 'country');
+                if (countryMeta) {
+                    log('Country Meta Found',
+                        `Type: ${countryMeta.type}<br>` +
+                        `Label: ${countryMeta.label}<br>` +
+                        `Levels: ${countryMeta.levels ? countryMeta.levels.length : 0} levels`,
+                        'pass');
+
+                    if (countryMeta.levels && countryMeta.levels.length > 0) {
+                        logRaw('Country Levels (first 5)', countryMeta.levels.slice(0, 5));
+                    }
+                } else {
+                    log('Country Meta', 'NOT FOUND!', 'fail');
+                }
+
+                // Step 3: Check cogData entries
+                if (data.cogData && data.cogData.length > 0) {
+                    log('CogData Found', `${data.cogData.length} rows`, 'pass');
+
+                    // Check first 3 entries
+                    for (let i = 0; i < Math.min(3, data.cogData.length); i++) {
+                        const row = data.cogData[i];
+                        const countryValue = row.country;
+                        const countryType = typeof countryValue;
+                        const isNumeric = countryType === 'number';
+
+                        let displayValue = countryValue;
+                        if (isNumeric && countryMeta && countryMeta.levels) {
+                            displayValue = `${countryValue} → "${countryMeta.levels[countryValue]}"`;
+                        }
+
+                        log(`Row ${i}`,
+                            `country value: ${countryValue}<br>` +
+                            `typeof: ${countryType}<br>` +
+                            `Display: ${displayValue}`,
+                            isNumeric ? 'pass' : 'fail');
+                    }
+
+                    // Show raw first entry
+                    logRaw('Raw First CogData Entry', data.cogData[0]);
+                } else {
+                    log('CogData', 'NOT FOUND or EMPTY!', 'fail');
+                }
+
+                // Step 4: Test the getLabelFromFactor logic
+                if (countryMeta && countryMeta.levels) {
+                    log('Manual Lookup Test', 'Testing JavaScript index lookups', 'info');
+
+                    for (let i = 0; i < Math.min(3, countryMeta.levels.length); i++) {
+                        const label = countryMeta.levels[i];
+                        const testValue = i;
+
+                        // Simulate buggy check
+                        const buggyResult = !testValue || testValue === -Infinity ? '[missing]' :
+                                          countryMeta.levels[testValue - 1];
+
+                        // Simulate fixed check
+                        const fixedResult = testValue === null || testValue === undefined ||
+                                          testValue === -Infinity ? '[missing]' :
+                                          countryMeta.levels[testValue];
+
+                        log(`Index ${i}`,
+                            `Buggy logic: "${buggyResult}"<br>` +
+                            `Fixed logic: "${fixedResult}"<br>` +
+                            `Expected: "${label}"`,
+                            fixedResult === label ? 'pass' : 'fail');
+                    }
+                }
+
+                // Step 5: Summary
+                const allNumeric = data.cogData.every(row => typeof row.country === 'number');
+                log('Final Verdict',
+                    allNumeric ?
+                    '✓ All country values are numeric indices (CORRECT)' :
+                    '✗ Some country values are strings (INCORRECT)',
+                    allNumeric ? 'pass' : 'fail');
+
+            } catch (error) {
+                log('ERROR', `${error.message}<br>${error.stack}`, 'fail');
+            }
+        }
+
+        // Run test immediately
+        runTest();
+    </script>
+</body>
+</html>

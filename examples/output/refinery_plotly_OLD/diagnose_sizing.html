@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Panel Sizing Diagnostic</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .result { margin: 10px 0; padding: 10px; background: #2d2d2d; border-left: 4px solid #4fc3f7; }
+        .warn { border-color: #ffb74d; }
+        .error { border-color: #f44336; }
+        h2 { color: #4fc3f7; }
+    </style>
+</head>
+<body>
+    <h1>Panel Sizing Diagnostic</h1>
+    <p>This page will inspect the actual DOM to see why panels aren't resizing.</p>
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function log(title, content, level = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${level}`;
+            div.innerHTML = `<strong>${title}</strong><br>${content}`;
+            output.appendChild(div);
+        }
+
+        function inspect() {
+            // Open the main viewer in an iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = './index.html';
+            iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:-1;';
+            document.body.appendChild(iframe);
+
+            iframe.onload = () => {
+                setTimeout(() => {
+                    try {
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+                        // Find the grid container
+                        const grid = doc.querySelector('[data-testid="panel-content"]');
+                        if (!grid) {
+                            log('Grid Not Found', 'Could not find panel-content grid element', 'error');
+                            return;
+                        }
+
+                        const gridStyles = window.getComputedStyle(grid);
+                        log('Grid Container',
+                            `Display: ${gridStyles.display}<br>` +
+                            `Width: ${gridStyles.width}<br>` +
+                            `Grid Template Columns: ${gridStyles.gridTemplateColumns}<br>` +
+                            `Grid Gap: ${gridStyles.gridGap || gridStyles.gap}`,
+                            'info');
+
+                        // Find panel containers
+                        const panels = doc.querySelectorAll('[class*="panelGraphic"]');
+                        if (panels.length === 0) {
+                            log('Panels Not Found', 'No panel elements found', 'warn');
+                            return;
+                        }
+
+                        log('Panels Found', `${panels.length} panels detected`, 'info');
+
+                        // Check first few panels
+                        for (let i = 0; i < Math.min(3, panels.length); i++) {
+                            const panel = panels[i];
+                            const styles = window.getComputedStyle(panel);
+                            const iframe = panel.querySelector('iframe');
+                            const iframeStyles = iframe ? window.getComputedStyle(iframe) : null;
+
+                            log(`Panel ${i}`,
+                                `Container computed width: ${styles.width}<br>` +
+                                `Container computed height: ${styles.height}<br>` +
+                                `Container display: ${styles.display}<br>` +
+                                `Container flex-grow: ${styles.flexGrow}<br>` +
+                                `Inline style width: ${panel.style.width || 'not set'}<br>` +
+                                `Inline style height: ${panel.style.height || 'not set'}<br>` +
+                                (iframe ?
+                                    `<br><strong>Iframe:</strong><br>` +
+                                    `Width attr: ${iframe.width}<br>` +
+                                    `Height attr: ${iframe.height}<br>` +
+                                    `Computed width: ${iframeStyles.width}<br>` +
+                                    `Computed height: ${iframeStyles.height}`
+                                    : 'No iframe found'),
+                                'info');
+                        }
+
+                        // Check if ncol is changing
+                        log('Column Test',
+                            'Try changing the number of columns in the viewer and refresh this page to see if widths change.',
+                            'info');
+
+                    } catch (error) {
+                        log('Error', error.message, 'error');
+                    }
+                }, 3000);  // Wait 3 seconds for viewer to load
+            };
+        }
+
+        inspect();
+    </script>
+</body>
+</html>

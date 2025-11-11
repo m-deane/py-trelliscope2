@@ -259,6 +259,26 @@ def _serialize_cog_data(display) -> List[Dict[str, Any]]:
                 # Convert pd.Timestamp to ISO format string
                 if hasattr(value, 'isoformat'):
                     value = value.isoformat()
+
+                # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
+                # The trelliscopejs viewer expects R-style 1-based factor indexing
+                # where levels[1-1] = levels[0] = first level
+                meta = display._meta_vars.get(varname)
+                if meta and meta.type == "factor":
+                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                        # Numeric categorical code (0, 1, 2...) but not NaN
+                        # Note: NaN != NaN, so we check for that
+                        value = int(value) + 1  # Convert 0-based to 1-based
+                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                        # String value - look up index in levels and convert to 1-based
+                        try:
+                            idx = meta.levels.index(value)
+                            value = idx + 1  # Convert to 1-based index
+                        except (ValueError, AttributeError):
+                            # Keep string value if not in levels
+                            pass
+                    # NaN/None values are kept as-is
+
                 entry[varname] = value
 
         # Add panelKey (using index as panel ID)
@@ -324,6 +344,19 @@ def write_metadata_json(display, output_path: Path) -> Path:
                 # Convert pd.Timestamp to ISO format string
                 if hasattr(value, 'isoformat'):
                     value = value.isoformat()
+
+                # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
+                meta = display._meta_vars.get(varname)
+                if meta and meta.type == "factor":
+                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                        value = int(value) + 1
+                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                        try:
+                            idx_temp = meta.levels.index(value)
+                            value = idx_temp + 1
+                        except (ValueError, AttributeError):
+                            pass
+
                 entry[varname] = value
 
         # Add panelKey
@@ -395,6 +428,19 @@ def write_metadata_js(display, output_path: Path) -> Path:
                 # Convert pd.Timestamp to ISO format string
                 if hasattr(value, 'isoformat'):
                     value = value.isoformat()
+
+                # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
+                meta = display._meta_vars.get(varname)
+                if meta and meta.type == "factor":
+                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                        value = int(value) + 1
+                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                        try:
+                            idx_temp = meta.levels.index(value)
+                            value = idx_temp + 1
+                        except (ValueError, AttributeError):
+                            pass
+
                 entry[varname] = value
 
         # Add panelKey

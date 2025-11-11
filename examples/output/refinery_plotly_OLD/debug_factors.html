@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Factor Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        pre { background: #f0f0f0; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Factor Data Diagnostic</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        const results = document.getElementById('results');
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = msg;
+            results.appendChild(div);
+        }
+
+        function logPre(title, content) {
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${title}:</strong>`;
+            results.appendChild(p);
+            const pre = document.createElement('pre');
+            pre.textContent = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+            results.appendChild(pre);
+        }
+
+        try {
+            // Load displayInfo.json
+            log('Loading displayInfo.json...');
+            const response = await fetch('./displays/refinery_plotly/displayInfo.json');
+            const data = await response.json();
+
+            log('✓ Loaded displayInfo.json', 'pass');
+
+            // Check country meta
+            const countryMeta = data.metas.find(m => m.varname === 'country');
+            if (countryMeta) {
+                log('✓ Found country meta', 'pass');
+                logPre('Country meta', countryMeta);
+            } else {
+                log('✗ Country meta not found!', 'fail');
+            }
+
+            // Check cogInfo
+            if (data.cogInfo && data.cogInfo.country) {
+                log('✓ Found country in cogInfo', 'pass');
+                logPre('Country cogInfo', data.cogInfo.country);
+            } else {
+                log('✗ Country cogInfo not found!', 'fail');
+            }
+
+            // Check cogData
+            log('\\nFirst 5 cogData entries:');
+            for (let i = 0; i < Math.min(5, data.cogData.length); i++) {
+                const row = data.cogData[i];
+                const countryValue = row.country;
+                const countryType = typeof countryValue;
+
+                let countryLabel = '???';
+                if (countryType === 'number' && countryMeta && countryMeta.levels) {
+                    countryLabel = countryMeta.levels[countryValue] || '[index out of bounds]';
+                }
+
+                const status = countryType === 'number' ? 'pass' : 'fail';
+                log(`  Row ${i}: country = ${countryValue} (${countryType}) → "${countryLabel}"`, status);
+            }
+
+            // Test the patched viewer's getLabelFromFactor equivalent
+            log('\\nTesting viewer logic:');
+            if (countryMeta && countryMeta.levels) {
+                const testIndex = 0;
+                const testLabel = countryMeta.levels[testIndex];
+                log(`  levels[${testIndex}] = "${testLabel}"`, 'pass');
+
+                // Old buggy code would do levels[testIndex - 1]
+                const buggyIndex = testIndex - 1;
+                const buggyLabel = countryMeta.levels[buggyIndex];
+                log(`  levels[${buggyIndex}] (buggy) = "${buggyLabel}" (undefined expected)`, buggyLabel === undefined ? 'pass' : 'fail');
+            }
+
+            // Load viewer and check if it loads
+            log('\\nLoading viewer...');
+            const viewerModule = await import('./viewer/assets/index.js');
+            log('✓ Viewer loaded', 'pass');
+
+            if (viewerModule.trelliscopeApp) {
+                log('✓ trelliscopeApp function found', 'pass');
+            } else {
+                log('✗ trelliscopeApp function not found!', 'fail');
+            }
+
+        } catch (error) {
+            log(`✗ Error: ${error.message}`, 'fail');
+            logPre('Error stack', error.stack);
+        }
+    </script>
+</body>
+</html>

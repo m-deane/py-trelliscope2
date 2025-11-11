@@ -8,7 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Key Architecture**: Python Backend → JSON Specification → JavaScript Viewer (React/Redux)
 
-## Critical Discovery: File-Based Panel Requirements
+**Purpose**: Enable interactive exploration of large collections of plots (hundreds to millions) through automatic faceting, rich filtering/sorting via metadata (cognostics), and a self-contained HTML viewer.
+
+## Critical Discoveries
+
+### 1. File-Based Panel Requirements
 
 **IMPORTANT**: The trelliscopejs-lib viewer requires THREE files for file-based static panels to function:
 
@@ -19,6 +23,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Even though cogData is embedded in displayInfo.json, metaData.js is MANDATORY. The viewer makes explicit requests for this file and won't load panels without it.
 
 See `.claude_plans/FILE_BASED_PANELS_SOLUTION.md` for complete working structure.
+
+### 2. Factor Indexing Must Be 1-Based
+
+**IMPORTANT**: The trelliscopejs-lib viewer expects **R-style 1-based factor indexing**, not Python/JavaScript 0-based.
+
+#### The Issue:
+- Python/pandas use 0-based indices for categoricals: [0, 1, 2, ...]
+- R uses 1-based indices for factors: [1, 2, 3, ...]
+- The viewer was built for R and expects 1-based indices
+
+#### The Solution:
+Factor indices are automatically converted from 0-based to 1-based during JSON serialization in `trelliscope/serialization.py`:
+
+```python
+# Convert factor indices from 0-based to 1-based (R-style)
+if meta and meta.type == "factor" and isinstance(value, (int, float)):
+    value = int(value) + 1  # Convert 0-based to 1-based
+```
+
+#### Example:
+```json
+{
+  "cogData": [
+    {"country": 1},  // ✅ 1-based (maps to levels[0] = "Algeria")
+    {"country": 2},  // ✅ 1-based (maps to levels[1] = "Denmark")
+  ],
+  "metas": [{
+    "type": "factor",
+    "levels": ["Algeria", "Denmark", "Germany"]
+  }]
+}
+```
+
+**Why**: The viewer code does `levels[factor - 1]`, expecting 1-based input. With 0-based indices, the first item (0) would calculate as `levels[-1]` → undefined → "[missing]".
+
+See `.claude_plans/FACTOR_INDEXING_SOLUTION.md` for complete details.
 
 ## Development Commands
 
@@ -63,12 +103,9 @@ pytest tests/unit/test_display.py::test_display_creation -v
 cd examples/output
 python3 -m http.server 8000
 
-# Start with specific port
-python3 -m http.server 8001
-
 # View displays at:
 # http://localhost:8000/
-# http://localhost:8000/test_static/  (clean test environment)
+# http://localhost:8000/{display_name}/
 ```
 
 ### Panel Server (REST API)
@@ -84,6 +121,8 @@ python3 panel_server.py
 #   http://localhost:5001/api/panels/<display>/<id>
 ```
 
+Note: macOS AirPlay uses port 5000, use 5001 or 8000+ for servers.
+
 ## Core Architecture
 
 ### Package Structure
@@ -94,19 +133,22 @@ trelliscope/
 ├── display.py               # Display class (main entry point)
 ├── meta.py                  # Meta variable type system
 ├── inference.py             # DataFrame type inference
-├── serialization.py         # JSON writers for displayInfo.json
+├── serialization.py         # JSON writers (handles 1-based conversion)
 ├── panel_interface.py       # Panel interface abstractions
 ├── config.py                # Configuration management
 ├── export.py                # Export utilities
 ├── server.py                # Development server
 ├── viewer.py                # Viewer integration
+├── viewer_html.py           # HTML generation
+├── multi_display.py         # Multi-display support
 ├── panels/                  # Panel rendering (matplotlib, plotly)
-├── viewer/                  # Viewer assets and templates
-├── utils/                   # Utility functions
-├── core/                    # Core abstractions (empty)
-├── integrations/            # Library integrations (empty)
-├── server/                  # Server components (empty)
-└── writers/                 # Additional writers (empty)
+│   ├── __init__.py
+│   ├── matplotlib_adapter.py
+│   ├── plotly_adapter.py
+│   └── manager.py
+└── utils/                   # Utility functions
+    ├── __init__.py
+    └── validation.py
 ```
 
 ### Key Classes
@@ -122,57 +164,60 @@ trelliscope/
 - Manual override capability
 
 **PanelInterface** (`panel_interface.py`): Abstractions for panel sources
-- File-based panels (static PNG/HTML)
-- REST API panels (dynamic loading)
-- WebSocket panels (streaming)
+- LocalPanelInterface: File-based panels (static PNG/HTML)
+- RESTPanelInterface: REST API panels (dynamic loading)
+- WebSocketPanelInterface: WebSocket panels (streaming)
 
-## Critical Implementation Details
+**PanelManager** (`panels/manager.py`): Coordinates panel rendering
+- Delegates to visualization library adapters (matplotlib, plotly)
+- Handles figure object conversion to files
+- Error-resilient rendering
 
-### displayInfo.json Required Fields
+## displayInfo.json Required Fields
 
 For file-based panels to work with trelliscopejs-lib v0.7.16:
 
-```python
+```javascript
 {
   "name": str,
-  "group": "common",           # Required
+  "group": "common",           // Required
   "description": str,
   "keysig": str,
-  "n": int,                    # Number of panels
-  "height": 500,               # Required
-  "width": 500,                # Required
-  "tags": [],                  # Required (can be empty)
-  "keycols": [],               # Required (can be empty)
-  "metas": [...],              # Array of meta definitions
-  "inputs": null,              # Required
-  "cogInterface": {            # Required
+  "n": int,                    // Number of panels
+  "height": 500,               // Required
+  "width": 500,                // Required
+  "tags": [],                  // Required (can be empty)
+  "keycols": [],               // Required (can be empty)
+  "metas": [...],              // Array of meta definitions
+  "inputs": null,              // Required
+  "cogInterface": {            // Required
     "name": str,
     "group": "common",
     "type": "JSON"
   },
-  "cogInfo": {...},            # Required - detailed meta info
-  "cogDistns": {},             # Required (can be empty object)
-  "cogData": [...],            # Required - embedded data
-  "state": {...},              # Layout, filters, sorts
-  "views": [],                 # Saved views
-  "primarypanel": "panel",     # Which meta is the panel
-  "panelInterface": {          # Required
+  "cogInfo": {...},            // Required - detailed meta info
+  "cogDistns": {},             // Required (can be empty object)
+  "cogData": [...],            // Required - embedded data (1-based factors!)
+  "state": {...},              // Layout, filters, sorts
+  "views": [],                 // Saved views
+  "primarypanel": "panel",     // Which meta is the panel
+  "panelInterface": {          // Required
     "type": "file",
     "base": "panels",
     "panelCol": "panel"
   },
-  "imgSrcLookup": {}           # Required (empty object)
+  "imgSrcLookup": {}           // Required (empty object)
 }
 ```
 
-### Panel File Naming
+## Panel File Naming
 
 **Correct**: `0.png`, `1.png`, `2.png` (ID only)
 **Wrong**: `panel_0.png`, `panel_1.png` (prefix not used)
 
 Panel filenames must match `panelKey` values in cogData.
 
-### metaData Files Structure
+## metaData Files Structure
 
 **metaData.json**:
 ```json
@@ -180,7 +225,7 @@ Panel filenames must match `panelKey` values in cogData.
   {
     "id": 0,
     "value": 10,
-    "category": "A",
+    "category": 1,            // 1-based if factor!
     "panelKey": "0",
     "panel": "panels/0.png"   // Relative path
   }
@@ -193,7 +238,7 @@ window.metaData = [
   {
     "id": 0,
     "value": 10,
-    "category": "A",
+    "category": 1,            // 1-based if factor!
     "panelKey": "0",
     "panel": "panels/0.png"   // Relative path
   }
@@ -202,27 +247,25 @@ window.metaData = [
 
 Panel paths are RELATIVE: `"panels/0.png"`, not full URLs.
 
-## Viewer Architectures
+## Viewer Compatibility
 
-### Modern Viewer (trelliscopejs-lib v0.7.16)
+### Target: trelliscopejs-lib v0.7.16
 
-**What we're targeting**:
 - Pure JSON data format
 - React/Redux frontend
 - File-based OR REST API panels
 - CDN: `https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/`
 
-### Old Viewer (trelliscopejs_widget v0.3.2)
+### DO NOT USE: Old Viewer (trelliscopejs_widget v0.3.2)
 
-**DO NOT USE** - R examples in `examples/output/r_example_static/` use this:
+R examples in `examples/output/r_example_static/` use this:
 - JSONP format with callback wrappers
 - htmlwidgets framework
 - Incompatible with modern viewer
-- Ignore for Python implementation
 
 ## Common Development Tasks
 
-### Creating a Simple Display
+### Creating a Display
 
 ```python
 import pandas as pd
@@ -261,8 +304,9 @@ If viewer shows "0 of 0":
 3. Confirm `metaData.json` exists
 4. Check panel file naming (`0.png` not `panel_0.png`)
 5. Verify panel paths in metaData are relative
-6. Check browser DevTools Console for JavaScript errors
-7. Check Network tab for 404 errors
+6. **Check factor indices are 1-based** (not 0-based)
+7. Check browser DevTools Console for JavaScript errors
+8. Check Network tab for 404 errors
 
 ## File Organization
 
@@ -274,7 +318,7 @@ If viewer shows "0 of 0":
 
 ### Never Modify
 - `/reference/` - R package source (reference only)
-- `/py-trelliscope/` - Virtual environment
+- `/py-trelliscope/` or `/py-trelliscope-env/` - Virtual environment
 - `/examples/output/r_example*/` - R-generated examples (old format)
 - Output directories created by displays
 
@@ -296,53 +340,6 @@ If viewer shows "0 of 0":
 └── index.html
 ```
 
-## Testing Strategy
-
-### Unit Tests
-- Meta variable type inference
-- DataFrame validation
-- JSON serialization
-- Panel interface abstractions
-
-### Integration Tests
-- End-to-end display creation
-- Panel rendering (matplotlib, plotly)
-- Viewer compatibility
-
-### Manual Testing
-- Browser-based viewer testing
-- Panel image loading verification
-- Interactive filtering/sorting
-
-## Key Reference Files
-
-**Always consult**:
-- `.claude_plans/FILE_BASED_PANELS_SOLUTION.md` - Working panel structure
-- `.claude/CLAUDE.md` - Project directives and patterns
-- `README.md` - User-facing documentation
-
-**Technical references**:
-- `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` - Architecture details
-- R source in `/reference/` - Behavior reference only
-
-## Common Pitfalls
-
-1. **Missing metaData.js**: Viewer requires this even with embedded cogData
-2. **Wrong panel naming**: Use `0.png` not `panel_0.png`
-3. **Full URLs in metaData**: Use relative paths `panels/0.png`
-4. **Missing required fields**: displayInfo.json needs all fields listed above
-5. **Using R examples**: Old JSONP format is incompatible
-6. **Port conflicts**: macOS AirPlay uses port 5000, use 5001 or 8000+
-
-## Workflow Guidelines
-
-1. Write tests FIRST for new features
-2. Run full test suite before committing
-3. Update `.claude_plans/projectplan.md` after major changes
-4. Clean up orphan files regularly
-5. Use descriptive commit messages
-6. Never commit mock/placeholder code
-
 ## Python Code Style
 
 - **Variables/Functions**: `snake_case`
@@ -356,7 +353,7 @@ If viewer shows "0 of 0":
 
 | Type | Python Type | Use Case |
 |------|-------------|----------|
-| factor | categorical | Categories with levels |
+| factor | categorical | Categories with levels (1-based in JSON!) |
 | number | numeric | Continuous values |
 | currency | numeric | Monetary values |
 | date | datetime | Dates without time |
@@ -365,21 +362,49 @@ If viewer shows "0 of 0":
 | graph | any | Sparklines/mini-plots |
 | base | any | Generic metadata |
 
-## Performance Considerations
+## Common Pitfalls
 
-- Lazy panel generation for large datasets
-- Streaming writes to avoid memory issues
-- Parallel processing for panel rendering (future)
-- Pagination in viewer (configurable page size)
+1. **Missing metaData.js**: Viewer requires this even with embedded cogData
+2. **Wrong panel naming**: Use `0.png` not `panel_0.png`
+3. **Full URLs in metaData**: Use relative paths `panels/0.png`
+4. **Missing required fields**: displayInfo.json needs all fields listed above
+5. **Using R examples**: Old JSONP format is incompatible
+6. **Port conflicts**: macOS AirPlay uses port 5000, use 5001 or 8000+
+7. **0-based factor indices**: Factors must be 1-based in JSON (automatic conversion in serialization.py)
 
-## Current Status
+## Key Reference Files
 
-**Phase 1**: Core infrastructure - COMPLETE
-**Phase 2**: Panel rendering - IN PROGRESS
-  - ✅ File-based static panels working
-  - ✅ REST API panels working
-  - ⏳ Metadata file generation
-  - ⏳ Python API updates
+**Always consult**:
+- `.claude_plans/FILE_BASED_PANELS_SOLUTION.md` - Working panel structure
+- `.claude_plans/FACTOR_INDEXING_SOLUTION.md` - Factor indexing details
+- `.claude/CLAUDE.md` - Project directives and patterns
+- `README.md` - User-facing documentation
 
-**Phase 3**: Viewer integration - PLANNED
+**Technical references**:
+- `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` - Architecture details
+- R source in `/reference/` - Behavior reference only
+
+## Current Implementation Status
+
+**Phase 1**: Core infrastructure - ✅ COMPLETE
+- Display class with fluent API
+- Meta variable type system (8 types)
+- DataFrame type inference
+- JSON serialization with 1-based factor conversion
+
+**Phase 2**: Panel rendering - ✅ COMPLETE
+- File-based static panels working
+- REST API panels working
+- Matplotlib adapter (PNG/JPEG/SVG/PDF)
+- Plotly adapter (interactive HTML)
+- PanelManager with error resilience
+
+**Phase 3**: Viewer integration - ✅ COMPLETE
+- HTML viewer generation
+- Multiple display support
+- Static export utilities
+
 **Phase 4**: Advanced features - PLANNED
+- Parallel panel rendering
+- Panel caching
+- Large dataset optimization (100k+ panels)
