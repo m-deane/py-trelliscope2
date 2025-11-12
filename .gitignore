@@ -46,6 +46,9 @@ htmlcov/
 trelliscope_output/
 **/displays/
 
+# Large data files
+_data/
+
 # OS
 .DS_Store
 Thumbs.db
