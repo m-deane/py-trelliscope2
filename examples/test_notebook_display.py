@@ -5,11 +5,12 @@ This script replicates the notebook workflow to ensure displays are generated
 correctly with the multi-display structure and proper panel configuration.
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
 import json
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 from trelliscope import Display
 
@@ -20,7 +21,7 @@ def make_plot(row):
 
     # Generate some data based on row values
     x = np.linspace(0, 10, 100)
-    y = np.sin(x + row['value'] / 100) * row['score']
+    y = np.sin(x + row["value"] / 100) * row["score"]
 
     ax.plot(x, y, linewidth=2)
     ax.set_title(f"Category {row['category']} - ID {row['id']}")
@@ -34,9 +35,9 @@ def make_plot(row):
 
 def verify_multi_display_structure(output_path: Path, display_name: str) -> bool:
     """Verify that all required files exist with correct structure."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("VERIFYING MULTI-DISPLAY STRUCTURE")
-    print("="*60)
+    print("=" * 60)
 
     all_valid = True
 
@@ -89,9 +90,9 @@ def verify_multi_display_structure(output_path: Path, display_name: str) -> bool
 
 def verify_display_info_content(output_path: Path, display_name: str) -> bool:
     """Verify displayInfo.json has correct content."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("VERIFYING DISPLAYINFO.JSON CONTENT")
-    print("="*60)
+    print("=" * 60)
 
     display_info_path = output_path / "displays" / display_name / "displayInfo.json"
 
@@ -99,7 +100,7 @@ def verify_display_info_content(output_path: Path, display_name: str) -> bool:
         print("\n✗ displayInfo.json not found!")
         return False
 
-    with open(display_info_path, 'r', encoding='utf-8') as f:
+    with open(display_info_path, "r", encoding="utf-8") as f:
         info = json.load(f)
 
     all_valid = True
@@ -188,24 +189,26 @@ def verify_display_info_content(output_path: Path, display_name: str) -> bool:
 
 def main():
     """Run the notebook workflow test."""
-    print("="*60)
+    print("=" * 60)
     print("NOTEBOOK DISPLAY GENERATION TEST")
-    print("="*60)
+    print("=" * 60)
 
     # Create sample data (matching notebook)
     print("\n1. Creating sample data...")
     np.random.seed(42)
-    data = pd.DataFrame({
-        'id': range(20),
-        'value': np.random.randn(20) * 100 + 500,
-        'category': np.random.choice(['A', 'B', 'C'], 20),
-        'score': np.random.uniform(0, 100, 20)
-    })
+    data = pd.DataFrame(
+        {
+            "id": range(20),
+            "value": np.random.randn(20) * 100 + 500,
+            "category": np.random.choice(["A", "B", "C"], 20),
+            "score": np.random.uniform(0, 100, 20),
+        }
+    )
     print(f"   Created DataFrame with {len(data)} rows")
 
     # Generate plots
     print("\n2. Generating plots...")
-    data['panel'] = data.apply(make_plot, axis=1)
+    data["panel"] = data.apply(make_plot, axis=1)
     print(f"   Generated {len(data)} matplotlib figures")
 
     # Create display
@@ -215,7 +218,7 @@ def main():
 
     display = (
         Display(data, name="basic_viewer_demo", path=output_dir)
-        .set_panel_column('panel')
+        .set_panel_column("panel")
         .infer_metas()
         .set_default_layout(nrow=2, ncol=3)
     )
@@ -227,7 +230,7 @@ def main():
     print(f"   Output path: {output_path}")
 
     # Close matplotlib figures
-    plt.close('all')
+    plt.close("all")
 
     # Verify structure
     structure_valid = verify_multi_display_structure(output_path, "basic_viewer_demo")
@@ -236,9 +239,9 @@ def main():
     content_valid = verify_display_info_content(output_path, "basic_viewer_demo")
 
     # Final result
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("FINAL RESULT")
-    print("="*60)
+    print("=" * 60)
 
     if structure_valid and content_valid:
         print("\n✓ ALL CHECKS PASSED!")

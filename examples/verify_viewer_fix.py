@@ -10,8 +10,9 @@ from pathlib import Path
 # Add project to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+
 from trelliscope import Display
 
 print("=" * 70)
@@ -20,29 +21,33 @@ print("=" * 70)
 
 # Create minimal test data
 print("\n1. Creating test data...")
-data = pd.DataFrame({
-    'id': [1, 2, 3],
-    'value': [10, 20, 30],
-})
+data = pd.DataFrame(
+    {
+        "id": [1, 2, 3],
+        "value": [10, 20, 30],
+    }
+)
+
 
 # Create simple panels
 def make_panel(row):
     fig, ax = plt.subplots(figsize=(4, 3))
-    ax.bar(['Value'], [row['value']])
+    ax.bar(["Value"], [row["value"]])
     ax.set_title(f"ID {row['id']}")
     ax.set_ylim(0, 35)
     plt.tight_layout()
     return fig
 
+
 print("2. Generating panels...")
-data['panel'] = data.apply(make_panel, axis=1)
+data["panel"] = data.apply(make_panel, axis=1)
 
 # Create display
 print("3. Creating display...")
 output_dir = Path(__file__).parent / "verification_test"
 display = (
     Display(data, name="viewer_fix_test", path=output_dir)
-    .set_panel_column('panel')
+    .set_panel_column("panel")
     .infer_metas()
     .set_default_layout(nrow=1, ncol=3)
 )
@@ -54,6 +59,7 @@ output_path = display.write(force=True)
 # Generate viewer HTML manually
 print("5. Generating viewer HTML...")
 from trelliscope.viewer import generate_viewer_html, write_index_html
+
 html = generate_viewer_html(display_name="viewer_fix_test", viewer_version="latest")
 index_html = output_dir / "index.html"
 write_index_html(index_html, html)
@@ -77,7 +83,10 @@ else:
     sys.exit(1)
 
 # Check it doesn't have the wrong ESM build
-if "trelliscope-viewer.js" in html_content and "trelliscope-viewer.umd.cjs" not in html_content:
+if (
+    "trelliscope-viewer.js" in html_content
+    and "trelliscope-viewer.umd.cjs" not in html_content
+):
     print("   ❌ FAIL: HTML uses ESM build instead of UMD build")
     sys.exit(1)
 else:
@@ -86,6 +95,7 @@ else:
 # Check displayInfo.json has required fields
 print("\n7. Verifying displayInfo.json...")
 import json
+
 display_info_path = output_dir / "viewer_fix_test" / "displayInfo.json"
 display_info = json.loads(display_info_path.read_text())
 

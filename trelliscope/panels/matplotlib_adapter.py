@@ -13,7 +13,7 @@ class MatplotlibAdapter(PanelRenderer):
     savefig() method with sensible defaults.
 
     Args:
-        format: Output format ('png', 'jpeg', 'svg', 'pdf'). Default: 'png'
+        output_format: Output format ('png', 'jpeg', 'svg', 'pdf'). Default: 'png'
         dpi: Resolution in dots per inch. Default: 100
         bbox_inches: Bounding box mode. Default: 'tight'
 
@@ -31,26 +31,22 @@ class MatplotlibAdapter(PanelRenderer):
     """
 
     def __init__(
-        self,
-        format: str = "png",
-        dpi: int = 100,
-        bbox_inches: str = "tight"
+        self, output_format: str = "png", dpi: int = 100, bbox_inches: str = "tight"
     ):
         """Initialize MatplotlibAdapter.
 
         Args:
-            format: Output format. Default: 'png'
+            output_format: Output format. Default: 'png'
             dpi: Resolution. Default: 100
             bbox_inches: Bounding box mode. Default: 'tight'
         """
         valid_formats = ["png", "jpeg", "jpg", "svg", "pdf"]
-        if format not in valid_formats:
+        if output_format not in valid_formats:
             raise ValueError(
-                f"Invalid format '{format}'. "
-                f"Valid formats: {valid_formats}"
+                f"Invalid format '{output_format}'. " f"Valid formats: {valid_formats}"
             )
 
-        self.format = format
+        self.format = output_format
         self.dpi = dpi
         self.bbox_inches = bbox_inches
 
@@ -65,11 +61,12 @@ class MatplotlibAdapter(PanelRenderer):
         """
         try:
             import matplotlib.figure
+
             return isinstance(obj, matplotlib.figure.Figure)
         except ImportError:
             return False
 
-    def save(self, obj: Any, path: Path, **kwargs) -> Path:
+    def save(self, obj: Any, path: Path, **kwargs: Any) -> Path:
         """Save matplotlib figure to file.
 
         Args:
@@ -85,25 +82,18 @@ class MatplotlibAdapter(PanelRenderer):
             Exception: If save operation fails
         """
         if not self.detect(obj):
-            raise ValueError(
-                f"Object is not a matplotlib Figure: {type(obj)}"
-            )
+            raise ValueError(f"Object is not a matplotlib Figure: {type(obj)}")
 
         # Get settings (kwargs override defaults)
         dpi = kwargs.get("dpi", self.dpi)
-        format = kwargs.get("format", self.format)
+        file_format = kwargs.get("format", self.format)
         bbox_inches = kwargs.get("bbox_inches", self.bbox_inches)
 
         # Create output path with extension
-        output_path = path.with_suffix(f".{format}")
+        output_path = path.with_suffix(f".{file_format}")
 
         # Save figure
-        obj.savefig(
-            output_path,
-            dpi=dpi,
-            bbox_inches=bbox_inches,
-            format=format
-        )
+        obj.savefig(output_path, dpi=dpi, bbox_inches=bbox_inches, format=file_format)
 
         return output_path
 

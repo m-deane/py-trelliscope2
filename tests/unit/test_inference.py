@@ -5,16 +5,17 @@ Tests cover automatic type detection from pandas Series dtypes,
 including edge cases and fallback behavior.
 """
 
-import pytest
-import pandas as pd
-import numpy as np
 from datetime import datetime
 
-from trelliscope.inference import infer_meta_from_series, infer_meta_dict
+import numpy as np
+import pandas as pd
+import pytest
+
+from trelliscope.inference import infer_meta_dict, infer_meta_from_series
 from trelliscope.meta import (
+    DateMeta,
     FactorMeta,
     NumberMeta,
-    DateMeta,
     TimeMeta,
 )
 
@@ -111,8 +112,7 @@ class TestInferDatetimeTypes:
     def test_date_only_infers_date(self):
         """Test that date-only datetime infers as DateMeta."""
         series = pd.Series(
-            pd.date_range("2024-01-01", periods=3, freq="D"),
-            name="date"
+            pd.date_range("2024-01-01", periods=3, freq="D"), name="date"
         )
         meta = infer_meta_from_series(series)
 
@@ -122,8 +122,7 @@ class TestInferDatetimeTypes:
     def test_datetime_with_time_infers_time(self):
         """Test that datetime with time component infers as TimeMeta."""
         series = pd.Series(
-            pd.date_range("2024-01-01", periods=3, freq="h"),
-            name="timestamp"
+            pd.date_range("2024-01-01", periods=3, freq="h"), name="timestamp"
         )
         meta = infer_meta_from_series(series)
 
@@ -133,8 +132,7 @@ class TestInferDatetimeTypes:
     def test_timezone_aware_infers_time(self):
         """Test that timezone-aware datetime infers as TimeMeta."""
         series = pd.Series(
-            pd.date_range("2024-01-01", periods=3, freq="D", tz="UTC"),
-            name="timestamp"
+            pd.date_range("2024-01-01", periods=3, freq="D", tz="UTC"), name="timestamp"
         )
         meta = infer_meta_from_series(series)
 
@@ -143,10 +141,12 @@ class TestInferDatetimeTypes:
 
     def test_datetime_with_microseconds_infers_time(self):
         """Test that datetime with microseconds infers as TimeMeta."""
-        dates = pd.to_datetime([
-            "2024-01-01 00:00:00.123456",
-            "2024-01-02 00:00:00.654321",
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-01 00:00:00.123456",
+                "2024-01-02 00:00:00.654321",
+            ]
+        )
         series = pd.Series(dates, name="timestamp")
         meta = infer_meta_from_series(series)
 
@@ -154,10 +154,12 @@ class TestInferDatetimeTypes:
 
     def test_datetime_with_seconds_infers_time(self):
         """Test that datetime with seconds infers as TimeMeta."""
-        dates = pd.to_datetime([
-            "2024-01-01 00:00:01",
-            "2024-01-01 00:00:02",
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-01 00:00:01",
+                "2024-01-01 00:00:02",
+            ]
+        )
         series = pd.Series(dates, name="timestamp")
         meta = infer_meta_from_series(series)
 
@@ -165,11 +167,13 @@ class TestInferDatetimeTypes:
 
     def test_datetime_midnight_only_infers_date(self):
         """Test that datetime at midnight with no time infers as DateMeta."""
-        dates = pd.to_datetime([
-            "2024-01-01 00:00:00",
-            "2024-01-02 00:00:00",
-            "2024-01-03 00:00:00",
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-01 00:00:00",
+                "2024-01-02 00:00:00",
+                "2024-01-03 00:00:00",
+            ]
+        )
         series = pd.Series(dates, name="date")
         meta = infer_meta_from_series(series)
 
@@ -177,11 +181,13 @@ class TestInferDatetimeTypes:
 
     def test_datetime_with_nat_infers_date(self):
         """Test that datetime with NaT values still infers correctly."""
-        dates = pd.to_datetime([
-            "2024-01-01",
-            pd.NaT,
-            "2024-01-03",
-        ])
+        dates = pd.to_datetime(
+            [
+                "2024-01-01",
+                pd.NaT,
+                "2024-01-03",
+            ]
+        )
         series = pd.Series(dates, name="date")
         meta = infer_meta_from_series(series)
 
@@ -236,12 +242,14 @@ class TestInferMetaDict:
 
     def test_infer_all_columns(self):
         """Test inferring meta for all DataFrame columns."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "category": ["A", "B", "C"],
-            "value": [1.5, 2.7, 3.9],
-            "date": pd.date_range("2024-01-01", periods=3),
-        })
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "category": ["A", "B", "C"],
+                "value": [1.5, 2.7, 3.9],
+                "date": pd.date_range("2024-01-01", periods=3),
+            }
+        )
         metas = infer_meta_dict(df)
 
         assert len(metas) == 4
@@ -252,11 +260,13 @@ class TestInferMetaDict:
 
     def test_infer_specific_columns(self):
         """Test inferring meta for specific columns only."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "category": ["A", "B", "C"],
-            "value": [1.5, 2.7, 3.9],
-        })
+        df = pd.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "category": ["A", "B", "C"],
+                "value": [1.5, 2.7, 3.9],
+            }
+        )
         metas = infer_meta_dict(df, columns=["category", "value"])
 
         assert len(metas) == 2
@@ -281,10 +291,12 @@ class TestInferMetaDict:
 
     def test_column_names_as_varnames(self):
         """Test that column names are used as varnames."""
-        df = pd.DataFrame({
-            "col_a": [1, 2],
-            "col_b": ["X", "Y"],
-        })
+        df = pd.DataFrame(
+            {
+                "col_a": [1, 2],
+                "col_b": ["X", "Y"],
+            }
+        )
         metas = infer_meta_dict(df)
 
         assert metas["col_a"].varname == "col_a"
@@ -297,7 +309,7 @@ class TestInferFallbackBehavior:
     def test_complex_dtype_infers_as_number(self):
         """Test that complex numbers infer as NumberMeta (are numeric)."""
         # Complex dtype is numeric in pandas
-        series = pd.Series([1+2j, 3+4j], name="complex")
+        series = pd.Series([1 + 2j, 3 + 4j], name="complex")
         meta = infer_meta_from_series(series)
 
         # Complex numbers are numeric, so should infer as NumberMeta
@@ -305,7 +317,9 @@ class TestInferFallbackBehavior:
 
     def test_timedelta_infers_as_factor(self):
         """Test that timedelta infers as FactorMeta (fallback behavior)."""
-        series = pd.Series(pd.to_timedelta(['1 days', '2 days', '3 days']), name="duration")
+        series = pd.Series(
+            pd.to_timedelta(["1 days", "2 days", "3 days"]), name="duration"
+        )
         meta = infer_meta_from_series(series)
 
         # Timedelta is not considered numeric by pandas, falls back to FactorMeta

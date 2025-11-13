@@ -5,12 +5,13 @@ Tests the complete workflow from DataFrame to written display output,
 verifying all components work together correctly.
 """
 
-import pytest
-import pandas as pd
 import json
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope import Display
 
@@ -22,11 +23,13 @@ class TestBasicWorkflow:
         """Test minimal workflow: create display and write."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create simple DataFrame
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "category": ["A", "B", "C"],
-                "value": [10.5, 20.7, 30.9]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "category": ["A", "B", "C"],
+                    "value": [10.5, 20.7, 30.9],
+                }
+            )
 
             # Create and write display
             output = (
@@ -70,13 +73,15 @@ class TestBasicWorkflow:
         """Test complete workflow with all configuration options."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create DataFrame with multiple types
-            df = pd.DataFrame({
-                "panel": ["p1", "p2", "p3", "p4"],
-                "category": ["A", "B", "A", "B"],
-                "value": [10.5, 20.7, 30.9, 40.2],
-                "date": pd.date_range("2024-01-01", periods=4),
-                "flag": [True, False, True, False]
-            })
+            df = pd.DataFrame(
+                {
+                    "panel": ["p1", "p2", "p3", "p4"],
+                    "category": ["A", "B", "A", "B"],
+                    "value": [10.5, 20.7, 30.9, 40.2],
+                    "date": pd.date_range("2024-01-01", periods=4),
+                    "flag": [True, False, True, False],
+                }
+            )
 
             # Create display with full configuration
             display = (
@@ -84,7 +89,7 @@ class TestBasicWorkflow:
                     df,
                     name="full_display",
                     description="A comprehensive test display",
-                    path=tmpdir
+                    path=tmpdir,
                 )
                 .set_panel_column("panel")
                 .infer_metas()
@@ -139,12 +144,14 @@ class TestBasicWorkflow:
     def test_workflow_with_explicit_metas(self):
         """Test workflow with explicitly defined meta variables."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "category": ["A", "B", "C"],
-                "score": [85.5, 92.3, 78.9],
-                "grade": ["B", "A", "C"]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "category": ["A", "B", "C"],
+                    "score": [85.5, 92.3, 78.9],
+                    "grade": ["B", "A", "C"],
+                }
+            )
 
             # Create display with explicit metas
             output = (
@@ -187,13 +194,15 @@ class TestBasicWorkflow:
     def test_workflow_with_mixed_meta_definition(self):
         """Test workflow mixing inferred and explicit metas."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "auto_category": ["X", "Y", "Z"],
-                "auto_value": [1.5, 2.7, 3.9],
-                "manual_score": [10, 20, 30],
-                "manual_label": ["low", "med", "high"]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "auto_category": ["X", "Y", "Z"],
+                    "auto_value": [1.5, 2.7, 3.9],
+                    "manual_score": [10, 20, 30],
+                    "manual_label": ["low", "med", "high"],
+                }
+            )
 
             # Infer some, define others
             output = (
@@ -226,27 +235,24 @@ class TestBasicWorkflow:
                 "auto_value",
                 "manual_score",
                 "manual_label",
-                "plot"  # panel column
+                "plot",  # panel column
             }
 
     def test_workflow_with_datetime_columns(self):
         """Test workflow with date and datetime columns."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "date_only": pd.date_range("2024-01-01", periods=3, freq="D"),
-                "datetime_with_time": pd.date_range(
-                    "2024-01-01 12:30:00",
-                    periods=3,
-                    freq="h"
-                ),
-                "datetime_with_tz": pd.date_range(
-                    "2024-01-01",
-                    periods=3,
-                    freq="D",
-                    tz="UTC"
-                )
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "date_only": pd.date_range("2024-01-01", periods=3, freq="D"),
+                    "datetime_with_time": pd.date_range(
+                        "2024-01-01 12:30:00", periods=3, freq="h"
+                    ),
+                    "datetime_with_tz": pd.date_range(
+                        "2024-01-01", periods=3, freq="D", tz="UTC"
+                    ),
+                }
+            )
 
             output = (
                 Display(df, name="datetime_test")
@@ -286,10 +292,7 @@ class TestBasicWorkflow:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "output"
 
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
 
             # First write
             Display(df, name="test1").set_panel_column("plot").write(
@@ -302,14 +305,10 @@ class TestBasicWorkflow:
             assert (output_path / "displays" / "displayList.json").exists()
 
             # Second write with different data (force=True)
-            df2 = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "value": [10, 20, 30]
-            })
+            df2 = pd.DataFrame({"plot": ["p1", "p2", "p3"], "value": [10, 20, 30]})
 
             Display(df2, name="test2").set_panel_column("plot").infer_metas().write(
-                output_path=output_path,
-                force=True
+                output_path=output_path, force=True
             )
 
             # Verify second display overwrote first
@@ -328,12 +327,14 @@ class TestBasicWorkflow:
     def test_workflow_with_empty_dataframe_columns(self):
         """Test workflow with DataFrame containing some empty values."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "category": ["A", None, "C"],
-                "value": [10.5, None, 30.9],
-                "flag": [True, False, None]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "category": ["A", None, "C"],
+                    "value": [10.5, None, 30.9],
+                    "flag": [True, False, None],
+                }
+            )
 
             output = (
                 Display(df, name="with_nulls")
@@ -368,10 +369,7 @@ class TestWorkflowEdgeCases:
     def test_single_row_dataframe(self):
         """Test workflow with single-row DataFrame."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1"],
-                "value": [42]
-            })
+            df = pd.DataFrame({"plot": ["p1"], "value": [42]})
 
             output = (
                 Display(df, name="single_row")
@@ -431,11 +429,13 @@ class TestWorkflowEdgeCases:
     def test_unicode_in_data(self):
         """Test workflow with Unicode characters in data."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2", "p3"],
-                "text": ["café", "naïve", "日本語"],
-                "emoji": ["😀", "🎉", "🚀"]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": ["p1", "p2", "p3"],
+                    "text": ["café", "naïve", "日本語"],
+                    "emoji": ["😀", "🎉", "🚀"],
+                }
+            )
 
             output = (
                 Display(df, name="unicode_test", description="Unicode: café 中文")

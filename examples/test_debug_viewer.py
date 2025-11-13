@@ -5,9 +5,10 @@ Creates a simple display with debug viewer enabled to verify
 the debug console and logging features work correctly.
 """
 
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 from trelliscope import Display
 from trelliscope.meta import FactorMeta, NumberMeta
@@ -26,11 +27,7 @@ def create_simple_plot(label, value):
 def main():
     """Create display with debug viewer."""
     # Create data
-    data = {
-        "label": ["X", "Y", "Z"],
-        "value": [10, 30, 20],
-        "panel": []
-    }
+    data = {"label": ["X", "Y", "Z"], "value": [10, 30, 20], "panel": []}
 
     # Create figures
     for label, val in zip(data["label"], data["value"]):
@@ -49,9 +46,7 @@ def main():
     # Write with debug enabled
     output_dir = Path("examples/output/debug_viewer_test")
     display.write(
-        output_path=output_dir,
-        force=True,
-        viewer_debug=True  # Enable debug mode
+        output_path=output_dir, force=True, viewer_debug=True  # Enable debug mode
     )
 
     print(f"\n✓ Display created with debug viewer at: {output_dir}")
@@ -61,7 +56,7 @@ def main():
     print(f"  3. Open http://localhost:8001/")
     print(f"  4. Check the debug console at the bottom of the page")
 
-    plt.close('all')
+    plt.close("all")
 
 
 if __name__ == "__main__":

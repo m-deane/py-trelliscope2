@@ -10,18 +10,19 @@ Prerequisites:
     - Forked viewer copied to trelliscope/viewer/ directory
 """
 
-import pandas as pd
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pandas as pd
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from trelliscope import (
     Display,
-    RESTPanelInterface,
-    NumberMeta,
     FactorMeta,
+    NumberMeta,
+    RESTPanelInterface,
 )
 
 
@@ -39,21 +40,21 @@ def create_rest_panel_display():
 
     # Step 1: Create sample data
     print("Step 1: Creating sample data...")
-    data = pd.DataFrame({
-        'id': [0, 1, 2],
-        'value': [0, 10, 20],
-        'category': ['A', 'B', 'C'],
-        'panel': ['0', '1', '2'],  # Panel IDs for REST API
-    })
+    data = pd.DataFrame(
+        {
+            "id": [0, 1, 2],
+            "value": [0, 10, 20],
+            "category": ["A", "B", "C"],
+            "panel": ["0", "1", "2"],  # Panel IDs for REST API
+        }
+    )
     print(f"  Created {len(data)} rows")
     print()
 
     # Step 2: Create display
     print("Step 2: Creating display...")
     display = Display(
-        data,
-        name="rest_demo",
-        description="Demonstration of REST panel loading"
+        data, name="rest_demo", description="Demonstration of REST panel loading"
     )
     print(f"  Display name: {display.name}")
     print()
@@ -67,8 +68,7 @@ def create_rest_panel_display():
     # Step 4: Configure REST panel interface
     print("Step 4: Configuring REST panel interface...")
     interface = RESTPanelInterface(
-        base="http://localhost:5001/api/panels/minimal_manual",
-        port=5001
+        base="http://localhost:5001/api/panels/minimal_manual", port=5001
     )
     display.set_panel_interface(interface)
     print(f"  Interface type: REST")
@@ -78,9 +78,7 @@ def create_rest_panel_display():
 
     # Step 5: Add metadata (cognostics)
     print("Step 5: Adding metadata...")
-    display.add_meta_variable(
-        NumberMeta("value", label="Value", digits=2)
-    )
+    display.add_meta_variable(NumberMeta("value", label="Value", digits=2))
     display.add_meta_variable(
         FactorMeta("category", label="Category", levels=["A", "B", "C"])
     )
@@ -102,7 +100,7 @@ def create_rest_panel_display():
     display.write(
         output_path=output_path,
         force=True,
-        render_panels=False  # Don't render panels - they come from REST API
+        render_panels=False,  # Don't render panels - they come from REST API
     )
     print(f"  Output: {output_path}")
     print()
@@ -115,6 +113,7 @@ def create_rest_panel_display():
 
         # Read and display relevant sections
         import json
+
         with open(display_info_path) as f:
             display_info = json.load(f)
 
@@ -124,8 +123,8 @@ def create_rest_panel_display():
 
         # Find panel meta in metas array
         panel_meta = None
-        for meta in display_info['metas']:
-            if meta['type'] == 'panel':
+        for meta in display_info["metas"]:
+            if meta["type"] == "panel":
                 panel_meta = meta
                 break
 
@@ -148,6 +147,7 @@ def create_rest_panel_display():
     viewer_src = Path(__file__).parent.parent / "trelliscope" / "viewer"
     if viewer_src.exists():
         import shutil
+
         # Copy viewer files to output directory
         for file in ["index.html"]:
             if (viewer_src / file).exists():
@@ -203,6 +203,7 @@ def create_rest_panel_display():
 def verify_panel_server():
     """Verify panel server is accessible."""
     import requests
+
     print("Verifying panel server...")
     try:
         response = requests.get("http://localhost:5001/api/health", timeout=2)
@@ -224,11 +225,11 @@ def verify_panel_server():
 def test_panel_endpoint():
     """Test individual panel endpoint."""
     import requests
+
     print("\nTesting panel endpoint...")
     try:
         response = requests.head(
-            "http://localhost:5001/api/panels/minimal_manual/0",
-            timeout=2
+            "http://localhost:5001/api/panels/minimal_manual/0", timeout=2
         )
         if response.status_code == 200:
             print(f"  ✓ Panel endpoint responding")

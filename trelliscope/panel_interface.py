@@ -7,8 +7,8 @@ Defines how panels are loaded in the viewer:
 - WebSocketPanelInterface: Panels streamed via WebSocket (future)
 """
 
-from typing import Optional, Dict, Any
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 
 @dataclass
@@ -40,6 +40,7 @@ class LocalPanelInterface(PanelInterface):
     >>> interface = LocalPanelInterface(format="png")
     >>> display.set_panel_interface(interface)
     """
+
     format: str = "png"
     base: str = "./panels"
 
@@ -84,19 +85,18 @@ class RESTPanelInterface(PanelInterface):
     ...     api_key="secret_key_123"
     ... )
     """
+
     base: str
     port: Optional[int] = None
     api_key: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate base URL."""
         if not self.base:
             raise ValueError("base URL cannot be empty")
         if not (self.base.startswith("http://") or self.base.startswith("https://")):
-            raise ValueError(
-                f"base must be a valid HTTP(S) URL, got: {self.base}"
-            )
+            raise ValueError(f"base must be a valid HTTP(S) URL, got: {self.base}")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to displayInfo.json panelInterface format for REST panels."""
@@ -104,8 +104,8 @@ class RESTPanelInterface(PanelInterface):
         source = {
             "type": "REST",
             "url": self.base,
-            "isLocal": self.base.startswith("http://localhost") or
-                      self.base.startswith("http://127.0.0.1"),
+            "isLocal": self.base.startswith("http://localhost")
+            or self.base.startswith("http://127.0.0.1"),
         }
 
         if self.port is not None:
@@ -141,6 +141,7 @@ class WebSocketPanelInterface(PanelInterface):
     ...     url="ws://localhost:8080/panels"
     ... )
     """
+
     url: str
 
     def to_dict(self) -> Dict[str, Any]:
@@ -151,16 +152,13 @@ class WebSocketPanelInterface(PanelInterface):
         }
 
 
-def create_panel_interface(
-    type: str,
-    **kwargs
-) -> PanelInterface:
+def create_panel_interface(panel_type: str, **kwargs: Any) -> PanelInterface:
     """
     Factory function to create panel interfaces.
 
     Parameters
     ----------
-    type : str
+    panel_type : str
         Interface type: "local", "rest", or "websocket"
     **kwargs
         Type-specific parameters
@@ -173,7 +171,7 @@ def create_panel_interface(
     Raises
     ------
     ValueError
-        If type is unknown
+        If panel_type is unknown
 
     Examples
     --------
@@ -192,11 +190,11 @@ def create_panel_interface(
         "websocket": WebSocketPanelInterface,
     }
 
-    if type not in type_map:
+    if panel_type not in type_map:
         raise ValueError(
-            f"Unknown panel interface type '{type}'. "
+            f"Unknown panel interface type '{panel_type}'. "
             f"Must be one of: {list(type_map.keys())}"
         )
 
-    interface_class = type_map[type]
-    return interface_class(**kwargs)
+    interface_class = type_map[panel_type]
+    return interface_class(**kwargs)  # type: ignore[no-any-return]

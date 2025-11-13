@@ -43,7 +43,7 @@ class PanelRenderer(ABC):
         pass
 
     @abstractmethod
-    def save(self, obj: Any, path: Path, **kwargs) -> Path:
+    def save(self, obj: Any, path: Path, **kwargs: Any) -> Path:
         """Save the object to a file.
 
         Args:

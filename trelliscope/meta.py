@@ -6,7 +6,8 @@ filtering, sorting, and labeling in the viewer. This module defines the type
 hierarchy for different meta variable types.
 """
 
-from typing import Optional, List, Any, Dict
+from typing import Any, Dict, List, Optional
+
 import attrs
 import pandas as pd
 
@@ -47,7 +48,7 @@ class MetaVariable:
     desc: Optional[str] = None
     type: str = attrs.field(init=False, default="")
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         """Set label to varname if not provided."""
         if self.label is None:
             self.label = self.varname
@@ -81,10 +82,7 @@ class MetaVariable:
 
     @classmethod
     def from_series(
-        cls,
-        series: pd.Series,
-        varname: Optional[str] = None,
-        **kwargs
+        cls, series: pd.Series, varname: Optional[str] = None, **kwargs: Any
     ) -> "MetaVariable":
         """
         Create meta variable from pandas Series with type inference.
@@ -110,9 +108,7 @@ class MetaVariable:
         """
         if varname is None:
             if series.name is None:
-                raise ValueError(
-                    "varname must be provided when series.name is None"
-                )
+                raise ValueError("varname must be provided when series.name is None")
             varname = str(series.name)
 
         # This is overridden in subclasses for type-specific inference
@@ -155,10 +151,7 @@ class FactorMeta(MetaVariable):
 
     @classmethod
     def from_series(
-        cls,
-        series: pd.Series,
-        varname: Optional[str] = None,
-        **kwargs
+        cls, series: pd.Series, varname: Optional[str] = None, **kwargs: Any
     ) -> "FactorMeta":
         """
         Create FactorMeta from series, inferring levels.
@@ -229,10 +222,7 @@ class NumberMeta(MetaVariable):
 
     @classmethod
     def from_series(
-        cls,
-        series: pd.Series,
-        varname: Optional[str] = None,
-        **kwargs
+        cls, series: pd.Series, varname: Optional[str] = None, **kwargs: Any
     ) -> "NumberMeta":
         """
         Create NumberMeta from numeric series.
@@ -291,10 +281,7 @@ class DateMeta(MetaVariable):
 
     @classmethod
     def from_series(
-        cls,
-        series: pd.Series,
-        varname: Optional[str] = None,
-        **kwargs
+        cls, series: pd.Series, varname: Optional[str] = None, **kwargs: Any
     ) -> "DateMeta":
         """
         Create DateMeta from datetime series.
@@ -358,10 +345,7 @@ class TimeMeta(MetaVariable):
 
     @classmethod
     def from_series(
-        cls,
-        series: pd.Series,
-        varname: Optional[str] = None,
-        **kwargs
+        cls, series: pd.Series, varname: Optional[str] = None, **kwargs: Any
     ) -> "TimeMeta":
         """
         Create TimeMeta from datetime series.

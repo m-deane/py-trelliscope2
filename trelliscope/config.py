@@ -1,7 +1,7 @@
 """Viewer configuration for trelliscope displays."""
 
-from typing import Optional, Dict, Any, List
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -65,14 +65,13 @@ class ViewerConfig:
     custom_css: Optional[str] = None
     config_options: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate configuration after initialization."""
         # Validate theme
         valid_themes = ["light", "dark", "auto"]
         if self.theme not in valid_themes:
             raise ValueError(
-                f"Invalid theme: {self.theme}. "
-                f"Must be one of {valid_themes}"
+                f"Invalid theme: {self.theme}. " f"Must be one of {valid_themes}"
             )
 
         # Validate panel_aspect

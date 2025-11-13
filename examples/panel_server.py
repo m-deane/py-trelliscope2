@@ -15,10 +15,11 @@ This serves:
 - Panel images via REST API at /api/panels/<display_name>/<panel_id>
 """
 
-from flask import Flask, send_file, send_from_directory, jsonify
-from flask_cors import CORS
-from pathlib import Path
 import logging
+from pathlib import Path
+
+from flask import Flask, jsonify, send_file, send_from_directory
+from flask_cors import CORS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +32,8 @@ CORS(app)  # Enable CORS for development
 OUTPUT_DIR = Path(__file__).parent / "output"
 DISPLAYS_DIR = OUTPUT_DIR / "displays"
 
-@app.route('/')
+
+@app.route("/")
 def index():
     """Serve the main index.html"""
     index_path = OUTPUT_DIR / "index.html"
@@ -39,7 +41,8 @@ def index():
         return send_file(index_path)
     return "Trelliscope output not found. Run a display generation script first.", 404
 
-@app.route('/<path:path>')
+
+@app.route("/<path:path>")
 def serve_static(path):
     """Serve static files (CSS, JS, JSON configs)"""
     try:
@@ -48,7 +51,8 @@ def serve_static(path):
         logger.error(f"Error serving {path}: {e}")
         return str(e), 404
 
-@app.route('/api/panels/<display_name>/<panel_id>')
+
+@app.route("/api/panels/<display_name>/<panel_id>")
 def serve_panel(display_name, panel_id):
     """
     Serve a panel image for a specific display.
@@ -68,12 +72,13 @@ def serve_panel(display_name, panel_id):
 
     if panel_path.exists():
         logger.info(f"✓ Serving panel: {panel_path}")
-        return send_file(panel_path, mimetype='image/png')
+        return send_file(panel_path, mimetype="image/png")
     else:
         logger.error(f"✗ Panel not found: {panel_path}")
         return f"Panel not found: {display_name}/{panel_id}", 404
 
-@app.route('/api/panels/<display_name>/<panel_id>.<ext>')
+
+@app.route("/api/panels/<display_name>/<panel_id>.<ext>")
 def serve_panel_with_extension(display_name, panel_id, ext):
     """
     Serve a panel with explicit extension (for compatibility).
@@ -87,12 +92,12 @@ def serve_panel_with_extension(display_name, panel_id, ext):
     if panel_path.exists():
         # Determine MIME type
         mime_types = {
-            'png': 'image/png',
-            'jpg': 'image/jpeg',
-            'jpeg': 'image/jpeg',
-            'html': 'text/html'
+            "png": "image/png",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "html": "text/html",
         }
-        mime_type = mime_types.get(ext.lower(), 'application/octet-stream')
+        mime_type = mime_types.get(ext.lower(), "application/octet-stream")
 
         logger.info(f"✓ Serving panel: {panel_path} as {mime_type}")
         return send_file(panel_path, mimetype=mime_type)
@@ -100,7 +105,8 @@ def serve_panel_with_extension(display_name, panel_id, ext):
         logger.error(f"✗ Panel not found: {panel_path}")
         return f"Panel not found: {display_name}/{panel_id}.{ext}", 404
 
-@app.route('/api/displays')
+
+@app.route("/api/displays")
 def list_displays():
     """List all available displays (for debugging)"""
     if not DISPLAYS_DIR.exists():
@@ -111,23 +117,29 @@ def list_displays():
         if display_dir.is_dir():
             info_file = display_dir / "displayInfo.json"
             if info_file.exists():
-                displays.append({
-                    "name": display_dir.name,
-                    "path": str(display_dir.relative_to(OUTPUT_DIR))
-                })
+                displays.append(
+                    {
+                        "name": display_dir.name,
+                        "path": str(display_dir.relative_to(OUTPUT_DIR)),
+                    }
+                )
 
     return jsonify({"displays": displays, "count": len(displays)})
 
-@app.route('/api/health')
+
+@app.route("/api/health")
 def health_check():
     """Health check endpoint"""
-    return jsonify({
-        "status": "ok",
-        "output_dir": str(OUTPUT_DIR),
-        "displays_dir_exists": DISPLAYS_DIR.exists()
-    })
+    return jsonify(
+        {
+            "status": "ok",
+            "output_dir": str(OUTPUT_DIR),
+            "displays_dir_exists": DISPLAYS_DIR.exists(),
+        }
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("=" * 60)
     print("Trelliscope Panel Server")
     print("=" * 60)
@@ -144,8 +156,8 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(
-        host='0.0.0.0',
+        host="0.0.0.0",
         port=5001,
         debug=True,
-        use_reloader=False  # Disable reloader for background running
+        use_reloader=False,  # Disable reloader for background running
     )

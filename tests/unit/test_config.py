@@ -1,6 +1,7 @@
 """Unit tests for viewer configuration."""
 
 import pytest
+
 from trelliscope.config import ViewerConfig, merge_configs
 
 
@@ -27,7 +28,7 @@ class TestViewerConfigInit:
             theme="dark",
             show_info=False,
             panel_aspect=1.5,
-            custom_css=".panel { border: 1px solid red; }"
+            custom_css=".panel { border: 1px solid red; }",
         )
 
         assert config.theme == "dark"
@@ -75,10 +76,7 @@ class TestViewerConfigSort:
 
     def test_valid_initial_sort(self):
         """Test valid initial_sort configuration."""
-        sort_config = [
-            {"var": "value", "dir": "asc"},
-            {"var": "name", "dir": "desc"}
-        ]
+        sort_config = [{"var": "value", "dir": "asc"}, {"var": "name", "dir": "desc"}]
         config = ViewerConfig(initial_sort=sort_config)
 
         assert config.initial_sort == sort_config
@@ -118,13 +116,11 @@ class TestViewerConfigSort:
 
     def test_with_sort_multiple_times(self):
         """Test with_sort can be called multiple times."""
-        config = (ViewerConfig()
-                  .with_sort("value", "desc")
-                  .with_sort("name", "asc"))
+        config = ViewerConfig().with_sort("value", "desc").with_sort("name", "asc")
 
         assert config.initial_sort == [
             {"var": "value", "dir": "desc"},
-            {"var": "name", "dir": "asc"}
+            {"var": "name", "dir": "asc"},
         ]
 
     def test_with_sort_default_direction(self):
@@ -169,7 +165,7 @@ class TestViewerConfigToDict:
         config = ViewerConfig(
             panel_aspect=1.5,
             initial_sort=[{"var": "value", "dir": "asc"}],
-            custom_css=".panel { color: red; }"
+            custom_css=".panel { color: red; }",
         )
         result = config.to_dict()
 
@@ -180,8 +176,7 @@ class TestViewerConfigToDict:
     def test_to_dict_merges_config_options(self):
         """Test to_dict merges config_options into top level."""
         config = ViewerConfig(
-            theme="dark",
-            config_options={"debug": True, "custom_option": "value"}
+            theme="dark", config_options={"debug": True, "custom_option": "value"}
         )
         result = config.to_dict()
 
@@ -236,19 +231,23 @@ class TestViewerConfigMethods:
 
     def test_with_option_multiple_times(self):
         """Test with_option can be called multiple times."""
-        config = (ViewerConfig()
-                  .with_option("debug", True)
-                  .with_option("theme_variant", "cool"))
+        config = (
+            ViewerConfig()
+            .with_option("debug", True)
+            .with_option("theme_variant", "cool")
+        )
 
         assert config.config_options["debug"] is True
         assert config.config_options["theme_variant"] == "cool"
 
     def test_method_chaining(self):
         """Test method chaining works correctly."""
-        config = (ViewerConfig()
-                  .with_sort("value", "desc")
-                  .with_css(".panel { color: red; }")
-                  .with_option("debug", True))
+        config = (
+            ViewerConfig()
+            .with_sort("value", "desc")
+            .with_css(".panel { color: red; }")
+            .with_option("debug", True)
+        )
 
         assert config.initial_sort == [{"var": "value", "dir": "desc"}]
         assert config.custom_css == ".panel { color: red; }"
@@ -289,15 +288,8 @@ class TestMergeConfigs:
 
     def test_merge_override_takes_precedence(self):
         """Test override values take precedence."""
-        base = ViewerConfig(
-            theme="light",
-            show_info=True,
-            show_labels=True
-        )
-        override = {
-            "show_info": False,
-            "custom_option": "value"
-        }
+        base = ViewerConfig(theme="light", show_info=True, show_labels=True)
+        override = {"show_info": False, "custom_option": "value"}
         result = merge_configs(base, override)
 
         assert result["theme"] == "light"
@@ -307,10 +299,7 @@ class TestMergeConfigs:
 
     def test_merge_with_config_options(self):
         """Test merge includes config_options."""
-        base = ViewerConfig(
-            theme="dark",
-            config_options={"debug": True}
-        )
+        base = ViewerConfig(theme="dark", config_options={"debug": True})
         override = {"show_info": False}
         result = merge_configs(base, override)
 
@@ -342,31 +331,26 @@ class TestViewerConfigEdgeCases:
             show_info=False,
             show_labels=False,
             show_panel_count=True,
-            panel_aspect=16/9,
+            panel_aspect=16 / 9,
             initial_sort=[
                 {"var": "value", "dir": "desc"},
-                {"var": "name", "dir": "asc"}
+                {"var": "name", "dir": "asc"},
             ],
-            initial_filter=[
-                {"var": "value", "op": "gt", "value": 10}
-            ],
+            initial_filter=[{"var": "value", "op": "gt", "value": 10}],
             custom_css="""
                 .panel {
                     border: 2px solid blue;
                     margin: 10px;
                 }
             """,
-            config_options={
-                "debug": True,
-                "log_level": "info"
-            }
+            config_options={"debug": True, "log_level": "info"},
         )
 
         result = config.to_dict()
 
         assert result["theme"] == "auto"
         assert result["show_info"] is False
-        assert result["panel_aspect"] == pytest.approx(16/9)
+        assert result["panel_aspect"] == pytest.approx(16 / 9)
         assert len(result["initial_sort"]) == 2
         assert result["debug"] is True
         assert result["log_level"] == "info"

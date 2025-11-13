@@ -5,21 +5,22 @@ This module provides the primary interface for creating trelliscope displays
 from pandas DataFrames with visualization panels and metadata.
 """
 
-from typing import Optional, Union, List, Dict, Any
-from pathlib import Path
-import pandas as pd
 import hashlib
 import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from trelliscope.meta import MetaVariable
+import pandas as pd
+
 from trelliscope.inference import infer_meta_from_series
+from trelliscope.meta import MetaVariable
+from trelliscope.multi_display import create_multi_display_structure
 from trelliscope.serialization import (
     write_display_info,
-    write_metadata_json,
     write_metadata_js,
+    write_metadata_json,
 )
 from trelliscope.viewer_html import write_viewer_html
-from trelliscope.multi_display import create_multi_display_structure
 
 
 class Display:
@@ -148,8 +149,10 @@ class Display:
         self.panel_interface: Optional[Any] = None  # PanelInterface instance
 
         # Track output paths for viewer integration
-        self._output_path: Optional[Path] = None  # Display directory (for writing files)
-        self._root_path: Optional[Path] = None    # Root directory (for serving HTTP)
+        self._output_path: Optional[Path] = (
+            None  # Display directory (for writing files)
+        )
+        self._root_path: Optional[Path] = None  # Root directory (for serving HTTP)
 
         # Viewer configuration
         self.viewer_config: Optional[Any] = None
@@ -170,16 +173,13 @@ class Display:
             "name": self.name,
             "columns": list(self.data.columns),
             "shape": self.data.shape,
-            "first_row": (
-                self.data.iloc[0].to_dict() if len(self.data) > 0 else {}
-            ),
-            "last_row": (
-                self.data.iloc[-1].to_dict() if len(self.data) > 0 else {}
-            ),
+            "first_row": (self.data.iloc[0].to_dict() if len(self.data) > 0 else {}),
+            "last_row": (self.data.iloc[-1].to_dict() if len(self.data) > 0 else {}),
         }
 
         content = json.dumps(components, sort_keys=True, default=str)
-        return hashlib.md5(content.encode()).hexdigest()
+        # MD5 used for keysig generation, not security
+        return hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()
 
     def set_panel_column(self, column: str) -> "Display":
         """
@@ -254,9 +254,7 @@ class Display:
         if page < 1:
             raise ValueError(f"page must be >= 1, got {page}")
         if arrangement not in {"row", "col"}:
-            raise ValueError(
-                f"arrangement must be 'row' or 'col', got '{arrangement}'"
-            )
+            raise ValueError(f"arrangement must be 'row' or 'col', got '{arrangement}'")
         if nrow is not None and nrow < 1:
             raise ValueError(f"nrow must be >= 1 or None, got {nrow}")
 
@@ -320,9 +318,7 @@ class Display:
         return self
 
     def set_panel_interface(
-        self,
-        interface: Optional[Union[str, Any]] = None,
-        **kwargs
+        self, interface: Optional[Union[str, Any]] = None, **kwargs: Any
     ) -> "Display":
         """
         Configure how panels are loaded in the viewer.
@@ -331,8 +327,9 @@ class Display:
         ----------
         interface : PanelInterface, str, or None
             Panel interface configuration. Can be:
-            - PanelInterface instance (LocalPanelInterface, RESTPanelInterface, etc.)
-            - String type: "local", "rest", or "websocket" (creates interface with **kwargs)
+            - PanelInterface instance (LocalPanelInterface, etc.)
+            - String type: "local", "rest", or "websocket"
+              (creates interface with **kwargs)
             - None: Uses default LocalPanelInterface
         **kwargs
             Parameters passed to interface constructor if interface is a string.
@@ -369,9 +366,9 @@ class Display:
         >>> display.set_panel_interface("local", format="png")
         """
         from trelliscope.panel_interface import (
-            PanelInterface,
             LocalPanelInterface,
-            create_panel_interface
+            PanelInterface,
+            create_panel_interface,
         )
 
         if interface is None:
@@ -461,8 +458,7 @@ class Display:
         """
         if not isinstance(meta, MetaVariable):
             raise TypeError(
-                f"meta must be a MetaVariable instance, "
-                f"got {type(meta).__name__}"
+                f"meta must be a MetaVariable instance, " f"got {type(meta).__name__}"
             )
 
         # Validate that column exists in DataFrame
@@ -483,11 +479,7 @@ class Display:
         return self
 
     def add_meta_def(
-        self,
-        varname: str,
-        meta_type: str,
-        replace: bool = False,
-        **kwargs
+        self, varname: str, meta_type: str, replace: bool = False, **kwargs: Any
     ) -> "Display":
         """
         Define and add a meta variable inline using type and parameters.
@@ -519,13 +511,13 @@ class Display:
         >>> display.add_meta_def("value", "number", digits=3, log=True)
         """
         from trelliscope.meta import (
-            FactorMeta,
-            NumberMeta,
-            DateMeta,
-            TimeMeta,
             CurrencyMeta,
-            HrefMeta,
+            DateMeta,
+            FactorMeta,
             GraphMeta,
+            HrefMeta,
+            NumberMeta,
+            TimeMeta,
         )
 
         type_map = {
@@ -772,7 +764,7 @@ class Display:
                 output_path=output_path,
                 display_name=self.name,
                 description=self.description,
-                collection_name=f"{self.name} Collection"
+                collection_name=f"{self.name} Collection",
             )
             display_output_path = paths["display_dir"]
             root_path = paths["root"]
@@ -860,18 +852,16 @@ class Display:
             panel_id = str(idx)
 
             try:
-                panel_path = manager.save_panel(
-                    panel_obj,
-                    panels_dir,
-                    panel_id
-                )
+                panel_path = manager.save_panel(panel_obj, panels_dir, panel_id)
                 print(f"  Rendered panel {idx}: {panel_path.name}")
 
                 # Capture panel format from first rendered panel
                 if panel_format is None:
-                    panel_format = panel_path.suffix.lstrip('.')  # Remove leading dot
+                    panel_format = panel_path.suffix.lstrip(".")  # Remove leading dot
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                # Intentionally catch all exceptions to continue rendering
+                # remaining panels even if one fails
                 print(f"  Error rendering panel {idx}: {e}")
                 # Continue with remaining panels
                 continue
@@ -909,7 +899,7 @@ class Display:
 
         return csv_path
 
-    def set_viewer_config(self, config) -> "Display":
+    def set_viewer_config(self, config: Any) -> "Display":
         """Set viewer configuration for display.
 
         Configure viewer appearance and behavior including theme, initial sort/filter,
@@ -1051,13 +1041,14 @@ class Display:
         - Requires internet connection to load trelliscopejs-lib from CDN
         - Multiple displays can be viewed simultaneously on different ports
         """
+        import webbrowser
+
         from trelliscope.server import DisplayServer
         from trelliscope.viewer import generate_viewer_html, write_index_html
-        import webbrowser
 
         # Ensure display is written
         if self._output_path is None or force_write:
-            print(f"Writing display...")
+            print("Writing display...")
             self.write(force=force_write)
         else:
             # Check if output path still exists
@@ -1071,14 +1062,16 @@ class Display:
             config_dict = self.viewer_config.to_dict()
 
         html = generate_viewer_html(
-            display_name=self.name,
-            config=config_dict,
-            viewer_version=viewer_version
+            display_name=self.name, config=config_dict, viewer_version=viewer_version
         )
 
         # Write index.html to root directory (for multi-display structure)
         # Use root path if available, otherwise fallback to output_path parent
-        root_path = getattr(self, '_root_path', self._output_path.parent)
+        root_path = getattr(
+            self,
+            "_root_path",
+            self._output_path.parent if self._output_path is not None else Path.cwd(),
+        )
         index_path = root_path / "index.html"
         write_index_html(index_path, html)
 
@@ -1102,7 +1095,8 @@ class Display:
         if open_browser:
             try:
                 webbrowser.open(url)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                # Intentionally catch all exceptions - browser opening is non-critical
                 print(f"Could not open browser: {e}")
                 print(f"Please open manually: {url}")
 
@@ -1111,14 +1105,15 @@ class Display:
             print(f"Serving display at {url}")
             print("Press Ctrl+C to stop")
             try:
-                server.httpd.serve_forever()
+                if server.httpd is not None:
+                    server.httpd.serve_forever()
             except KeyboardInterrupt:
                 print("\nShutting down server...")
                 server.stop()
         else:
             print(f"Display available at: {url}")
             print("Server running in background")
-            print(f"Note: Server will stop when Python exits")
+            print("Note: Server will stop when Python exits")
 
         return url
 

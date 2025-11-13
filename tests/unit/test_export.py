@@ -1,9 +1,10 @@
 """Unit tests for export utilities."""
 
-import pytest
 import tempfile
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope import Display
 from trelliscope.export import (
@@ -120,7 +121,9 @@ class TestExportStatic:
 
             # Export with version
             output = Path(tmpdir) / "export"
-            export_static(display_dir, output, viewer_version="2.0.0", include_readme=False)
+            export_static(
+                display_dir, output, viewer_version="2.0.0", include_readme=False
+            )
 
             # Check version in HTML
             index = output / "index.html"
@@ -223,17 +226,14 @@ class TestExportStaticFromDisplay:
         """Test export from display writes display if not written."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create display (not written)
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
 
             # Export (should write automatically)
             output = Path(tmpdir) / "export"
-            result = export_static_from_display(
-                display,
-                output,
-                include_readme=False
-            )
+            result = export_static_from_display(display, output, include_readme=False)
 
             # Check display was written
             assert display._output_path is not None
@@ -248,18 +248,16 @@ class TestExportStaticFromDisplay:
         """Test export from already written display."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create and write display
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
             display.write(render_panels=False)
 
             # Export
             output = Path(tmpdir) / "export"
             result = export_static_from_display(
-                display,
-                output,
-                write_display=False,
-                include_readme=False
+                display, output, write_display=False, include_readme=False
             )
 
             assert result.exists()
@@ -269,18 +267,15 @@ class TestExportStaticFromDisplay:
         """Test export from unwritten display with write_display=False raises error."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create display (not written)
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
 
             # Try to export without writing
             output = Path(tmpdir) / "export"
             with pytest.raises(ValueError, match="has not been written"):
-                export_static_from_display(
-                    display,
-                    output,
-                    write_display=False
-                )
+                export_static_from_display(display, output, write_display=False)
 
     def test_export_from_display_invalid_type_raises_error(self):
         """Test export with non-Display object raises error."""
@@ -321,10 +316,10 @@ class TestValidateExport:
             # Validate
             report = validate_export(export_dir)
 
-            assert report['valid'] is True
-            assert len(report['missing_files']) == 0
-            assert report['display_name'] == 'my_display'
-            assert report['panel_count'] == 1
+            assert report["valid"] is True
+            assert len(report["missing_files"]) == 0
+            assert report["display_name"] == "my_display"
+            assert report["panel_count"] == 1
 
     def test_validate_missing_index_html(self):
         """Test validation catches missing index.html."""
@@ -340,8 +335,8 @@ class TestValidateExport:
 
             report = validate_export(export_dir)
 
-            assert report['valid'] is False
-            assert "index.html" in report['missing_files']
+            assert report["valid"] is False
+            assert "index.html" in report["missing_files"]
 
     def test_validate_missing_display_info(self):
         """Test validation catches missing displayInfo.json."""
@@ -357,8 +352,8 @@ class TestValidateExport:
 
             report = validate_export(export_dir)
 
-            assert report['valid'] is False
-            assert any("displayInfo.json" in f for f in report['missing_files'])
+            assert report["valid"] is False
+            assert any("displayInfo.json" in f for f in report["missing_files"])
 
     def test_validate_missing_metadata(self):
         """Test validation catches missing metadata.csv."""
@@ -374,8 +369,8 @@ class TestValidateExport:
 
             report = validate_export(export_dir)
 
-            assert report['valid'] is False
-            assert any("metadata.csv" in f for f in report['missing_files'])
+            assert report["valid"] is False
+            assert any("metadata.csv" in f for f in report["missing_files"])
 
     def test_validate_warns_missing_readme(self):
         """Test validation warns about missing README."""
@@ -392,12 +387,12 @@ class TestValidateExport:
             report = validate_export(export_dir)
 
             # Valid but with warning
-            assert report['valid'] is True
-            assert any("README" in w for w in report['warnings'])
+            assert report["valid"] is True
+            assert any("README" in w for w in report["warnings"])
 
     def test_validate_nonexistent_export(self):
         """Test validation of nonexistent directory."""
         report = validate_export("/nonexistent/path")
 
-        assert report['valid'] is False
-        assert len(report['missing_files']) > 0
+        assert report["valid"] is False
+        assert len(report["missing_files"]) > 0

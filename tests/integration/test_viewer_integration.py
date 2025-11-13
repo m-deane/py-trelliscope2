@@ -1,10 +1,11 @@
 """Integration tests for Display.view() and viewer functionality."""
 
-import pytest
 import tempfile
-import pandas as pd
 import time
 from pathlib import Path
+
+import pandas as pd
+import pytest
 
 matplotlib = pytest.importorskip("matplotlib")
 plt = pytest.importorskip("matplotlib.pyplot")
@@ -21,20 +22,20 @@ class TestDisplayView:
             # Create matplotlib figures
             def make_plot(i):
                 fig, ax = plt.subplots()
-                ax.plot([1, 2, 3], [i, i*2, i*3])
+                ax.plot([1, 2, 3], [i, i * 2, i * 3])
                 return fig
 
-            df = pd.DataFrame({
-                'plot': [make_plot(i) for i in range(3)],
-                'value': [10, 20, 30]
-            })
+            df = pd.DataFrame(
+                {"plot": [make_plot(i) for i in range(3)], "value": [10, 20, 30]}
+            )
 
             # Create display without writing
-            display = (Display(df, name="test_view", path=Path(tmpdir))
-                       .set_panel_column('plot'))
+            display = Display(df, name="test_view", path=Path(tmpdir)).set_panel_column(
+                "plot"
+            )
 
             # Clean up figures
-            for fig in df['plot']:
+            for fig in df["plot"]:
                 plt.close(fig)
 
             # view() should write the display
@@ -61,17 +62,17 @@ class TestDisplayView:
                 ax.plot([1, 2, 3])
                 return fig
 
-            df = pd.DataFrame({
-                'plot': [make_plot(i) for i in range(2)],
-                'value': [1, 2]
-            })
+            df = pd.DataFrame(
+                {"plot": [make_plot(i) for i in range(2)], "value": [1, 2]}
+            )
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('plot'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "plot"
+            )
             output_path = display.write()
 
             # Clean up figures
-            for fig in df['plot']:
+            for fig in df["plot"]:
                 plt.close(fig)
 
             # Get write time
@@ -82,7 +83,9 @@ class TestDisplayView:
             time.sleep(0.1)
 
             # view() should use existing display (not rewrite)
-            url = display.view(port=8021, open_browser=False, blocking=False, force_write=False)
+            url = display.view(
+                port=8021, open_browser=False, blocking=False, force_write=False
+            )
 
             # Verify file wasn't modified
             assert display_info_path.stat().st_mtime == write_time
@@ -100,17 +103,17 @@ class TestDisplayView:
                 ax.plot([1, 2, 3])
                 return fig
 
-            df = pd.DataFrame({
-                'plot': [make_plot(i) for i in range(2)],
-                'value': [1, 2]
-            })
+            df = pd.DataFrame(
+                {"plot": [make_plot(i) for i in range(2)], "value": [1, 2]}
+            )
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('plot'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "plot"
+            )
             output_path = display.write()
 
             # Clean up figures
-            for fig in df['plot']:
+            for fig in df["plot"]:
                 plt.close(fig)
 
             # Get write time
@@ -121,7 +124,9 @@ class TestDisplayView:
             time.sleep(0.2)
 
             # view() with force_write should rewrite
-            display.view(port=8022, open_browser=False, blocking=False, force_write=True)
+            display.view(
+                port=8022, open_browser=False, blocking=False, force_write=True
+            )
 
             # Verify file was modified
             assert display_info_path.stat().st_mtime > write_time
@@ -130,13 +135,11 @@ class TestDisplayView:
         """Test view() creates index.html with correct content."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create simple display
-            df = pd.DataFrame({
-                'panel': ['a', 'b'],
-                'value': [1, 2]
-            })
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
-            display = (Display(df, name="test_html", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            display = Display(df, name="test_html", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
             display.write(render_panels=False)
 
             # Call view
@@ -155,17 +158,17 @@ class TestDisplayView:
     def test_view_with_custom_viewer_version(self):
         """Test view() with custom viewer version."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                'panel': ['a'],
-                'value': [1]
-            })
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
             display.write(render_panels=False)
 
             # View with specific version
-            display.view(port=8024, open_browser=False, blocking=False, viewer_version="2.0.0")
+            display.view(
+                port=8024, open_browser=False, blocking=False, viewer_version="2.0.0"
+            )
 
             # Check index.html has version
             index_path = Path(tmpdir) / "index.html"
@@ -175,7 +178,7 @@ class TestDisplayView:
     def test_view_without_panel_column_raises_error(self):
         """Test view() without panel column raises error."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'value': [1, 2, 3]})
+            df = pd.DataFrame({"value": [1, 2, 3]})
 
             display = Display(df, name="test", path=Path(tmpdir))
 
@@ -186,13 +189,11 @@ class TestDisplayView:
     def test_view_returns_correct_url(self):
         """Test view() returns correct URL format."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                'panel': ['a'],
-                'value': [1]
-            })
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
 
             # Test URL format
             url = display.view(port=8032, open_browser=False, blocking=False)
@@ -208,13 +209,11 @@ class TestViewerIndexHTML:
     def test_index_html_in_parent_directory(self):
         """Test index.html is created in parent of display directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                'panel': ['a', 'b'],
-                'value': [1, 2]
-            })
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
-            display = (Display(df, name="my_display", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            display = Display(
+                df, name="my_display", path=Path(tmpdir)
+            ).set_panel_column("panel")
             display.write(render_panels=False)
 
             display.view(port=8027, open_browser=False, blocking=False)
@@ -230,13 +229,11 @@ class TestViewerIndexHTML:
     def test_index_html_references_correct_display(self):
         """Test index.html references correct display path."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                'panel': ['a'],
-                'value': [1]
-            })
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
-            display = (Display(df, name="my_display", path=Path(tmpdir))
-                       .set_panel_column('panel'))
+            display = Display(
+                df, name="my_display", path=Path(tmpdir)
+            ).set_panel_column("panel")
             display.write(render_panels=False)
 
             display.view(port=8028, open_browser=False, blocking=False)
@@ -258,21 +255,22 @@ class TestViewerWithPanels:
             # Create matplotlib figures
             def make_plot(i):
                 fig, ax = plt.subplots()
-                ax.plot([1, 2, 3], [i, i*2, i*3])
+                ax.plot([1, 2, 3], [i, i * 2, i * 3])
                 ax.set_title(f"Plot {i}")
                 return fig
 
-            df = pd.DataFrame({
-                'plot': [make_plot(i) for i in range(3)],
-                'category': ['A', 'B', 'C']
-            })
+            df = pd.DataFrame(
+                {"plot": [make_plot(i) for i in range(3)], "category": ["A", "B", "C"]}
+            )
 
-            display = (Display(df, name="plots", path=Path(tmpdir))
-                       .set_panel_column('plot')
-                       .infer_metas())
+            display = (
+                Display(df, name="plots", path=Path(tmpdir))
+                .set_panel_column("plot")
+                .infer_metas()
+            )
 
             # Clean up figures
-            for fig in df['plot']:
+            for fig in df["plot"]:
                 plt.close(fig)
 
             # View display
@@ -295,24 +293,28 @@ class TestViewerWithPanels:
             # Create display with method chaining
             def make_plot(i):
                 fig, ax = plt.subplots(figsize=(5, 4))
-                ax.plot([1, 2, 3, 4], [i, i*2, i*3, i*4], marker='o')
+                ax.plot([1, 2, 3, 4], [i, i * 2, i * 3, i * 4], marker="o")
                 ax.set_title(f"Category {chr(65+i)}")
                 return fig
 
-            df = pd.DataFrame({
-                'plot': [make_plot(i) for i in range(4)],
-                'category': ['A', 'B', 'C', 'D'],
-                'value': [10, 20, 30, 40]
-            })
+            df = pd.DataFrame(
+                {
+                    "plot": [make_plot(i) for i in range(4)],
+                    "category": ["A", "B", "C", "D"],
+                    "value": [10, 20, 30, 40],
+                }
+            )
 
             # Complete workflow with chaining
-            display = (Display(df, name="complete_test", path=Path(tmpdir))
-                       .set_panel_column('plot')
-                       .infer_metas()
-                       .set_default_layout(ncol=2, nrow=2))
+            display = (
+                Display(df, name="complete_test", path=Path(tmpdir))
+                .set_panel_column("plot")
+                .infer_metas()
+                .set_default_layout(ncol=2, nrow=2)
+            )
 
             # Clean up figures
-            for fig in df['plot']:
+            for fig in df["plot"]:
                 plt.close(fig)
 
             # View (this will write and start server)
@@ -333,4 +335,4 @@ class TestViewerWithPanels:
             assert "value" in metadata.columns
 
             # Clean up all figures
-            plt.close('all')
+            plt.close("all")

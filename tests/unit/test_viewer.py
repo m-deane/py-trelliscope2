@@ -1,15 +1,16 @@
 """Unit tests for viewer HTML generation."""
 
-import pytest
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from trelliscope.viewer import (
-    generate_viewer_html,
-    write_index_html,
-    generate_deployment_readme,
     _dict_to_js_object,
     _list_to_js_array,
+    generate_deployment_readme,
+    generate_viewer_html,
+    write_index_html,
 )
 
 

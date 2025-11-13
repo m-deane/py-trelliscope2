@@ -1,7 +1,7 @@
 """Panel manager for coordinating panel rendering adapters."""
 
 from pathlib import Path
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 from trelliscope.panels import PanelRenderer
 from trelliscope.panels.matplotlib_adapter import MatplotlibAdapter
@@ -33,7 +33,7 @@ class PanelManager:
         /tmp/plot1.png
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize PanelManager with default adapters.
 
         Default adapters (in order):
@@ -45,7 +45,7 @@ class PanelManager:
             PlotlyAdapter(),
         ]
 
-    def register_adapter(self, adapter: PanelRenderer, prepend: bool = True):
+    def register_adapter(self, adapter: PanelRenderer, prepend: bool = True) -> None:
         """Register a new adapter.
 
         Args:
@@ -84,9 +84,7 @@ class PanelManager:
             try:
                 obj = obj()
             except Exception as e:
-                raise ValueError(
-                    f"Failed to execute callable panel: {e}"
-                ) from e
+                raise ValueError(f"Failed to execute callable panel: {e}") from e
 
         # Try each adapter
         for adapter in self.adapters:
@@ -96,11 +94,7 @@ class PanelManager:
         return None
 
     def save_panel(
-        self,
-        obj: Any,
-        output_dir: Path,
-        panel_id: str,
-        **kwargs
+        self, obj: Any, output_dir: Path, panel_id: str, **kwargs: Any
     ) -> Path:
         """Save panel using the appropriate adapter.
 
@@ -153,7 +147,7 @@ class PanelManager:
             supported_types = [
                 "matplotlib.figure.Figure",
                 "plotly.graph_objects.Figure",
-                "callable returning one of the above"
+                "callable returning one of the above",
             ]
             raise ValueError(
                 f"No adapter found for panel '{panel_id}' of type '{obj_type}'. "
@@ -170,9 +164,7 @@ class PanelManager:
             saved_path = adapter.save(obj, panel_path, **kwargs)
             return saved_path
         except Exception as e:
-            raise Exception(
-                f"Failed to save panel '{panel_id}': {e}"
-            ) from e
+            raise RuntimeError(f"Failed to save panel '{panel_id}': {e}") from e
 
     def get_panel_interface(self) -> Dict[str, Any]:
         """Get panelInterface configuration based on most common adapter.
@@ -188,13 +180,7 @@ class PanelManager:
         """
         # Use first adapter as default
         if not self.adapters:
-            return {
-                "type": "panel_local",
-                "format": "png"
-            }
+            return {"type": "panel_local", "format": "png"}
 
         adapter = self.adapters[0]
-        return {
-            "type": adapter.get_interface_type(),
-            "format": adapter.get_format()
-        }
+        return {"type": adapter.get_interface_type(), "format": adapter.get_format()}

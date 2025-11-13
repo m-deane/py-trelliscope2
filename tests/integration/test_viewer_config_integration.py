@@ -1,9 +1,10 @@
 """Integration tests for viewer configuration with Display."""
 
-import pytest
 import tempfile
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope import Display
 from trelliscope.config import ViewerConfig
@@ -16,12 +17,14 @@ class TestDisplaySetViewerConfig:
     def test_set_config_with_viewer_config_object(self):
         """Test setting config with ViewerConfig object."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
             config = ViewerConfig(theme="dark", show_info=False)
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
             assert display.viewer_config is config
             assert display.viewer_config.theme == "dark"
@@ -30,11 +33,13 @@ class TestDisplaySetViewerConfig:
     def test_set_config_with_dict(self):
         """Test setting config with dictionary."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config({"theme": "dark", "show_labels": False}))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config({"theme": "dark", "show_labels": False})
+            )
 
             assert isinstance(display.viewer_config, ViewerConfig)
             assert display.viewer_config.theme == "dark"
@@ -43,7 +48,7 @@ class TestDisplaySetViewerConfig:
     def test_set_config_with_invalid_type_raises_error(self):
         """Test setting config with invalid type raises TypeError."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
             display = Display(df, name="test", path=Path(tmpdir))
 
             with pytest.raises(TypeError, match="config must be ViewerConfig or dict"):
@@ -52,11 +57,13 @@ class TestDisplaySetViewerConfig:
     def test_set_config_method_chaining(self):
         """Test set_viewer_config works in method chain."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
-            display = (Display(df, name="test", path=Path(tmpdir), description="Test display")
-                      .set_panel_column('panel')
-                      .set_viewer_config(ViewerConfig.dark_theme()))
+            display = (
+                Display(df, name="test", path=Path(tmpdir), description="Test display")
+                .set_panel_column("panel")
+                .set_viewer_config(ViewerConfig.dark_theme())
+            )
 
             assert display.viewer_config.theme == "dark"
             assert display.description == "Test display"
@@ -64,39 +71,48 @@ class TestDisplaySetViewerConfig:
     def test_set_config_with_preset(self):
         """Test setting config with preset configurations."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
             # Dark theme preset
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_viewer_config(ViewerConfig.dark_theme()))
+            display = Display(df, name="test", path=Path(tmpdir)).set_viewer_config(
+                ViewerConfig.dark_theme()
+            )
             assert display.viewer_config.theme == "dark"
 
             # Light theme preset
-            display = (Display(df, name="test2", path=Path(tmpdir))
-                      .set_viewer_config(ViewerConfig.light_theme()))
+            display = Display(df, name="test2", path=Path(tmpdir)).set_viewer_config(
+                ViewerConfig.light_theme()
+            )
             assert display.viewer_config.theme == "light"
 
             # Minimal preset
-            display = (Display(df, name="test3", path=Path(tmpdir))
-                      .set_viewer_config(ViewerConfig.minimal()))
+            display = Display(df, name="test3", path=Path(tmpdir)).set_viewer_config(
+                ViewerConfig.minimal()
+            )
             assert display.viewer_config.show_info is False
             assert display.viewer_config.show_labels is False
 
     def test_set_config_with_chained_methods(self):
         """Test setting config with chained configuration methods."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
-            config = (ViewerConfig()
-                     .with_sort("value", "desc")
-                     .with_css(".panel { border: 1px solid red; }")
-                     .with_option("debug", True))
+            config = (
+                ViewerConfig()
+                .with_sort("value", "desc")
+                .with_css(".panel { border: 1px solid red; }")
+                .with_option("debug", True)
+            )
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
-            assert display.viewer_config.initial_sort == [{"var": "value", "dir": "desc"}]
+            assert display.viewer_config.initial_sort == [
+                {"var": "value", "dir": "desc"}
+            ]
             assert ".panel" in display.viewer_config.custom_css
             assert display.viewer_config.config_options["debug"] is True
 
@@ -107,20 +123,21 @@ class TestDisplayViewWithConfig:
     def test_view_uses_viewer_config(self):
         """Test view() uses viewer_config when set."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
             config = ViewerConfig(theme="dark", show_info=False)
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
             # Write display
             display.write(render_panels=False)
 
             # Generate HTML (view() does this internally)
             html = generate_viewer_html(
-                display_name=display.name,
-                config=config.to_dict()
+                display_name=display.name, config=config.to_dict()
             )
 
             # Check HTML includes config options
@@ -129,10 +146,11 @@ class TestDisplayViewWithConfig:
     def test_view_without_config_uses_defaults(self):
         """Test view() works without config set."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
 
             # Write display
             display.write(render_panels=False)
@@ -144,23 +162,22 @@ class TestDisplayViewWithConfig:
     def test_view_with_custom_css_in_config(self):
         """Test view() with custom CSS in config."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
             custom_css = ".panel { border: 2px solid blue; }"
             config = ViewerConfig().with_css(custom_css)
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
             display.write(render_panels=False)
 
             # Generate HTML
             config_dict = config.to_dict()
-            html = generate_viewer_html(
-                display_name=display.name,
-                config=config_dict
-            )
+            html = generate_viewer_html(display_name=display.name, config=config_dict)
 
             # Check custom CSS is in HTML
             assert custom_css in html
@@ -168,17 +185,21 @@ class TestDisplayViewWithConfig:
     def test_view_with_initial_sort_in_config(self):
         """Test view() with initial sort in config."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a', 'b'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["a", "b"], "value": [1, 2]})
 
             config = ViewerConfig().with_sort("value", "desc")
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="test", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
             display.write(render_panels=False)
 
             # Config should be available
-            assert display.viewer_config.initial_sort == [{"var": "value", "dir": "desc"}]
+            assert display.viewer_config.initial_sort == [
+                {"var": "value", "dir": "desc"}
+            ]
 
 
 class TestGenerateViewerHtmlWithConfig:
@@ -201,9 +222,7 @@ class TestGenerateViewerHtmlWithConfig:
 
     def test_generate_html_with_custom_css(self):
         """Test generating HTML with custom CSS."""
-        config = {
-            "custom_css": ".panel { border: 2px solid red; }"
-        }
+        config = {"custom_css": ".panel { border: 2px solid red; }"}
         html = generate_viewer_html("test_display", config=config)
 
         assert ".panel { border: 2px solid red; }" in html
@@ -211,10 +230,7 @@ class TestGenerateViewerHtmlWithConfig:
 
     def test_generate_html_custom_css_not_in_viewer_config(self):
         """Test custom_css is extracted and not passed to viewer."""
-        config = {
-            "theme": "dark",
-            "custom_css": ".panel { color: blue; }"
-        }
+        config = {"theme": "dark", "custom_css": ".panel { color: blue; }"}
         html = generate_viewer_html("test_display", config=config)
 
         # Custom CSS should be in style section
@@ -233,11 +249,7 @@ class TestGenerateViewerHtmlWithConfig:
 
     def test_generate_html_with_config_options(self):
         """Test generating HTML with config options."""
-        config = {
-            "theme": "dark",
-            "show_info": False,
-            "panel_aspect": 1.5
-        }
+        config = {"theme": "dark", "show_info": False, "panel_aspect": 1.5}
         html = generate_viewer_html("test_display", config=config)
 
         # Should generate valid HTML
@@ -252,15 +264,24 @@ class TestEndToEndConfigWorkflow:
         """Test complete workflow with dark theme configuration."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create display with dark theme
-            df = pd.DataFrame({
-                'panel': ['plot1', 'plot2', 'plot3'],
-                'value': [10, 20, 30],
-                'category': ['A', 'B', 'A']
-            })
+            df = pd.DataFrame(
+                {
+                    "panel": ["plot1", "plot2", "plot3"],
+                    "value": [10, 20, 30],
+                    "category": ["A", "B", "A"],
+                }
+            )
 
-            display = (Display(df, name="test_display", path=Path(tmpdir), description="Test display with dark theme")
-                      .set_panel_column('panel')
-                      .set_viewer_config(ViewerConfig.dark_theme()))
+            display = (
+                Display(
+                    df,
+                    name="test_display",
+                    path=Path(tmpdir),
+                    description="Test display with dark theme",
+                )
+                .set_panel_column("panel")
+                .set_viewer_config(ViewerConfig.dark_theme())
+            )
 
             # Write display
             display.write(render_panels=False)
@@ -275,42 +296,49 @@ class TestEndToEndConfigWorkflow:
     def test_complete_workflow_with_custom_config(self):
         """Test complete workflow with custom configuration."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                'panel': ['a', 'b', 'c'],
-                'value': [1, 2, 3]
-            })
+            df = pd.DataFrame({"panel": ["a", "b", "c"], "value": [1, 2, 3]})
 
             # Create custom config
-            config = (ViewerConfig()
-                     .with_sort("value", "desc")
-                     .with_css("""
+            config = (
+                ViewerConfig()
+                .with_sort("value", "desc")
+                .with_css(
+                    """
                         .panel {
                             border: 2px solid blue;
                             border-radius: 8px;
                         }
-                     """)
-                     .with_option("debug", True))
+                     """
+                )
+                .with_option("debug", True)
+            )
 
-            display = (Display(df, name="custom_display", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(config))
+            display = (
+                Display(df, name="custom_display", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(config)
+            )
 
             # Write display
             display.write(render_panels=False)
 
             # Verify all config options were set
-            assert display.viewer_config.initial_sort == [{"var": "value", "dir": "desc"}]
+            assert display.viewer_config.initial_sort == [
+                {"var": "value", "dir": "desc"}
+            ]
             assert "border: 2px solid blue" in display.viewer_config.custom_css
             assert display.viewer_config.config_options["debug"] is True
 
     def test_workflow_with_minimal_preset(self):
         """Test workflow with minimal preset configuration."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['x', 'y'], 'value': [1, 2]})
+            df = pd.DataFrame({"panel": ["x", "y"], "value": [1, 2]})
 
-            display = (Display(df, name="minimal", path=Path(tmpdir))
-                      .set_panel_column('panel')
-                      .set_viewer_config(ViewerConfig.minimal()))
+            display = (
+                Display(df, name="minimal", path=Path(tmpdir))
+                .set_panel_column("panel")
+                .set_viewer_config(ViewerConfig.minimal())
+            )
 
             # Write display
             display.write(render_panels=False)
@@ -322,10 +350,11 @@ class TestEndToEndConfigWorkflow:
     def test_workflow_updating_config(self):
         """Test workflow where config is updated multiple times."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({'panel': ['a'], 'value': [1]})
+            df = pd.DataFrame({"panel": ["a"], "value": [1]})
 
-            display = (Display(df, name="test", path=Path(tmpdir))
-                      .set_panel_column('panel'))
+            display = Display(df, name="test", path=Path(tmpdir)).set_panel_column(
+                "panel"
+            )
 
             # Set initial config
             display.set_viewer_config(ViewerConfig.light_theme())

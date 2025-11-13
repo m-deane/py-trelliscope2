@@ -4,19 +4,20 @@ Unit tests for JSON serialization.
 Tests cover serialization of Display objects to displayInfo.json format.
 """
 
-import pytest
-import pandas as pd
 import json
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope.display import Display
 from trelliscope.serialization import (
     serialize_display_info,
-    write_display_info,
     serialize_to_json_string,
     validate_display_info,
+    write_display_info,
 )
 
 
@@ -40,10 +41,7 @@ class TestSerializeDisplayInfo:
 
     def test_serialize_includes_all_metas(self):
         """Test that all meta variables are serialized."""
-        df = pd.DataFrame({
-            "category": ["A", "B", "C"],
-            "value": [1.5, 2.7, 3.9]
-        })
+        df = pd.DataFrame({"category": ["A", "B", "C"], "value": [1.5, 2.7, 3.9]})
         display = Display(df, name="test")
         display.infer_metas()
 
@@ -55,11 +53,7 @@ class TestSerializeDisplayInfo:
 
     def test_serialize_metas_are_sorted(self):
         """Test that metas are sorted by varname."""
-        df = pd.DataFrame({
-            "z_col": [1],
-            "a_col": [2],
-            "m_col": [3]
-        })
+        df = pd.DataFrame({"z_col": [1], "a_col": [2], "m_col": [3]})
         display = Display(df, name="test")
         display.infer_metas()
 
@@ -302,7 +296,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [],
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -315,7 +309,7 @@ class TestValidateDisplayInfo:
             "name": "test",
             "description": "test",
             "keysig": "abc123",
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -329,7 +323,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [],
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -343,7 +337,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [],
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -357,7 +351,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": "not a list",
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -371,7 +365,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [{"type": "number"}],  # Missing varname
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -385,7 +379,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [{"varname": "value"}],  # Missing type
-            "state": {"layout": {}, "labels": [], "sort": [], "filter": []}
+            "state": {"layout": {}, "labels": [], "sort": [], "filter": []},
         }
         errors = validate_display_info(info)
 
@@ -399,7 +393,7 @@ class TestValidateDisplayInfo:
             "description": "test",
             "keysig": "abc123",
             "metas": [],
-            "state": {"layout": {}}  # Missing labels, sort, filter
+            "state": {"layout": {}},  # Missing labels, sort, filter
         }
         errors = validate_display_info(info)
 

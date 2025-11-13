@@ -1,7 +1,7 @@
 """HTML generation utilities for trelliscope viewer."""
 
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 
 def generate_viewer_html(
@@ -52,9 +52,13 @@ def generate_viewer_html(
     if viewer_version == "latest":
         viewer_version = "0.7.16"  # Use known working version instead of "latest"
 
-    css_url = f"https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.css"
+    css_url = (
+        f"https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.css"
+    )
     # Use unpkg.com - the official CDN for npm packages
-    js_url = f"https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.js"
+    js_url = (
+        f"https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.js"
+    )
 
     # Build config object (R API uses: trelliscopeApp(id, config))
     # The element ID is passed as first parameter, not in config
@@ -71,9 +75,6 @@ def generate_viewer_html(
     # Merge custom config if provided
     if config:
         config_dict.update(config)
-
-    # Convert config to JavaScript object notation
-    config_js = _dict_to_js_object(config_dict)
 
     # Element ID for initialization
     element_id = "trelliscope-root"
@@ -94,7 +95,8 @@ def generate_viewer_html(
         body {{
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, sans-serif;
         }}
         #trelliscope-root {{
             width: 100vw;

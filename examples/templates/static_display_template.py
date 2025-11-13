@@ -18,9 +18,11 @@ Requirements:
 - trelliscope
 """
 
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
 from trelliscope import Display
 
 # ============================================================================
@@ -44,6 +46,7 @@ LABEL_COLUMNS = ["category", "value"]
 # ============================================================================
 # Replace this section with your actual data loading/generation
 
+
 def generate_data() -> pd.DataFrame:
     """
     Generate or load your data here.
@@ -54,16 +57,18 @@ def generate_data() -> pd.DataFrame:
     Returns:
         DataFrame with one row per panel plus cognostic columns
     """
-    data = pd.DataFrame({
-        'id': range(10),
-        'value': [10, 25, 15, 30, 20, 18, 22, 28, 12, 16],
-        'category': ['A', 'B', 'C', 'D', 'E', 'A', 'B', 'C', 'D', 'E'],
-        # Add more cognostic columns as needed
-        # Examples:
-        # 'date': pd.date_range('2024-01-01', periods=10),
-        # 'region': ['North', 'South', ...],
-        # 'score': [0.85, 0.92, ...],
-    })
+    data = pd.DataFrame(
+        {
+            "id": range(10),
+            "value": [10, 25, 15, 30, 20, 18, 22, 28, 12, 16],
+            "category": ["A", "B", "C", "D", "E", "A", "B", "C", "D", "E"],
+            # Add more cognostic columns as needed
+            # Examples:
+            # 'date': pd.date_range('2024-01-01', periods=10),
+            # 'region': ['North', 'South', ...],
+            # 'score': [0.85, 0.92, ...],
+        }
+    )
     return data
 
 
@@ -71,6 +76,7 @@ def generate_data() -> pd.DataFrame:
 # 2. PANEL GENERATION
 # ============================================================================
 # Customize this function to create your visualizations
+
 
 def create_panel(row: pd.Series, panel_dir: Path, panel_id: int) -> str:
     """
@@ -90,10 +96,10 @@ def create_panel(row: pd.Series, panel_dir: Path, panel_id: int) -> str:
     fig, ax = plt.subplots(figsize=(5, 5))
 
     # Example visualization - replace with your plotting logic
-    ax.bar([row['category']], [row['value']], color='steelblue')
-    ax.set_ylabel('Value', fontsize=12)
-    ax.set_title(f"{row['category']}: {row['value']}", fontsize=14, fontweight='bold')
-    ax.set_ylim(0, max(row['value'] + 10, 35))
+    ax.bar([row["category"]], [row["value"]], color="steelblue")
+    ax.set_ylabel("Value", fontsize=12)
+    ax.set_title(f"{row['category']}: {row['value']}", fontsize=14, fontweight="bold")
+    ax.set_ylim(0, max(row["value"] + 10, 35))
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
@@ -101,7 +107,7 @@ def create_panel(row: pd.Series, panel_dir: Path, panel_id: int) -> str:
     # Save panel
     panel_filename = f"panel_{panel_id}.png"
     panel_path = panel_dir / panel_filename
-    fig.savefig(panel_path, dpi=100, bbox_inches='tight')
+    fig.savefig(panel_path, dpi=100, bbox_inches="tight")
     plt.close(fig)
 
     return panel_filename
@@ -110,6 +116,7 @@ def create_panel(row: pd.Series, panel_dir: Path, panel_id: int) -> str:
 # ============================================================================
 # 3. GENERATE PANELS
 # ============================================================================
+
 
 def generate_panels(data: pd.DataFrame, output_path: Path) -> pd.DataFrame:
     """
@@ -148,6 +155,7 @@ def generate_panels(data: pd.DataFrame, output_path: Path) -> pd.DataFrame:
 # 4. CREATE DISPLAY
 # ============================================================================
 
+
 def create_display(data: pd.DataFrame, output_path: Path) -> Display:
     """
     Create trelliscope Display object.
@@ -163,11 +171,13 @@ def create_display(data: pd.DataFrame, output_path: Path) -> Display:
 
     # Create display WITHOUT setting panel_interface
     # This defaults to local file-based panels (Approach 2)
-    display = (Display(data, name=DISPLAY_NAME, description=DISPLAY_DESCRIPTION)
+    display = (
+        Display(data, name=DISPLAY_NAME, description=DISPLAY_DESCRIPTION)
         .set_panel_column(PANEL_COLUMN_NAME)
         .infer_metas()  # Auto-detect cognostic types from DataFrame
         .set_default_layout(ncol=NCOL, nrow=NROW)
-        .set_default_labels(LABEL_COLUMNS))
+        .set_default_labels(LABEL_COLUMNS)
+    )
 
     # Optional: Add custom meta variable descriptions
     # display.update_meta(
@@ -183,6 +193,7 @@ def create_display(data: pd.DataFrame, output_path: Path) -> Display:
 # 5. CREATE HTML VIEWER
 # ============================================================================
 
+
 def create_viewer_html(output_path: Path) -> None:
     """
     Create HTML viewer file.
@@ -190,7 +201,7 @@ def create_viewer_html(output_path: Path) -> None:
     Args:
         output_path: Output directory path
     """
-    viewer_html = f'''<!DOCTYPE html>
+    viewer_html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -228,10 +239,10 @@ def create_viewer_html(output_path: Path) -> None:
     </script>
 </body>
 </html>
-'''
+"""
 
     viewer_path = output_path.parent / f"{DISPLAY_NAME}_viewer.html"
-    with open(viewer_path, 'w') as f:
+    with open(viewer_path, "w") as f:
         f.write(viewer_html)
 
     print(f"✓ Viewer HTML created: {viewer_path}")
@@ -240,6 +251,7 @@ def create_viewer_html(output_path: Path) -> None:
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
+
 
 def main():
     """Main execution function."""
