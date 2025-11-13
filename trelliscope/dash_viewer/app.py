@@ -15,6 +15,7 @@ import dash_bootstrap_components as dbc
 from trelliscope.dash_viewer.loader import DisplayLoader
 from trelliscope.dash_viewer.state import DisplayState
 from trelliscope.dash_viewer.components.filters import create_filter_panel
+from trelliscope.dash_viewer.components.sorts import create_sort_panel, update_sort_panel_state
 from trelliscope.dash_viewer.components.controls import create_control_bar, create_header
 from trelliscope.dash_viewer.components.layout import create_panel_grid
 
@@ -109,8 +110,9 @@ class DashViewer:
 
     def _create_layout(self) -> html.Div:
         """Create main application layout."""
-        # Get filterable metas
+        # Get filterable and sortable metas
         filterable_metas = self.loader.get_filterable_metas()
+        sortable_metas = self.loader.get_sortable_metas()
 
         # Create initial panel grid
         filtered_data = self.state.filter_data(self.cog_data)
@@ -125,6 +127,7 @@ class DashViewer:
                 # Store components for state
                 dcc.Store(id='filtered-data-store', data=filtered_data.to_dict('records')),
                 dcc.Store(id='current-page-store', data=self.state.current_page),
+                dcc.Store(id='active-sorts-store', data=self.state.active_sorts),
 
                 # Header
                 create_header(self.display_info),
@@ -132,9 +135,20 @@ class DashViewer:
                 # Main container
                 dbc.Row(
                     [
-                        # Left sidebar: Filters
+                        # Left sidebar: Filters + Sorts
                         dbc.Col(
-                            create_filter_panel(filterable_metas, self.cog_data),
+                            html.Div(
+                                [
+                                    create_filter_panel(filterable_metas, self.cog_data),
+                                    create_sort_panel(sortable_metas, self.state.active_sorts)
+                                ],
+                                style={
+                                    'height': '100vh',
+                                    'overflowY': 'auto',
+                                    'backgroundColor': '#f8f9fa',
+                                    'borderRight': '1px solid #dee2e6'
+                                }
+                            ),
                             width=2,
                             style={'padding': 0}
                         ),
@@ -178,7 +192,7 @@ class DashViewer:
     def _register_callbacks(self, app: dash.Dash):
         """Register all Dash callbacks."""
 
-        # Callback: Update filtered data and panel grid when filters change
+        # Callback: Update filtered data and panel grid when filters or sorts change
         @app.callback(
             [
                 Output('filtered-data-store', 'data'),
@@ -186,7 +200,9 @@ class DashViewer:
                 Output('panel-count', 'children'),
                 Output('page-info', 'children'),
                 Output('prev-page-btn', 'disabled'),
-                Output('next-page-btn', 'disabled')
+                Output('next-page-btn', 'disabled'),
+                Output('active-sorts-list', 'children'),
+                Output('clear-sorts-btn', 'disabled')
             ],
             [
                 Input({'type': 'filter', 'varname': ALL}, 'value'),
@@ -194,18 +210,30 @@ class DashViewer:
                 Input('prev-page-btn', 'n_clicks'),
                 Input('next-page-btn', 'n_clicks'),
                 Input('ncol-select', 'value'),
-                Input('nrow-select', 'value')
+                Input('nrow-select', 'value'),
+                Input('add-sort-select', 'value'),
+                Input({'type': 'sort-asc', 'varname': ALL}, 'n_clicks'),
+                Input({'type': 'sort-desc', 'varname': ALL}, 'n_clicks'),
+                Input({'type': 'sort-remove', 'varname': ALL}, 'n_clicks'),
+                Input('clear-sorts-btn', 'n_clicks')
             ],
             [
                 State({'type': 'filter', 'varname': ALL}, 'id'),
+                State({'type': 'sort-asc', 'varname': ALL}, 'id'),
+                State({'type': 'sort-desc', 'varname': ALL}, 'id'),
+                State({'type': 'sort-remove', 'varname': ALL}, 'id'),
                 State('current-page-store', 'data')
             ],
             prevent_initial_call=False
         )
         def update_display(
-            filter_values, clear_clicks, prev_clicks, next_clicks,
+            filter_values, clear_filters_clicks, prev_clicks, next_clicks,
             ncol, nrow,
-            filter_ids, current_page
+            add_sort_value,
+            sort_asc_clicks, sort_desc_clicks, sort_remove_clicks,
+            clear_sorts_clicks,
+            filter_ids, sort_asc_ids, sort_desc_ids, sort_remove_ids,
+            current_page
         ):
             # Determine what triggered the callback
             triggered_id = ctx.triggered_id
@@ -230,6 +258,22 @@ class DashViewer:
                 for filter_id, value in zip(filter_ids, filter_values):
                     varname = filter_id['varname']
                     self.state.set_filter(varname, value)
+
+            # Handle sorting actions
+            if triggered_id == 'add-sort-select' and add_sort_value:
+                # Add new sort (ascending by default)
+                self.state.set_sort(add_sort_value, 'asc')
+            elif triggered_id == 'clear-sorts-btn':
+                # Clear all sorts
+                self.state.clear_sorts()
+            elif isinstance(triggered_id, dict):
+                # Handle sort button clicks
+                if triggered_id['type'] == 'sort-asc':
+                    self.state.set_sort(triggered_id['varname'], 'asc')
+                elif triggered_id['type'] == 'sort-desc':
+                    self.state.set_sort(triggered_id['varname'], 'desc')
+                elif triggered_id['type'] == 'sort-remove':
+                    self.state.remove_sort(triggered_id['varname'])
 
             # Apply filters and sorts
             filtered_data = self.state.filter_data(self.cog_data)
@@ -266,13 +310,22 @@ class DashViewer:
             prev_disabled = self.state.current_page <= 1
             next_disabled = self.state.current_page >= total_pages or total_pages == 0
 
+            # Update sort panel
+            sortable_metas = self.loader.get_sortable_metas()
+            active_sorts_list, clear_sorts_disabled = update_sort_panel_state(
+                sortable_metas,
+                self.state.active_sorts
+            )
+
             return (
                 filtered_data.to_dict('records'),
                 panel_grid,
                 panel_count_text,
                 page_info_text,
                 prev_disabled,
-                next_disabled
+                next_disabled,
+                active_sorts_list,
+                clear_sorts_disabled
             )
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
