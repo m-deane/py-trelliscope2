@@ -14,7 +14,22 @@ setup(
     install_requires=requirements,
     extras_require={
         "viz": ["matplotlib>=3.0", "plotly>=5.0"],
-        "all": ["matplotlib>=3.0", "plotly>=5.0"],
+        "dash": [
+            "dash>=2.18.0",
+            "dash-bootstrap-components>=1.6.0",
+        ],
+        "jupyter": [
+            "dash>=2.18.0",
+            "dash-bootstrap-components>=1.6.0",
+            "jupyter-dash>=0.4.2",
+        ],
+        "all": [
+            "matplotlib>=3.0",
+            "plotly>=5.0",
+            "dash>=2.18.0",
+            "dash-bootstrap-components>=1.6.0",
+            "jupyter-dash>=0.4.2",
+        ],
     },
     python_requires=">=3.8",
     classifiers=[

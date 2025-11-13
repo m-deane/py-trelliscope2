@@ -1122,6 +1122,134 @@ class Display:
 
         return url
 
+    def show_interactive(
+        self,
+        mode: str = "external",
+        port: int = 8050,
+        debug: bool = False,
+        force_write: bool = False,
+        **kwargs
+    ):
+        """
+        Launch interactive Plotly Dash viewer for this display.
+
+        Creates an interactive Python-based viewer using Plotly Dash that can be
+        launched from Jupyter notebooks or as a standalone web application. Provides
+        native Python controls for filtering, sorting, and layout customization.
+
+        Parameters
+        ----------
+        mode : str, default="external"
+            Display mode:
+            - "external": Open in external browser (default)
+            - "inline": Embed in Jupyter notebook (requires jupyter-dash)
+            - "jupyterlab": JupyterLab mode (requires jupyter-dash)
+        port : int, default=8050
+            Port number for the Dash server.
+        debug : bool, default=False
+            Enable Dash debug mode with hot reloading.
+        force_write : bool, default=False
+            If True, force rewriting the display even if it exists.
+            If False, only write if not already written.
+        **kwargs
+            Additional arguments passed to DashViewer.
+
+        Returns
+        -------
+        DashViewer or None
+            DashViewer instance if mode="external", None if mode="inline" or "jupyterlab"
+
+        Raises
+        ------
+        ValueError
+            If panel_column is not set.
+        ImportError
+            If dash, dash-bootstrap-components, or jupyter-dash (for inline/jupyterlab modes)
+            are not installed.
+
+        Examples
+        --------
+        >>> import pandas as pd
+        >>> from trelliscope import Display
+        >>>
+        >>> # Create display
+        >>> df = pd.DataFrame({
+        ...     'plot': [fig1, fig2, fig3],
+        ...     'category': ['A', 'B', 'C'],
+        ...     'value': [10, 20, 30]
+        ... })
+        >>> display = (Display(df, name="my_display")
+        ...     .set_panel_column("plot")
+        ...     .infer_metas())
+        >>>
+        >>> # Launch in external browser
+        >>> display.show_interactive()
+        🚀 Dash viewer starting on http://localhost:8050
+        📊 Display: my_display
+        📈 Panels: 3
+        ✨ Opening browser...
+        >>>
+        >>> # Embed in Jupyter notebook (for interactive work)
+        >>> display.show_interactive(mode="inline")
+        >>>
+        >>> # JupyterLab mode
+        >>> display.show_interactive(mode="jupyterlab")
+        >>>
+        >>> # Custom port
+        >>> display.show_interactive(port=8888)
+
+        Notes
+        -----
+        - Requires: dash >= 2.18.0, dash-bootstrap-components >= 1.6.0
+        - For Jupyter integration: jupyter-dash >= 0.4.2
+        - Interactive features include:
+          * Multi-type filters (factor, number, date, etc.)
+          * Multi-column sorting
+          * Dynamic grid layout (adjustable columns/rows)
+          * Pagination controls
+          * Panel labels
+        - Unlike view(), this creates a native Python Dash app instead of serving
+          static HTML files
+        - Plotly panels are rendered natively (no iframes) for better performance
+        - Use view() for traditional HTML viewer with trelliscopejs-lib
+
+        See Also
+        --------
+        view : Launch traditional HTML viewer
+        write : Write display files to disk
+        """
+        try:
+            from trelliscope.dash_viewer import DashViewer
+        except ImportError as e:
+            raise ImportError(
+                "Dash viewer requires additional dependencies. Install with:\n"
+                "  pip install dash dash-bootstrap-components\n"
+                "For Jupyter support also install:\n"
+                "  pip install jupyter-dash"
+            ) from e
+
+        # Ensure display is written
+        if self._output_path is None or force_write:
+            print(f"Writing display...")
+            self.write(force=force_write)
+        else:
+            # Check if output path still exists
+            if not self._output_path.exists():
+                print(f"Display not found at {self._output_path}, writing...")
+                self.write(force=True)
+
+        # Create and run viewer
+        viewer = DashViewer(
+            display_path=self._output_path,
+            mode=mode,
+            debug=debug,
+            **kwargs
+        )
+
+        viewer.run(port=port)
+
+        return viewer if mode == "external" else None
+
     def __repr__(self) -> str:
         """Return string representation of Display."""
         n_panels = len(self.data)

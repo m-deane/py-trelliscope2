@@ -1,0 +1,96 @@
+/* Trelliscope Dash Viewer Custom Styles */
+
+/* Panel Grid */
+.panel-container {
+    transition: box-shadow 0.2s ease;
+}
+
+.panel-container:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.panel-content {
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-content img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.panel-labels {
+    min-height: 40px;
+}
+
+.panel-label {
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Filter Panel */
+#filter-panel {
+    position: sticky;
+    top: 0;
+}
+
+#filter-panel .card {
+    margin-bottom: 12px;
+}
+
+#filter-panel .card-header {
+    background-color: white;
+    border-bottom: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
+
+#filter-panel .card-body {
+    padding: 12px;
+}
+
+/* Control Bar */
+.btn-group {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar Styling */
+#filter-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+#filter-panel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#filter-panel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#filter-panel::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .panel-container {
+        margin-bottom: 15px;
+    }
+}
+
+/* Loading state */
+.dash-graph {
+    min-height: 400px;
+}
+
+/* Dropdown styling */
+.Select-control {
+    font-size: 13px;
+}
+
+/* Button styling */
+.btn-sm {
+    font-size: 13px;
+}
