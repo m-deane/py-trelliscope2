@@ -73,10 +73,139 @@
     background: #555;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Responsive Design */
+
+/* Tablet (768px - 991px) */
+@media (max-width: 991px) {
+    /* Collapse sidebar on tablets */
+    .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        height: 100vh;
+        width: 300px;
+        background-color: #f8f9fa;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    /* Adjust main content */
+    .main-content {
+        width: 100% !important;
+        padding: 10px;
+    }
+
+    /* Smaller control bar */
+    .control-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Stack layout controls */
+    .layout-controls {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+}
+
+/* Mobile (480px - 767px) */
+@media (max-width: 767px) {
     .panel-container {
         margin-bottom: 15px;
+    }
+
+    /* Full-width panels on mobile */
+    .panel-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Compact panel labels */
+    .panel-labels {
+        padding: 8px !important;
+        font-size: 11px;
+    }
+
+    /* Smaller control buttons */
+    .btn-sm {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    /* Adjust modal size */
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-xl {
+        max-width: calc(100% - 20px);
+    }
+
+    /* Stack filter inputs */
+    .filter-inputs {
+        flex-direction: column;
+    }
+
+    /* Touch-friendly targets */
+    .btn {
+        min-height: 44px;
+    }
+
+    input, select, textarea {
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* Small mobile (< 480px) */
+@media (max-width: 479px) {
+    /* Even more compact */
+    body {
+        font-size: 14px;
+    }
+
+    h6 {
+        font-size: 14px;
+    }
+
+    /* Hide less important UI elements */
+    .secondary-info {
+        display: none;
+    }
+
+    /* Compact pagination */
+    .pagination-info {
+        font-size: 11px;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .panel-content img {
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    /* Optional: Add dark mode styles */
+}
+
+/* Print styles */
+@media print {
+    .sidebar,
+    .control-bar,
+    button {
+        display: none !important;
+    }
+
+    .panel-container {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 }
 

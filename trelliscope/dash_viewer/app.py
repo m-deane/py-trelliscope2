@@ -183,16 +183,20 @@ class DashViewer:
                                     nrow=self.state.nrow
                                 ),
 
-                                # Panel grid
-                                html.Div(
-                                    create_panel_grid(
-                                        panel_data=page_data,
-                                        ncol=self.state.ncol,
-                                        nrow=self.state.nrow,
-                                        active_labels=self.state.active_labels,
-                                        display_info=self.display_info
-                                    ),
-                                    id='panel-grid-container'
+                                # Panel grid with loading state
+                                dcc.Loading(
+                                    id='panel-grid-loading',
+                                    type='default',
+                                    children=html.Div(
+                                        create_panel_grid(
+                                            panel_data=page_data,
+                                            ncol=self.state.ncol,
+                                            nrow=self.state.nrow,
+                                            active_labels=self.state.active_labels,
+                                            display_info=self.display_info
+                                        ),
+                                        id='panel-grid-container'
+                                    )
                                 )
                             ],
                             width=10,
