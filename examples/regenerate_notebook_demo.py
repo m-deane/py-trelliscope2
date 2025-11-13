@@ -2,10 +2,12 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+
 from trelliscope import Display
 from trelliscope.meta import FactorMeta, NumberMeta
 
@@ -13,7 +15,13 @@ from trelliscope.meta import FactorMeta, NumberMeta
 def create_simple_plot(category, value):
     """Create a simple bar plot - EXACT function from working version."""
     fig, ax = plt.subplots(figsize=(5, 5))
-    ax.bar([category], [value], color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'][ord(category) - ord('A')])
+    ax.bar(
+        [category],
+        [value],
+        color=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"][
+            ord(category) - ord("A")
+        ],
+    )
     ax.set_ylim(0, 35)
     ax.set_title(f"Category {category}")
     ax.set_ylabel("Value")
@@ -29,7 +37,7 @@ def main():
     data = {
         "category": ["A", "B", "C", "D", "E"],
         "value": [10, 25, 15, 30, 20],
-        "panel": []
+        "panel": [],
     }
 
     # Create matplotlib figures
@@ -40,16 +48,18 @@ def main():
     df = pd.DataFrame(data)
 
     # Create display - EXACT pattern
-    display = Display(df, name="notebook_demo", description="Notebook Demo - Exact Working Pattern")
+    display = Display(
+        df, name="notebook_demo", description="Notebook Demo - Exact Working Pattern"
+    )
     display.set_panel_column("panel")
 
     # Add explicit meta variables
     display.add_meta_variable(
-        FactorMeta(varname="category", label="Category", levels=["A", "B", "C", "D", "E"])
+        FactorMeta(
+            varname="category", label="Category", levels=["A", "B", "C", "D", "E"]
+        )
     )
-    display.add_meta_variable(
-        NumberMeta(varname="value", label="Value")
-    )
+    display.add_meta_variable(NumberMeta(varname="value", label="Value"))
 
     # Set default layout
     display.set_default_layout(ncol=3, nrow=None, arrangement="row")
@@ -66,7 +76,7 @@ def main():
     print(f"\nExpected result: 5 panels displayed correctly!")
 
     # Close matplotlib figures
-    plt.close('all')
+    plt.close("all")
 
 
 if __name__ == "__main__":

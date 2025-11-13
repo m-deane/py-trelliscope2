@@ -4,12 +4,15 @@ JSON serialization for trelliscope displays.
 Converts Display objects to displayInfo.json format for the JavaScript viewer.
 """
 
-from typing import Dict, Any, List
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List
+
+if TYPE_CHECKING:
+    from trelliscope.display import Display
 
 
-def serialize_display_info(display) -> Dict[str, Any]:
+def serialize_display_info(display: "Display") -> Dict[str, Any]:
     """
     Serialize Display to displayInfo.json format.
 
@@ -39,9 +42,9 @@ def serialize_display_info(display) -> Dict[str, Any]:
     'example'
     """
     from trelliscope.panel_interface import (
-        RESTPanelInterface,
         LocalPanelInterface,
-        PanelInterface
+        PanelInterface,
+        RESTPanelInterface,
     )
 
     # Serialize meta variables
@@ -94,7 +97,7 @@ def serialize_display_info(display) -> Dict[str, Any]:
 
         # Detect panel type based on format
         panel_type = "img"  # Default to image panels
-        if hasattr(display, '_panel_format') and display._panel_format == "html":
+        if hasattr(display, "_panel_format") and display._panel_format == "html":
             panel_type = "iframe"  # HTML panels use iframe
 
         # Build panel meta variable
@@ -126,7 +129,7 @@ def serialize_display_info(display) -> Dict[str, Any]:
         meta = display._meta_vars[varname]
         cog_info[varname] = {
             "name": varname,
-            "label": meta.label if hasattr(meta, 'label') else varname,
+            "label": meta.label if hasattr(meta, "label") else varname,
             "type": meta.type,
             "group": None,
             "defLabel": True,
@@ -136,7 +139,7 @@ def serialize_display_info(display) -> Dict[str, Any]:
             "log": None,
         }
         # Add type-specific fields
-        if meta.type == "factor" and hasattr(meta, 'levels'):
+        if meta.type == "factor" and hasattr(meta, "levels"):
             cog_info[varname]["levels"] = meta.levels
 
     # Add panelKey to cogInfo
@@ -167,7 +170,7 @@ def serialize_display_info(display) -> Dict[str, Any]:
             panel_format = "png"  # Default extension
 
             # Check for HTML panels by looking at display attribute
-            if hasattr(display, '_panel_format'):
+            if hasattr(display, "_panel_format"):
                 # Use format set by display
                 panel_format = display._panel_format
                 panel_type = "iframe" if panel_format == "html" else "file"
@@ -190,7 +193,11 @@ def serialize_display_info(display) -> Dict[str, Any]:
         "group": "common",  # Default group
         "description": display.description,
         "keysig": display.keysig,
-        "n": len(display.data) if hasattr(display, 'data') and display.data is not None else 0,
+        "n": (
+            len(display.data)
+            if hasattr(display, "data") and display.data is not None
+            else 0
+        ),
         "height": display.panel_options.get("height") or 500,
         "width": display.panel_options.get("width") or 500,
         "tags": [],
@@ -224,7 +231,7 @@ def serialize_display_info(display) -> Dict[str, Any]:
     return info
 
 
-def _serialize_cog_data(display) -> List[Dict[str, Any]]:
+def _serialize_cog_data(display: "Display") -> List[Dict[str, Any]]:
     """
     Generate cogData array from Display's DataFrame.
 
@@ -254,10 +261,10 @@ def _serialize_cog_data(display) -> List[Dict[str, Any]]:
             if varname in row:
                 value = row[varname]
                 # Convert numpy/pandas types to Python native types
-                if hasattr(value, 'item'):
+                if hasattr(value, "item"):
                     value = value.item()
                 # Convert pd.Timestamp to ISO format string
-                if hasattr(value, 'isoformat'):
+                if hasattr(value, "isoformat"):
                     value = value.isoformat()
 
                 # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
@@ -265,11 +272,17 @@ def _serialize_cog_data(display) -> List[Dict[str, Any]]:
                 # where levels[1-1] = levels[0] = first level
                 meta = display._meta_vars.get(varname)
                 if meta and meta.type == "factor":
-                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                    if isinstance(value, (int, float)) and not (
+                        isinstance(value, float) and value != value
+                    ):
                         # Numeric categorical code (0, 1, 2...) but not NaN
                         # Note: NaN != NaN, so we check for that
                         value = int(value) + 1  # Convert 0-based to 1-based
-                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                    elif (
+                        isinstance(value, str)
+                        and hasattr(meta, "levels")
+                        and meta.levels
+                    ):
                         # String value - look up index in levels and convert to 1-based
                         try:
                             idx = meta.levels.index(value)
@@ -293,7 +306,7 @@ def _serialize_cog_data(display) -> List[Dict[str, Any]]:
             else:
                 # For file-based panels, use relative path with correct extension
                 panel_format = "png"  # Default
-                if hasattr(display, '_panel_format'):
+                if hasattr(display, "_panel_format"):
                     panel_format = display._panel_format
                 entry[display.panel_column] = f"{panel_id}.{panel_format}"
 
@@ -302,7 +315,7 @@ def _serialize_cog_data(display) -> List[Dict[str, Any]]:
     return cog_data
 
 
-def write_metadata_json(display, output_path: Path) -> Path:
+def write_metadata_json(display: "Display", output_path: Path) -> Path:
     """
     Write metaData.json file with cogData array.
 
@@ -339,18 +352,24 @@ def write_metadata_json(display, output_path: Path) -> Path:
             if varname in row:
                 value = row[varname]
                 # Convert numpy/pandas types to Python native types
-                if hasattr(value, 'item'):
+                if hasattr(value, "item"):
                     value = value.item()
                 # Convert pd.Timestamp to ISO format string
-                if hasattr(value, 'isoformat'):
+                if hasattr(value, "isoformat"):
                     value = value.isoformat()
 
                 # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
                 meta = display._meta_vars.get(varname)
                 if meta and meta.type == "factor":
-                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                    if isinstance(value, (int, float)) and not (
+                        isinstance(value, float) and value != value
+                    ):
                         value = int(value) + 1
-                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                    elif (
+                        isinstance(value, str)
+                        and hasattr(meta, "levels")
+                        and meta.levels
+                    ):
                         try:
                             idx_temp = meta.levels.index(value)
                             value = idx_temp + 1
@@ -370,7 +389,7 @@ def write_metadata_json(display, output_path: Path) -> Path:
             else:
                 # Use correct extension for file-based panels
                 panel_format = "png"  # Default
-                if hasattr(display, '_panel_format'):
+                if hasattr(display, "_panel_format"):
                     panel_format = display._panel_format
                 # CRITICAL: Use "panels/{id}.{format}" format for viewer to find files
                 entry[display.panel_column] = f"panels/{panel_id}.{panel_format}"
@@ -385,7 +404,7 @@ def write_metadata_json(display, output_path: Path) -> Path:
     return json_path
 
 
-def write_metadata_js(display, output_path: Path) -> Path:
+def write_metadata_js(display: "Display", output_path: Path) -> Path:
     """
     Write metaData.js file with window.metaData wrapper.
 
@@ -423,18 +442,24 @@ def write_metadata_js(display, output_path: Path) -> Path:
             if varname in row:
                 value = row[varname]
                 # Convert numpy/pandas types to Python native types
-                if hasattr(value, 'item'):
+                if hasattr(value, "item"):
                     value = value.item()
                 # Convert pd.Timestamp to ISO format string
-                if hasattr(value, 'isoformat'):
+                if hasattr(value, "isoformat"):
                     value = value.isoformat()
 
                 # CRITICAL: Convert factor indices from 0-based to 1-based (R-style)
                 meta = display._meta_vars.get(varname)
                 if meta and meta.type == "factor":
-                    if isinstance(value, (int, float)) and not (isinstance(value, float) and value != value):
+                    if isinstance(value, (int, float)) and not (
+                        isinstance(value, float) and value != value
+                    ):
                         value = int(value) + 1
-                    elif isinstance(value, str) and hasattr(meta, 'levels') and meta.levels:
+                    elif (
+                        isinstance(value, str)
+                        and hasattr(meta, "levels")
+                        and meta.levels
+                    ):
                         try:
                             idx_temp = meta.levels.index(value)
                             value = idx_temp + 1
@@ -454,7 +479,7 @@ def write_metadata_js(display, output_path: Path) -> Path:
             else:
                 # Use correct extension for file-based panels
                 panel_format = "png"  # Default
-                if hasattr(display, '_panel_format'):
+                if hasattr(display, "_panel_format"):
                     panel_format = display._panel_format
                 # CRITICAL: Use "panels/{id}.{format}" format
                 entry[display.panel_column] = f"panels/{panel_id}.{panel_format}"
@@ -475,7 +500,7 @@ def write_metadata_js(display, output_path: Path) -> Path:
     return js_path
 
 
-def write_display_info(display, output_path: Path) -> Path:
+def write_display_info(display: "Display", output_path: Path) -> Path:
     """
     Write displayInfo.json file for Display.
 
@@ -523,7 +548,7 @@ def write_display_info(display, output_path: Path) -> Path:
     return json_path
 
 
-def serialize_to_json_string(display, indent: int = 2) -> str:
+def serialize_to_json_string(display: "Display", indent: int = 2) -> str:
     """
     Serialize Display to JSON string.
 

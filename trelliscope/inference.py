@@ -5,23 +5,21 @@ This module provides automatic type detection to create appropriate
 MetaVariable instances from pandas Series based on their dtype and values.
 """
 
-from typing import Optional
+from typing import Any, Dict, Optional
+
 import pandas as pd
-import numpy as np
 
 from trelliscope.meta import (
-    MetaVariable,
-    FactorMeta,
-    NumberMeta,
     DateMeta,
+    FactorMeta,
+    MetaVariable,
+    NumberMeta,
     TimeMeta,
 )
 
 
 def infer_meta_from_series(
-    series: pd.Series,
-    varname: Optional[str] = None,
-    **kwargs
+    series: pd.Series, varname: Optional[str] = None, **kwargs: Any
 ) -> MetaVariable:
     """
     Automatically infer and create appropriate MetaVariable from pandas Series.
@@ -78,9 +76,7 @@ def infer_meta_from_series(
     # Determine varname
     if varname is None:
         if series.name is None:
-            raise ValueError(
-                "varname must be provided when series.name is None"
-            )
+            raise ValueError("varname must be provided when series.name is None")
         varname = str(series.name)
 
     # Handle empty series - default to FactorMeta
@@ -105,9 +101,11 @@ def infer_meta_from_series(
         return NumberMeta.from_series(series, varname=varname, **kwargs)
 
     # Categorical, object, string → FactorMeta
-    if (isinstance(dtype, pd.CategoricalDtype) or
-        pd.api.types.is_object_dtype(dtype) or
-        pd.api.types.is_string_dtype(dtype)):
+    if (
+        isinstance(dtype, pd.CategoricalDtype)
+        or pd.api.types.is_object_dtype(dtype)
+        or pd.api.types.is_string_dtype(dtype)
+    ):
         return FactorMeta.from_series(series, varname=varname, **kwargs)
 
     # Fallback to FactorMeta for unknown types
@@ -115,9 +113,7 @@ def infer_meta_from_series(
 
 
 def _infer_datetime_meta(
-    series: pd.Series,
-    varname: str,
-    **kwargs
+    series: pd.Series, varname: str, **kwargs: Any
 ) -> MetaVariable:
     """
     Infer whether datetime series should be DateMeta or TimeMeta.
@@ -153,10 +149,10 @@ def _infer_datetime_meta(
         try:
             # Check if any values have hour/minute/second components
             has_time = (
-                (non_nat.dt.hour != 0).any() or
-                (non_nat.dt.minute != 0).any() or
-                (non_nat.dt.second != 0).any() or
-                (non_nat.dt.microsecond != 0).any()
+                (non_nat.dt.hour != 0).any()
+                or (non_nat.dt.minute != 0).any()
+                or (non_nat.dt.second != 0).any()
+                or (non_nat.dt.microsecond != 0).any()
             )
             if has_time:
                 return TimeMeta.from_series(series, varname=varname, **kwargs)
@@ -171,7 +167,7 @@ def _infer_datetime_meta(
 def infer_meta_dict(
     df: pd.DataFrame,
     columns: Optional[list] = None,
-) -> dict:
+) -> Dict[str, MetaVariable]:
     """
     Infer meta variables for multiple DataFrame columns.
 
@@ -206,7 +202,4 @@ def infer_meta_dict(
     if columns is None:
         columns = list(df.columns)
 
-    return {
-        col: infer_meta_from_series(df[col], varname=col)
-        for col in columns
-    }
+    return {col: infer_meta_from_series(df[col], varname=col) for col in columns}

@@ -10,40 +10,40 @@ __version__ = "0.1.0"
 __author__ = "py-trelliscope contributors"
 
 from trelliscope.display import Display
-from trelliscope.meta import (
-    MetaVariable,
-    FactorMeta,
-    NumberMeta,
-    DateMeta,
-    TimeMeta,
-    CurrencyMeta,
-    HrefMeta,
-    GraphMeta,
-)
-from trelliscope.panel_interface import (
-    PanelInterface,
-    LocalPanelInterface,
-    RESTPanelInterface,
-    WebSocketPanelInterface,
-    create_panel_interface,
-)
-from trelliscope.inference import infer_meta_from_series, infer_meta_dict
-from trelliscope.serialization import (
-    serialize_display_info,
-    write_display_info,
-    serialize_to_json_string,
-)
-from trelliscope.panels import PanelRenderer
-from trelliscope.panels.matplotlib_adapter import MatplotlibAdapter
-from trelliscope.panels.plotly_adapter import PlotlyAdapter
-from trelliscope.panels.manager import PanelManager
-from trelliscope.server import DisplayServer
-from trelliscope.viewer import generate_viewer_html, write_index_html
 from trelliscope.export import (
     export_static,
     export_static_from_display,
     validate_export,
 )
+from trelliscope.inference import infer_meta_dict, infer_meta_from_series
+from trelliscope.meta import (
+    CurrencyMeta,
+    DateMeta,
+    FactorMeta,
+    GraphMeta,
+    HrefMeta,
+    MetaVariable,
+    NumberMeta,
+    TimeMeta,
+)
+from trelliscope.panel_interface import (
+    LocalPanelInterface,
+    PanelInterface,
+    RESTPanelInterface,
+    WebSocketPanelInterface,
+    create_panel_interface,
+)
+from trelliscope.panels import PanelRenderer
+from trelliscope.panels.manager import PanelManager
+from trelliscope.panels.matplotlib_adapter import MatplotlibAdapter
+from trelliscope.panels.plotly_adapter import PlotlyAdapter
+from trelliscope.serialization import (
+    serialize_display_info,
+    serialize_to_json_string,
+    write_display_info,
+)
+from trelliscope.server import DisplayServer
+from trelliscope.viewer import generate_viewer_html, write_index_html
 
 __all__ = [
     "Display",

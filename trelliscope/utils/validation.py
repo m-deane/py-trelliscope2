@@ -6,7 +6,8 @@ throughout the trelliscope package. All functions raise descriptive errors
 with actionable messages.
 """
 
-from typing import Any, List, Optional, Union, Set
+from typing import Any, List, Optional, Set, Union
+
 import pandas as pd
 
 
@@ -42,8 +43,7 @@ def validate_dataframe(data: Any, param_name: str = "data") -> pd.DataFrame:
     """
     if not isinstance(data, pd.DataFrame):
         raise TypeError(
-            f"{param_name} must be a pandas DataFrame, "
-            f"got {type(data).__name__}"
+            f"{param_name} must be a pandas DataFrame, " f"got {type(data).__name__}"
         )
     return data
 
@@ -188,14 +188,10 @@ def validate_positive_integer(
         raise TypeError(f"{param_name} cannot be None")
 
     if not isinstance(value, int) or isinstance(value, bool):
-        raise TypeError(
-            f"{param_name} must be an integer, got {type(value).__name__}"
-        )
+        raise TypeError(f"{param_name} must be an integer, got {type(value).__name__}")
 
     if value < min_value:
-        raise ValueError(
-            f"{param_name} must be >= {min_value}, got {value}"
-        )
+        raise ValueError(f"{param_name} must be >= {min_value}, got {value}")
 
     return value
 
@@ -244,17 +240,14 @@ def validate_string_nonempty(
     # Raises TypeError
     """
     if not isinstance(value, str):
-        raise TypeError(
-            f"{param_name} must be a string, got {type(value).__name__}"
-        )
+        raise TypeError(f"{param_name} must be a string, got {type(value).__name__}")
 
-    if strip:
-        value = value.strip()
+    result: str = value.strip() if strip else value
 
-    if not value:
+    if not result:
         raise ValueError(f"{param_name} cannot be empty")
 
-    return value
+    return result
 
 
 def validate_choice(
@@ -306,14 +299,12 @@ def validate_choice(
         choices_lower = {str(c).lower() for c in choices_set}
         if value.lower() not in choices_lower:
             raise ValueError(
-                f"{param_name} must be one of {sorted(choices_set)}, "
-                f"got '{value}'"
+                f"{param_name} must be one of {sorted(choices_set)}, " f"got '{value}'"
             )
     else:
         if value not in choices_set:
             raise ValueError(
-                f"{param_name} must be one of {sorted(choices_set)}, "
-                f"got '{value}'"
+                f"{param_name} must be one of {sorted(choices_set)}, " f"got '{value}'"
             )
 
     return value
@@ -376,17 +367,10 @@ def validate_numeric_positive(
             f"got {type(value).__name__}"
         )
 
-    min_value = 0 if allow_zero else 0
-    comparison = ">=" if allow_zero else ">"
-
     if allow_zero and value < 0:
-        raise ValueError(
-            f"{param_name} must be >= 0, got {value}"
-        )
-    elif not allow_zero and value <= 0:
-        raise ValueError(
-            f"{param_name} must be > 0, got {value}"
-        )
+        raise ValueError(f"{param_name} must be >= 0, got {value}")
+    if not allow_zero and value <= 0:
+        raise ValueError(f"{param_name} must be > 0, got {value}")
 
     return value
 
@@ -433,9 +417,7 @@ def validate_dataframe_not_empty(
         )
 
     if len(data) == 0:
-        raise ValueError(
-            f"{param_name} cannot be empty (has {len(data)} rows)"
-        )
+        raise ValueError(f"{param_name} cannot be empty (has {len(data)} rows)")
 
     return data
 
@@ -481,9 +463,7 @@ def validate_list_of_strings(
     # Raises TypeError
     """
     if not isinstance(value, list):
-        raise TypeError(
-            f"{param_name} must be a list, got {type(value).__name__}"
-        )
+        raise TypeError(f"{param_name} must be a list, got {type(value).__name__}")
 
     if not allow_empty and len(value) == 0:
         raise ValueError(f"{param_name} cannot be empty")
@@ -491,8 +471,7 @@ def validate_list_of_strings(
     for i, item in enumerate(value):
         if not isinstance(item, str):
             raise TypeError(
-                f"{param_name}[{i}] must be a string, "
-                f"got {type(item).__name__}"
+                f"{param_name}[{i}] must be a string, " f"got {type(item).__name__}"
             )
 
     return value

@@ -1,9 +1,10 @@
 """Unit tests for DisplayServer."""
 
-import pytest
 import tempfile
 import time
 from pathlib import Path
+
+import pytest
 
 from trelliscope.server import DisplayServer
 

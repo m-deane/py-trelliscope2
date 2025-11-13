@@ -5,19 +5,19 @@ Tests cover all validation functions with valid inputs, invalid inputs,
 edge cases, and error messages.
 """
 
-import pytest
 import pandas as pd
+import pytest
 
 from trelliscope.utils.validation import (
-    validate_dataframe,
+    validate_choice,
     validate_column_exists,
     validate_columns_exist,
-    validate_positive_integer,
-    validate_string_nonempty,
-    validate_choice,
-    validate_numeric_positive,
+    validate_dataframe,
     validate_dataframe_not_empty,
     validate_list_of_strings,
+    validate_numeric_positive,
+    validate_positive_integer,
+    validate_string_nonempty,
 )
 
 
@@ -255,7 +255,9 @@ class TestValidateChoice:
 
     def test_case_insensitive(self):
         """Test that case-insensitive comparison works."""
-        result = validate_choice("ROW", ["row", "col"], "arrangement", case_sensitive=False)
+        result = validate_choice(
+            "ROW", ["row", "col"], "arrangement", case_sensitive=False
+        )
         assert result == "ROW"
 
     def test_numeric_choices(self):

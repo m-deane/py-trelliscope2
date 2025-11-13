@@ -1,11 +1,11 @@
 """Development server for viewing trelliscope displays locally."""
 
 import http.server
+import os
 import socketserver
 import threading
-import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 
 class DisplayServer:
@@ -190,17 +190,19 @@ class DisplayServer:
         """
         return f"http://localhost:{self.port}"
 
-    def __enter__(self):
+    def __enter__(self) -> "DisplayServer":
         """Context manager entry."""
         self.start(blocking=False)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         self.stop()
-        return False
 
     def __repr__(self) -> str:
         """String representation."""
         status = "running" if self.is_running() else "stopped"
-        return f"DisplayServer(dir={self.display_dir.name}, port={self.port}, status={status})"
+        return (
+            f"DisplayServer(dir={self.display_dir.name}, "
+            f"port={self.port}, status={status})"
+        )

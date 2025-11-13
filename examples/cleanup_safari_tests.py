@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Clean up Safari debugging test files."""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 output_dir = Path(__file__).parent / "output"
 

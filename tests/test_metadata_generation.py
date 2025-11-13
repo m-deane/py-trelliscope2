@@ -4,20 +4,21 @@ Tests for metadata file generation (metaData.json and metaData.js).
 These files are REQUIRED by trelliscopejs-lib viewer for file-based panels.
 """
 
-import pytest
-import pandas as pd
 import json
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope import Display
-from trelliscope.serialization import (
-    write_metadata_json,
-    write_metadata_js,
-    _serialize_cog_data,
-)
 from trelliscope.meta import FactorMeta, NumberMeta
+from trelliscope.serialization import (
+    _serialize_cog_data,
+    write_metadata_js,
+    write_metadata_json,
+)
 
 
 class TestMetadataGeneration:
@@ -26,22 +27,30 @@ class TestMetadataGeneration:
     @pytest.fixture
     def sample_display(self):
         """Create a sample Display for testing."""
-        df = pd.DataFrame({
-            "category": ["A", "B", "C", "D", "E"],
-            "value": [10, 25, 15, 30, 20],
-            "panel": [None, None, None, None, None],  # Panel objects (will be rendered)
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A", "B", "C", "D", "E"],
+                "value": [10, 25, 15, 30, 20],
+                "panel": [
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ],  # Panel objects (will be rendered)
+            }
+        )
 
         display = Display(df, name="test_display", description="Test Display")
         display.set_panel_column("panel")
 
         # Add meta variables
         display.add_meta_variable(
-            FactorMeta(varname="category", label="Category", levels=["A", "B", "C", "D", "E"])
+            FactorMeta(
+                varname="category", label="Category", levels=["A", "B", "C", "D", "E"]
+            )
         )
-        display.add_meta_variable(
-            NumberMeta(varname="value", label="Value")
-        )
+        display.add_meta_variable(NumberMeta(varname="value", label="Value"))
 
         return display
 
@@ -220,11 +229,13 @@ class TestMetadataWithDisplay:
     def test_display_write_creates_metadata_files(self, temp_output_dir):
         """Test that Display.write() creates both metadata files."""
         # Note: This test uses render_panels=False to avoid needing actual panel objects
-        df = pd.DataFrame({
-            "category": ["A", "B", "C"],
-            "value": [10, 20, 30],
-            "panel": ["panel1", "panel2", "panel3"],  # Dummy panel values
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A", "B", "C"],
+                "value": [10, 20, 30],
+                "panel": ["panel1", "panel2", "panel3"],  # Dummy panel values
+            }
+        )
 
         display = Display(df, name="test_metadata", description="Test")
         display.set_panel_column("panel")
@@ -232,7 +243,11 @@ class TestMetadataWithDisplay:
         display.add_meta_variable(NumberMeta("value"))
 
         # Write display (without rendering panels)
-        output_path = display.write(output_path=temp_output_dir / "test_metadata", force=True, render_panels=False)
+        output_path = display.write(
+            output_path=temp_output_dir / "test_metadata",
+            force=True,
+            render_panels=False,
+        )
 
         # Check that all required files were created
         assert (output_path / "displayInfo.json").exists()
@@ -242,18 +257,24 @@ class TestMetadataWithDisplay:
 
     def test_display_write_metadata_consistency(self, temp_output_dir):
         """Test that metadata files are consistent with displayInfo.json."""
-        df = pd.DataFrame({
-            "category": ["A", "B"],
-            "value": [10, 20],
-            "panel": ["p1", "p2"],
-        })
+        df = pd.DataFrame(
+            {
+                "category": ["A", "B"],
+                "value": [10, 20],
+                "panel": ["p1", "p2"],
+            }
+        )
 
         display = Display(df, name="test_consistency", description="Test")
         display.set_panel_column("panel")
         display.add_meta_variable(FactorMeta("category", levels=["A", "B"]))
         display.add_meta_variable(NumberMeta("value"))
 
-        output_path = display.write(output_path=temp_output_dir / "test_consistency", force=True, render_panels=False)
+        output_path = display.write(
+            output_path=temp_output_dir / "test_consistency",
+            force=True,
+            render_panels=False,
+        )
 
         # Load all three files
         with open(output_path / "displayInfo.json", "r") as f:
@@ -272,10 +293,16 @@ class TestMetadataWithDisplay:
         assert len(display_info["cogData"]) == 2
 
         # All three should have same number of entries
-        assert len(display_info["cogData"]) == len(metadata_json) == len(metadata_js) == 2
+        assert (
+            len(display_info["cogData"]) == len(metadata_json) == len(metadata_js) == 2
+        )
 
         # First entry should have same values (except panel paths differ)
-        assert display_info["cogData"][0]["category"] == metadata_json[0]["category"] == "A"
+        assert (
+            display_info["cogData"][0]["category"]
+            == metadata_json[0]["category"]
+            == "A"
+        )
         assert display_info["cogData"][0]["value"] == metadata_json[0]["value"] == 10
 
 

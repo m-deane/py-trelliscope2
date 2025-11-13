@@ -3,11 +3,13 @@
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 from trelliscope import Display
 
 print("=" * 60)
@@ -16,23 +18,27 @@ print("=" * 60)
 
 # Create simple test data
 np.random.seed(42)
-data = pd.DataFrame({
-    'id': range(5),
-    'value': np.random.randn(5) * 100 + 500,
-    'category': ['A', 'B', 'C', 'A', 'B']
-})
+data = pd.DataFrame(
+    {
+        "id": range(5),
+        "value": np.random.randn(5) * 100 + 500,
+        "category": ["A", "B", "C", "A", "B"],
+    }
+)
 
 print(f"\n1. Created test DataFrame with {len(data)} rows")
+
 
 # Create simple plots
 def make_plot(row):
     fig, ax = plt.subplots(figsize=(4, 3))
-    ax.bar(['Value'], [row['value']])
+    ax.bar(["Value"], [row["value"]])
     ax.set_title(f"ID {row['id']} - {row['category']}")
     plt.tight_layout()
     return fig
 
-data['panel'] = data.apply(make_plot, axis=1)
+
+data["panel"] = data.apply(make_plot, axis=1)
 print(f"2. Generated {len(data)} matplotlib figures")
 
 # Create test output directory
@@ -43,7 +49,7 @@ print(f"3. Created output directory: {test_dir}")
 # Create and write display
 display = (
     Display(data, name="viewer_test", path=test_dir)
-    .set_panel_column('panel')
+    .set_panel_column("panel")
     .infer_metas()
 )
 
@@ -66,6 +72,7 @@ if panels_dir.exists():
 
 # Check displayInfo.json content
 import json
+
 with open(display_info) as f:
     info = json.load(f)
 

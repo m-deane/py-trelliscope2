@@ -1,7 +1,7 @@
 """Plotly adapter for panel rendering."""
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from trelliscope.panels import PanelRenderer
 
@@ -16,10 +16,14 @@ class PlotlyAdapter(PanelRenderer):
     package to be installed.
 
     Args:
-        format: Output format ('html', 'png', 'jpeg', 'svg', 'pdf'). Default: 'html'
-        include_plotlyjs: How to include plotly.js in HTML ('cdn', True, False). Default: 'cdn'
-        width: Width in pixels for static exports. Default: None (use figure default)
-        height: Height in pixels for static exports. Default: None (use figure default)
+        output_format: Output format ('html', 'png', 'jpeg', 'svg', 'pdf').
+            Default: 'html'
+        include_plotlyjs: How to include plotly.js in HTML.
+            ('cdn', True, False). Default: 'cdn'
+        width: Width in pixels for static exports.
+            Default: None (use figure default)
+        height: Height in pixels for static exports.
+            Default: None (use figure default)
 
     Example:
         >>> import plotly.graph_objects as go
@@ -35,27 +39,26 @@ class PlotlyAdapter(PanelRenderer):
 
     def __init__(
         self,
-        format: str = "html",
+        output_format: str = "html",
         include_plotlyjs: str = "cdn",
-        width: int = None,
-        height: int = None
+        width: Optional[int] = None,
+        height: Optional[int] = None,
     ):
         """Initialize PlotlyAdapter.
 
         Args:
-            format: Output format. Default: 'html'
+            output_format: Output format. Default: 'html'
             include_plotlyjs: Plotly.js inclusion mode. Default: 'cdn'
             width: Width for static exports. Default: None
             height: Height for static exports. Default: None
         """
         valid_formats = ["html", "png", "jpeg", "jpg", "svg", "pdf"]
-        if format not in valid_formats:
+        if output_format not in valid_formats:
             raise ValueError(
-                f"Invalid format '{format}'. "
-                f"Valid formats: {valid_formats}"
+                f"Invalid format '{output_format}'. " f"Valid formats: {valid_formats}"
             )
 
-        self.format = format
+        self.format = output_format
         self.include_plotlyjs = include_plotlyjs
         self.width = width
         self.height = height
@@ -80,14 +83,14 @@ class PlotlyAdapter(PanelRenderer):
                 return True
 
             # Check for dict with plotly structure
-            if isinstance(obj, dict) and ('data' in obj or 'layout' in obj):
+            if isinstance(obj, dict) and ("data" in obj or "layout" in obj):
                 return True
 
             return False
         except ImportError:
             return False
 
-    def save(self, obj: Any, path: Path, **kwargs) -> Path:
+    def save(self, obj: Any, path: Path, **kwargs: Any) -> Path:
         """Save plotly figure to file.
 
         For HTML format, saves interactive plot with plotly.js from CDN.
@@ -96,7 +99,8 @@ class PlotlyAdapter(PanelRenderer):
         Args:
             obj: plotly Figure to save
             path: Base path for output (extension added automatically)
-            **kwargs: Override default settings (format, width, height, include_plotlyjs)
+            **kwargs: Override default settings
+                (format, width, height, include_plotlyjs)
 
         Returns:
             Path: Path to saved file with extension
@@ -107,44 +111,34 @@ class PlotlyAdapter(PanelRenderer):
             Exception: If save operation fails
         """
         if not self.detect(obj):
-            raise ValueError(
-                f"Object is not a plotly Figure: {type(obj)}"
-            )
+            raise ValueError(f"Object is not a plotly Figure: {type(obj)}")
 
         # Get settings (kwargs override defaults)
-        format = kwargs.get("format", self.format)
+        file_format = kwargs.get("format", self.format)
         width = kwargs.get("width", self.width)
         height = kwargs.get("height", self.height)
 
         # Create output path with extension
-        output_path = path.with_suffix(f".{format}")
+        output_path = path.with_suffix(f".{file_format}")
 
         # Import plotly
         import plotly.io as pio
 
         # Save based on format
-        if format == "html":
+        if file_format == "html":
             include_plotlyjs = kwargs.get("include_plotlyjs", self.include_plotlyjs)
-            pio.write_html(
-                obj,
-                output_path,
-                include_plotlyjs=include_plotlyjs
-            )
+            pio.write_html(obj, output_path, include_plotlyjs=include_plotlyjs)
         else:
             # Static image export (requires kaleido)
             try:
                 pio.write_image(
-                    obj,
-                    output_path,
-                    format=format,
-                    width=width,
-                    height=height
+                    obj, output_path, format=file_format, width=width, height=height
                 )
             except ValueError as e:
                 if "kaleido" in str(e).lower():
                     raise ImportError(
-                        f"Static image export requires kaleido package. "
-                        f"Install with: pip install kaleido"
+                        "Static image export requires kaleido package. "
+                        "Install with: pip install kaleido"
                     ) from e
                 raise
 

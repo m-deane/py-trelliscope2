@@ -5,19 +5,20 @@ Tests cover all meta variable types, initialization, serialization,
 and inference from pandas Series.
 """
 
-import pytest
-import pandas as pd
 from datetime import datetime
 
+import pandas as pd
+import pytest
+
 from trelliscope.meta import (
-    MetaVariable,
-    FactorMeta,
-    NumberMeta,
-    DateMeta,
-    TimeMeta,
     CurrencyMeta,
-    HrefMeta,
+    DateMeta,
+    FactorMeta,
     GraphMeta,
+    HrefMeta,
+    MetaVariable,
+    NumberMeta,
+    TimeMeta,
 )
 
 
@@ -257,9 +258,7 @@ class TestTimeMeta:
     def test_to_dict_with_all_fields(self):
         """Test to_dict with all fields."""
         meta = TimeMeta(
-            varname="timestamp",
-            timezone="America/New_York",
-            format="%Y-%m-%d %H:%M:%S"
+            varname="timestamp", timezone="America/New_York", format="%Y-%m-%d %H:%M:%S"
         )
         result = meta.to_dict()
 
@@ -269,8 +268,7 @@ class TestTimeMeta:
     def test_from_series_without_tz(self):
         """Test creating from datetime series without timezone."""
         series = pd.Series(
-            pd.date_range("2024-01-01", periods=3, freq="h"),
-            name="timestamps"
+            pd.date_range("2024-01-01", periods=3, freq="h"), name="timestamps"
         )
         meta = TimeMeta.from_series(series)
 
@@ -281,7 +279,7 @@ class TestTimeMeta:
         """Test creating from timezone-aware datetime series."""
         series = pd.Series(
             pd.date_range("2024-01-01", periods=3, freq="h", tz="UTC"),
-            name="timestamps"
+            name="timestamps",
         )
         meta = TimeMeta.from_series(series)
 
@@ -291,7 +289,7 @@ class TestTimeMeta:
         """Test that explicit timezone overrides inferred timezone."""
         series = pd.Series(
             pd.date_range("2024-01-01", periods=3, freq="h", tz="UTC"),
-            name="timestamps"
+            name="timestamps",
         )
         meta = TimeMeta.from_series(series, timezone="America/New_York")
 

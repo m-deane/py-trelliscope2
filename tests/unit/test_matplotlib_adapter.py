@@ -1,8 +1,9 @@
 """Tests for MatplotlibAdapter."""
 
-import pytest
 import tempfile
 from pathlib import Path
+
+import pytest
 
 matplotlib = pytest.importorskip("matplotlib")
 plt = pytest.importorskip("matplotlib.pyplot")
@@ -42,7 +43,7 @@ class TestMatplotlibAdapterSave:
             fig, ax = plt.subplots()
             ax.plot([1, 2, 3], [1, 4, 9])
 
-            adapter = MatplotlibAdapter(format="png")
+            adapter = MatplotlibAdapter(output_format="png")
             output_path = adapter.save(fig, Path(tmpdir) / "test")
 
             assert output_path.exists()
@@ -56,7 +57,7 @@ class TestMatplotlibAdapterSave:
             fig, ax = plt.subplots()
             ax.plot([1, 2, 3])
 
-            adapter = MatplotlibAdapter(format="jpeg")
+            adapter = MatplotlibAdapter(output_format="jpeg")
             output_path = adapter.save(fig, Path(tmpdir) / "test")
 
             assert output_path.exists()
@@ -69,7 +70,7 @@ class TestMatplotlibAdapterSave:
             fig, ax = plt.subplots()
             ax.plot([1, 2, 3])
 
-            adapter = MatplotlibAdapter(format="svg")
+            adapter = MatplotlibAdapter(output_format="svg")
             output_path = adapter.save(fig, Path(tmpdir) / "test")
 
             assert output_path.exists()
@@ -82,7 +83,7 @@ class TestMatplotlibAdapterSave:
             fig, ax = plt.subplots()
             ax.plot([1, 2, 3])
 
-            adapter = MatplotlibAdapter(format="png", dpi=150)
+            adapter = MatplotlibAdapter(output_format="png", dpi=150)
             output_path = adapter.save(fig, Path(tmpdir) / "test")
 
             assert output_path.exists()
@@ -95,7 +96,7 @@ class TestMatplotlibAdapterSave:
             ax.plot([1, 2, 3])
 
             # Adapter configured for PNG
-            adapter = MatplotlibAdapter(format="png")
+            adapter = MatplotlibAdapter(output_format="png")
             # But save as SVG
             output_path = adapter.save(fig, Path(tmpdir) / "test", format="svg")
 
@@ -123,7 +124,7 @@ class TestMatplotlibAdapterConfiguration:
 
     def test_initialization_custom(self):
         """Test custom configuration."""
-        adapter = MatplotlibAdapter(format="svg", dpi=150, bbox_inches="standard")
+        adapter = MatplotlibAdapter(output_format="svg", dpi=150, bbox_inches="standard")
         assert adapter.format == "svg"
         assert adapter.dpi == 150
         assert adapter.bbox_inches == "standard"
@@ -131,7 +132,7 @@ class TestMatplotlibAdapterConfiguration:
     def test_invalid_format_raises_error(self):
         """Test that invalid format raises ValueError."""
         with pytest.raises(ValueError, match="Invalid format"):
-            MatplotlibAdapter(format="invalid")
+            MatplotlibAdapter(output_format="invalid")
 
     def test_get_interface_type(self):
         """Test getting interface type."""
@@ -140,7 +141,7 @@ class TestMatplotlibAdapterConfiguration:
 
     def test_get_format(self):
         """Test getting format."""
-        adapter = MatplotlibAdapter(format="svg")
+        adapter = MatplotlibAdapter(output_format="svg")
         assert adapter.get_format() == "svg"
 
 
@@ -158,7 +159,7 @@ class TestMatplotlibAdapterIntegration:
             ax.set_ylabel("Y")
 
             # Save with adapter
-            adapter = MatplotlibAdapter(format="png", dpi=100)
+            adapter = MatplotlibAdapter(output_format="png", dpi=100)
             output_path = adapter.save(fig, Path(tmpdir) / "myplot")
 
             # Verify file exists and has content

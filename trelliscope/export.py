@@ -2,9 +2,12 @@
 
 import shutil
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Union
 
-from trelliscope.viewer import generate_viewer_html, generate_deployment_readme
+if TYPE_CHECKING:
+    from trelliscope.display import Display
+
+from trelliscope.viewer import generate_deployment_readme, generate_viewer_html
 
 
 def export_static(
@@ -133,7 +136,7 @@ def export_static(
     print(f"  ✓ Copied to {target_display_dir}")
 
     # Generate index.html
-    print(f"Generating viewer HTML...")
+    print("Generating viewer HTML...")
     html = generate_viewer_html(display_name, viewer_version=viewer_version)
     index_path = output_path / "index.html"
     index_path.write_text(html, encoding="utf-8")
@@ -141,23 +144,23 @@ def export_static(
 
     # Generate README if requested
     if include_readme:
-        print(f"Generating deployment README...")
+        print("Generating deployment README...")
         readme = generate_deployment_readme(display_name)
         readme_path = output_path / "README.md"
         readme_path.write_text(readme, encoding="utf-8")
         print(f"  ✓ Created {readme_path}")
 
     print(f"\n✓ Static site exported to: {output_path}")
-    print(f"\nTo deploy:")
+    print("\nTo deploy:")
     print(f"  1. cd {output_path}")
-    print(f"  2. Serve locally: python -m http.server 8000")
-    print(f"  3. Or deploy to GitHub Pages, Netlify, etc.")
+    print("  2. Serve locally: python -m http.server 8000")
+    print("  3. Or deploy to GitHub Pages, Netlify, etc.")
 
     return output_path
 
 
 def export_static_from_display(
-    display,
+    display: "Display",
     output_path: Union[str, Path],
     viewer_version: str = "latest",
     include_readme: bool = True,
@@ -222,6 +225,9 @@ def export_static_from_display(
         )
 
     # Export the written display
+    if display._output_path is None:
+        raise ValueError("Display output path is not set")
+
     return export_static(
         display_path=display._output_path,
         output_path=output_path,
@@ -231,7 +237,7 @@ def export_static_from_display(
     )
 
 
-def validate_export(export_path: Union[str, Path]) -> dict:
+def validate_export(export_path: Union[str, Path]) -> Dict[str, Any]:
     """Validate that an exported site has all required files.
 
     Checks for required files and returns a validation report.
@@ -262,7 +268,7 @@ def validate_export(export_path: Union[str, Path]) -> dict:
     ...     print(f"Missing files: {report['missing_files']}")
     """
     export_path = Path(export_path)
-    report = {
+    report: Dict[str, Any] = {
         "valid": True,
         "missing_files": [],
         "warnings": [],

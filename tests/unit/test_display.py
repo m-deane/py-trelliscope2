@@ -4,9 +4,10 @@ Unit tests for Display class.
 Tests cover initialization, validation, configuration methods, and error handling.
 """
 
-import pytest
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from trelliscope.display import Display
 
@@ -143,7 +144,9 @@ class TestSetPanelColumn:
         df = pd.DataFrame({"plot": [1, 2, 3], "value": [10, 20, 30]})
         display = Display(df, name="test")
 
-        with pytest.raises(ValueError, match="Available columns: \\['plot', 'value'\\]"):
+        with pytest.raises(
+            ValueError, match="Available columns: \\['plot', 'value'\\]"
+        ):
             display.set_panel_column("missing")
 
 
@@ -281,7 +284,9 @@ class TestSetDefaultLabels:
 
     def test_set_labels_valid(self):
         """Test setting valid labels."""
-        df = pd.DataFrame({"plot": [1, 2, 3], "cat": ["A", "B", "C"], "val": [10, 20, 30]})
+        df = pd.DataFrame(
+            {"plot": [1, 2, 3], "cat": ["A", "B", "C"], "val": [10, 20, 30]}
+        )
         display = Display(df, name="test")
 
         result = display.set_default_labels(["cat", "val"])
@@ -311,7 +316,9 @@ class TestSetDefaultLabels:
         df = pd.DataFrame({"plot": [1, 2, 3], "value": [10, 20, 30]})
         display = Display(df, name="test")
 
-        with pytest.raises(ValueError, match="Available columns: \\['plot', 'value'\\]"):
+        with pytest.raises(
+            ValueError, match="Available columns: \\['plot', 'value'\\]"
+        ):
             display.set_default_labels(["missing", "also_missing"])
 
 
@@ -361,11 +368,9 @@ class TestMethodChaining:
 
     def test_method_chaining(self):
         """Test that multiple methods can be chained."""
-        df = pd.DataFrame({
-            "plot": [1, 2, 3],
-            "category": ["A", "B", "C"],
-            "value": [10, 20, 30]
-        })
+        df = pd.DataFrame(
+            {"plot": [1, 2, 3], "category": ["A", "B", "C"], "value": [10, 20, 30]}
+        )
 
         display = (
             Display(df, name="test")
@@ -415,13 +420,13 @@ class TestAddMetaVariable:
     def test_add_meta_variable_valid(self):
         """Test adding valid meta variable."""
         from trelliscope.meta import FactorMeta
-        
+
         df = pd.DataFrame({"category": ["A", "B", "C"]})
         display = Display(df, name="test")
-        
+
         meta = FactorMeta("category", levels=["A", "B", "C"])
         result = display.add_meta_variable(meta)
-        
+
         assert result is display  # Method chaining
         assert "category" in display._meta_vars
         assert display._meta_vars["category"] == meta
@@ -430,17 +435,17 @@ class TestAddMetaVariable:
         """Test that non-MetaVariable raises TypeError."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         with pytest.raises(TypeError, match="meta must be a MetaVariable"):
             display.add_meta_variable("not a meta")
 
     def test_add_meta_variable_invalid_column(self):
         """Test that meta for non-existent column raises ValueError."""
         from trelliscope.meta import NumberMeta
-        
+
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         meta = NumberMeta("nonexistent")
         with pytest.raises(ValueError, match="not found in DataFrame"):
             display.add_meta_variable(meta)
@@ -448,13 +453,13 @@ class TestAddMetaVariable:
     def test_add_meta_variable_duplicate_without_replace(self):
         """Test that duplicate meta without replace raises ValueError."""
         from trelliscope.meta import NumberMeta
-        
+
         df = pd.DataFrame({"value": [1, 2]})
         display = Display(df, name="test")
-        
+
         meta1 = NumberMeta("value", digits=2)
         meta2 = NumberMeta("value", digits=4)
-        
+
         display.add_meta_variable(meta1)
         with pytest.raises(ValueError, match="already exists"):
             display.add_meta_variable(meta2)
@@ -462,16 +467,16 @@ class TestAddMetaVariable:
     def test_add_meta_variable_duplicate_with_replace(self):
         """Test that replace=True allows overwriting meta."""
         from trelliscope.meta import NumberMeta
-        
+
         df = pd.DataFrame({"value": [1, 2]})
         display = Display(df, name="test")
-        
+
         meta1 = NumberMeta("value", digits=2)
         meta2 = NumberMeta("value", digits=4)
-        
+
         display.add_meta_variable(meta1)
         display.add_meta_variable(meta2, replace=True)
-        
+
         assert display._meta_vars["value"].digits == 4
 
 
@@ -482,9 +487,9 @@ class TestAddMetaDef:
         """Test defining factor meta inline."""
         df = pd.DataFrame({"category": ["A", "B"]})
         display = Display(df, name="test")
-        
+
         result = display.add_meta_def("category", "factor", levels=["A", "B", "C"])
-        
+
         assert result is display
         assert "category" in display._meta_vars
         assert display._meta_vars["category"].type == "factor"
@@ -494,9 +499,9 @@ class TestAddMetaDef:
         """Test defining number meta inline."""
         df = pd.DataFrame({"value": [1.5, 2.7]})
         display = Display(df, name="test")
-        
+
         display.add_meta_def("value", "number", digits=4, log=True)
-        
+
         meta = display._meta_vars["value"]
         assert meta.type == "number"
         assert meta.digits == 4
@@ -504,17 +509,19 @@ class TestAddMetaDef:
 
     def test_add_meta_def_all_types(self):
         """Test defining all meta types."""
-        df = pd.DataFrame({
-            "cat": ["A"],
-            "num": [1.0],
-            "dt": [pd.Timestamp("2024-01-01")],
-            "time": [pd.Timestamp("2024-01-01 12:00")],
-            "price": [10.50],
-            "link": ["http://example.com"],
-            "graph": ["plot_data"]
-        })
+        df = pd.DataFrame(
+            {
+                "cat": ["A"],
+                "num": [1.0],
+                "dt": [pd.Timestamp("2024-01-01")],
+                "time": [pd.Timestamp("2024-01-01 12:00")],
+                "price": [10.50],
+                "link": ["http://example.com"],
+                "graph": ["plot_data"],
+            }
+        )
         display = Display(df, name="test")
-        
+
         display.add_meta_def("cat", "factor")
         display.add_meta_def("num", "number")
         display.add_meta_def("dt", "date")
@@ -522,14 +529,14 @@ class TestAddMetaDef:
         display.add_meta_def("price", "currency")
         display.add_meta_def("link", "href")
         display.add_meta_def("graph", "graph")
-        
+
         assert len(display._meta_vars) == 7
 
     def test_add_meta_def_unknown_type(self):
         """Test that unknown meta_type raises ValueError."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         with pytest.raises(ValueError, match="Unknown meta_type"):
             display.add_meta_def("col", "unknown_type")
 
@@ -539,15 +546,13 @@ class TestInferMetas:
 
     def test_infer_metas_all_columns(self):
         """Test inferring all columns."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "category": ["A", "B", "C"],
-            "value": [1.5, 2.7, 3.9]
-        })
+        df = pd.DataFrame(
+            {"id": [1, 2, 3], "category": ["A", "B", "C"], "value": [1.5, 2.7, 3.9]}
+        )
         display = Display(df, name="test")
-        
+
         result = display.infer_metas()
-        
+
         assert result is display
         assert len(display._meta_vars) == 3
         assert display._meta_vars["id"].type == "number"
@@ -556,15 +561,11 @@ class TestInferMetas:
 
     def test_infer_metas_specific_columns(self):
         """Test inferring specific columns only."""
-        df = pd.DataFrame({
-            "id": [1, 2],
-            "category": ["A", "B"],
-            "value": [1.5, 2.7]
-        })
+        df = pd.DataFrame({"id": [1, 2], "category": ["A", "B"], "value": [1.5, 2.7]})
         display = Display(df, name="test")
-        
+
         display.infer_metas(columns=["category", "value"])
-        
+
         assert len(display._meta_vars) == 2
         assert "category" in display._meta_vars
         assert "value" in display._meta_vars
@@ -574,24 +575,24 @@ class TestInferMetas:
         """Test that invalid column raises ValueError."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         with pytest.raises(ValueError, match="not found in DataFrame"):
             display.infer_metas(columns=["nonexistent"])
 
     def test_infer_metas_skip_existing(self):
         """Test that existing metas are skipped without replace."""
         from trelliscope.meta import NumberMeta
-        
+
         df = pd.DataFrame({"value": [1, 2]})
         display = Display(df, name="test")
-        
+
         # Add explicit meta with custom settings
         custom_meta = NumberMeta("value", digits=5)
         display.add_meta_variable(custom_meta)
-        
+
         # Infer without replace - should skip
         display.infer_metas()
-        
+
         # Custom settings should be preserved
         assert display._meta_vars["value"].digits == 5
 
@@ -615,11 +616,13 @@ class TestInferMetas:
     def test_infer_metas_skips_panel_column(self):
         """Test that panel column is automatically skipped during inference."""
         # Create DataFrame with unhashable objects in panel column
-        df = pd.DataFrame({
-            "panel": [{"a": 1}, {"b": 2}],  # Unhashable dicts
-            "category": ["A", "B"],
-            "value": [10, 20]
-        })
+        df = pd.DataFrame(
+            {
+                "panel": [{"a": 1}, {"b": 2}],  # Unhashable dicts
+                "category": ["A", "B"],
+                "value": [10, 20],
+            }
+        )
         display = Display(df, name="test").set_panel_column("panel")
 
         # Should not raise TypeError when trying to infer panel column
@@ -638,13 +641,13 @@ class TestGetMetaVariable:
     def test_get_meta_variable_exists(self):
         """Test getting existing meta variable."""
         from trelliscope.meta import FactorMeta
-        
+
         df = pd.DataFrame({"category": ["A", "B"]})
         display = Display(df, name="test")
-        
+
         meta = FactorMeta("category", levels=["A", "B"])
         display.add_meta_variable(meta)
-        
+
         retrieved = display.get_meta_variable("category")
         assert retrieved == meta
 
@@ -652,7 +655,7 @@ class TestGetMetaVariable:
         """Test that non-existent meta raises KeyError."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         with pytest.raises(KeyError, match="not found"):
             display.get_meta_variable("nonexistent")
 
@@ -664,21 +667,18 @@ class TestGetAllMetaVariables:
         """Test getting all metas when none exist."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         metas = display.get_all_meta_variables()
         assert metas == {}
 
     def test_get_all_meta_variables_populated(self):
         """Test getting all metas when some exist."""
-        df = pd.DataFrame({
-            "cat": ["A", "B"],
-            "val": [1, 2]
-        })
+        df = pd.DataFrame({"cat": ["A", "B"], "val": [1, 2]})
         display = Display(df, name="test")
         display.infer_metas()
-        
+
         metas = display.get_all_meta_variables()
-        
+
         assert len(metas) == 2
         assert "cat" in metas
         assert "val" in metas
@@ -688,10 +688,10 @@ class TestGetAllMetaVariables:
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
         display.infer_metas()
-        
+
         metas = display.get_all_meta_variables()
         metas["new_key"] = "should not affect display"
-        
+
         assert "new_key" not in display._meta_vars
 
 
@@ -702,20 +702,16 @@ class TestListMetaVariables:
         """Test listing when no metas exist."""
         df = pd.DataFrame({"col": [1, 2]})
         display = Display(df, name="test")
-        
+
         names = display.list_meta_variables()
         assert names == []
 
     def test_list_meta_variables_sorted(self):
         """Test that meta names are sorted."""
-        df = pd.DataFrame({
-            "z_col": [1],
-            "a_col": [2],
-            "m_col": [3]
-        })
+        df = pd.DataFrame({"z_col": [1], "a_col": [2], "m_col": [3]})
         display = Display(df, name="test")
         display.infer_metas()
-        
+
         names = display.list_meta_variables()
         assert names == ["a_col", "m_col", "z_col"]
 
@@ -725,19 +721,15 @@ class TestMetaMethodChaining:
 
     def test_meta_method_chaining(self):
         """Test chaining multiple meta methods."""
-        df = pd.DataFrame({
-            "category": ["A", "B"],
-            "value": [1.5, 2.7]
-        })
+        df = pd.DataFrame({"category": ["A", "B"], "value": [1.5, 2.7]})
         display = Display(df, name="test")
-        
+
         result = (
-            display
-            .infer_metas(columns=["category"])
+            display.infer_metas(columns=["category"])
             .add_meta_def("value", "number", digits=3)
             .set_panel_column("category")
         )
-        
+
         assert result is display
         assert len(display._meta_vars) == 2
         assert display.panel_column == "category"
@@ -748,22 +740,19 @@ class TestDisplayWrite:
 
     def test_write_creates_output_directory(self):
         """Test that write() creates output directory."""
-        import tempfile
         import shutil
-        
+        import tempfile
+
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
-            
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test")
             display.set_panel_column("plot")
             display.infer_metas()
-            
+
             result_path = display.write(output_path=output_path)
-            
+
             assert result_path.exists()
             assert result_path.is_dir()
 
@@ -774,10 +763,7 @@ class TestDisplayWrite:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
 
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test")
             display.set_panel_column("plot")
             display.infer_metas()
@@ -790,19 +776,17 @@ class TestDisplayWrite:
     def test_write_creates_metadata_csv(self):
         """Test that write() creates metadata.csv."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
-            
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "category": ["A", "B"],
-                "value": [1, 2]
-            })
+
+            df = pd.DataFrame(
+                {"plot": ["p1", "p2"], "category": ["A", "B"], "value": [1, 2]}
+            )
             display = Display(df, name="test")
             display.set_panel_column("plot")
             display.infer_metas()
-            
+
             display.write(output_path=output_path)
 
             csv_path = output_path / "displays" / "test" / "metadata.csv"
@@ -817,18 +801,15 @@ class TestDisplayWrite:
     def test_write_uses_display_path_by_default(self):
         """Test that write() uses display.path / display.name by default."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test_display", path=tmpdir)
             display.set_panel_column("plot")
             display.infer_metas()
-            
+
             result_path = display.write()
-            
+
             expected_path = Path(tmpdir) / "test_display"
             assert result_path == expected_path
             assert result_path.exists()
@@ -836,48 +817,42 @@ class TestDisplayWrite:
     def test_write_without_panel_column_raises_error(self):
         """Test that write() raises error if panel_column not set."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             df = pd.DataFrame({"value": [1, 2]})
             display = Display(df, name="test")
-            
+
             with pytest.raises(ValueError, match="panel_column must be set"):
                 display.write(output_path=tmpdir)
 
     def test_write_existing_directory_without_force_raises_error(self):
         """Test that write() raises error if directory exists and force=False."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
             output_path.mkdir()  # Create directory
-            
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test")
             display.set_panel_column("plot")
-            
+
             with pytest.raises(ValueError, match="already exists"):
                 display.write(output_path=output_path, force=False)
 
     def test_write_existing_directory_with_force_succeeds(self):
         """Test that write() succeeds if directory exists and force=True."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
             output_path.mkdir()  # Create directory
-            
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test")
             display.set_panel_column("plot")
             display.infer_metas()
-            
+
             # Should not raise
             result_path = display.write(output_path=output_path, force=True)
             assert result_path.exists()
@@ -885,19 +860,16 @@ class TestDisplayWrite:
     def test_write_returns_output_path(self):
         """Test that write() returns the output path."""
         import tempfile
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_output"
-            
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "value": [1, 2]
-            })
+
+            df = pd.DataFrame({"plot": ["p1", "p2"], "value": [1, 2]})
             display = Display(df, name="test")
             display.set_panel_column("plot")
-            
+
             result = display.write(output_path=output_path)
-            
+
             assert isinstance(result, Path)
             assert result == output_path
 
@@ -908,11 +880,9 @@ class TestDisplayWrite:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "output"
 
-            df = pd.DataFrame({
-                "plot": ["p1", "p2"],
-                "category": ["A", "B"],
-                "value": [1.5, 2.7]
-            })
+            df = pd.DataFrame(
+                {"plot": ["p1", "p2"], "category": ["A", "B"], "value": [1.5, 2.7]}
+            )
 
             output = (
                 Display(df, name="test")

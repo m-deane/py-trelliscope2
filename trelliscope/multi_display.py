@@ -14,15 +14,13 @@ root/
         └── panels/
 """
 
-from pathlib import Path
 import json
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 def create_config_json(
-    output_path: Path,
-    name: str = "Trelliscope Display",
-    display_base: str = "displays"
+    output_path: Path, name: str = "Trelliscope Display", display_base: str = "displays"
 ) -> Path:
     """
     Create config.json file at root.
@@ -45,7 +43,7 @@ def create_config_json(
         "name": name,
         "datatype": "json",
         "id": "trelliscope_root",
-        "display_base": display_base
+        "display_base": display_base,
     }
 
     config_path = output_path / "config.json"
@@ -56,8 +54,7 @@ def create_config_json(
 
 
 def create_display_list(
-    displays_dir: Path,
-    display_entries: List[Dict[str, Any]]
+    displays_dir: Path, display_entries: List[Dict[str, Any]]
 ) -> Path:
     """
     Create displayList.json file.
@@ -85,7 +82,7 @@ def create_multi_display_structure(
     output_path: Path,
     display_name: str,
     description: str = "",
-    collection_name: str = "Trelliscope Displays"
+    collection_name: str = "Trelliscope Displays",
 ) -> Dict[str, Path]:
     """
     Create proper multi-display directory structure.
@@ -135,7 +132,7 @@ def create_multi_display_structure(
         "description": description,
         "tags": [],
         "thumbnailurl": f"{display_name}/panels/0.png",
-        "order": 0
+        "order": 0,
     }
     create_display_list(displays_dir, [display_entry])
 
@@ -143,5 +140,5 @@ def create_multi_display_structure(
         "root": output_path,
         "displays_dir": displays_dir,
         "display_dir": display_dir,
-        "panels_dir": panels_dir
+        "panels_dir": panels_dir,
     }

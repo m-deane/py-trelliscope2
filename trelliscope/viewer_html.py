@@ -53,12 +53,14 @@ def generate_viewer_html(
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{title}</title>
-    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/trelliscopejs-lib@{
+        viewer_version}/dist/assets/index.css">
     <style>
         body {{
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, "Helvetica Neue", Arial, sans-serif;
         }}
         #trelliscope-root {{
             width: 100vw;
@@ -103,7 +105,8 @@ def generate_viewer_html(
         const debugLog = document.getElementById('debug-log');
         function log(msg, type = 'info') {
             console.log(msg);
-            const className = type === 'success' ? 'debug-success' : type === 'error' ? 'debug-error' : 'debug-info';
+            const className = type === 'success' ? 'debug-success' :
+                type === 'error' ? 'debug-error' : 'debug-info';
             debugLog.innerHTML += `<div class="${className}">${msg}</div>`;
             debugLog.parentElement.scrollTop = debugLog.parentElement.scrollHeight;
         }
@@ -129,7 +132,8 @@ def generate_viewer_html(
         const OriginalImage = window.Image;
         window.Image = function() {
             const img = new OriginalImage();
-            const originalSrcSet = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src').set;
+            const originalSrcSet = Object.getOwnPropertyDescriptor(
+                HTMLImageElement.prototype, 'src').set;
             Object.defineProperty(img, 'src', {
                 set: function(value) {
                     imageCount++;
@@ -146,17 +150,18 @@ def generate_viewer_html(
         log('✓ Debug interceptors active', 'success');
     </script>"""
 
-    html += f"""
+    html += """
 
     <script type="module">
-        try {{"""
+        try {"""
 
     if debug:
         html += """
             log('Loading viewer module...', 'info');"""
 
     html += f"""
-            const module = await import('https://unpkg.com/trelliscopejs-lib@{viewer_version}/dist/assets/index.js');
+            const module = await import('https://unpkg.com/trelliscopejs-lib@{
+                viewer_version}/dist/assets/index.js');
             const initFunc = window.trelliscopeApp || module.trelliscopeApp;
 
             if (typeof initFunc === 'function') {{"""
@@ -187,7 +192,8 @@ def generate_viewer_html(
                     }
 
                     const imgs = root ? root.querySelectorAll('img') : [];
-                    log(`Total images in DOM: ${imgs.length}`, imgs.length > 0 ? 'success' : 'info');
+                    log(`Total images in DOM: ${imgs.length}`,
+                        imgs.length > 0 ? 'success' : 'info');
                 }, 3000);"""
 
     html += """
