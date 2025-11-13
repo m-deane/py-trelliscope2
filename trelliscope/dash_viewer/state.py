@@ -54,10 +54,19 @@ class DisplayState:
 
             if 'layout' in state:
                 layout = state['layout']
-                self.ncol = layout.get('ncol', self.ncol)
-                self.nrow = layout.get('nrow', self.nrow)
-                self.arrangement = layout.get('arrangement', self.arrangement)
-                self.current_page = layout.get('page', self.current_page)
+                # Only override defaults if values are not None
+                ncol_val = layout.get('ncol')
+                if ncol_val is not None:
+                    self.ncol = ncol_val
+                nrow_val = layout.get('nrow')
+                if nrow_val is not None:
+                    self.nrow = nrow_val
+                arrangement_val = layout.get('arrangement')
+                if arrangement_val is not None:
+                    self.arrangement = arrangement_val
+                page_val = layout.get('page')
+                if page_val is not None:
+                    self.current_page = page_val
 
             if 'labels' in state:
                 self.active_labels = state['labels']
@@ -367,13 +376,23 @@ class DisplayState:
         """
         state = view.get('state', {})
 
-        # Restore layout
+        # Restore layout (only override if not None)
         if 'layout' in state:
             layout = state['layout']
-            self.ncol = layout.get('ncol', self.ncol)
-            self.nrow = layout.get('nrow', self.nrow)
-            self.current_page = layout.get('page', 1)
-            self.arrangement = layout.get('arrangement', self.arrangement)
+            ncol_val = layout.get('ncol')
+            if ncol_val is not None:
+                self.ncol = ncol_val
+            nrow_val = layout.get('nrow')
+            if nrow_val is not None:
+                self.nrow = nrow_val
+            page_val = layout.get('page')
+            if page_val is not None:
+                self.current_page = page_val
+            else:
+                self.current_page = 1
+            arrangement_val = layout.get('arrangement')
+            if arrangement_val is not None:
+                self.arrangement = arrangement_val
 
         # Restore labels
         if 'labels' in state:

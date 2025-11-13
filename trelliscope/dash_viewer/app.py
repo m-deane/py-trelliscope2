@@ -709,7 +709,7 @@ class DashViewer:
         print(f"📈 Panels: {len(self.cog_data)}")
         print(f"\n✨ Opening browser...")
 
-        self.app.run_server(port=port, debug=debug)
+        self.app.run(port=port, debug=debug)
 
     def show(self, port: int = 8050):
         """
