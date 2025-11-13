@@ -22,6 +22,7 @@ from trelliscope.dash_viewer.components.views import create_views_panel, update_
 from trelliscope.dash_viewer.components.search import create_search_panel, search_dataframe, get_searchable_columns
 from trelliscope.dash_viewer.components.panel_detail import create_panel_detail_modal
 from trelliscope.dash_viewer.components.layout_controls import create_layout_controls, get_layout_from_state
+from trelliscope.dash_viewer.components.label_config import create_label_config_panel, get_labelable_metas
 from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
@@ -144,12 +145,16 @@ class DashViewer:
                 # Main container
                 dbc.Row(
                     [
-                        # Left sidebar: Search + Layout + Filters + Sorts + Views
+                        # Left sidebar: Search + Layout + Labels + Filters + Sorts + Views
                         dbc.Col(
                             html.Div(
                                 [
                                     create_search_panel(),
                                     create_layout_controls(),
+                                    create_label_config_panel(
+                                        self.display_info.get('metas', []),
+                                        self.state.active_labels
+                                    ),
                                     create_filter_panel(filterable_metas, self.cog_data),
                                     create_sort_panel(sortable_metas, self.state.active_sorts),
                                     create_views_panel(self.views_manager.get_views())
@@ -741,6 +746,74 @@ class DashViewer:
                 # Return new values to trigger main callback
                 return ncol, nrow
             raise dash.exceptions.PreventUpdate
+
+        # Label Configuration Callbacks
+
+        # Toggle label info collapse
+        @app.callback(
+            Output('label-info-collapse', 'is_open'),
+            [Input('label-info-btn', 'n_clicks')],
+            [State('label-info-collapse', 'is_open')],
+            prevent_initial_call=True
+        )
+        def toggle_label_info(n_clicks, is_open):
+            """Toggle label info collapse."""
+            if n_clicks:
+                return not is_open
+            raise dash.exceptions.PreventUpdate
+
+        # Select all labels
+        @app.callback(
+            Output('label-checklist', 'value'),
+            [Input('label-select-all-btn', 'n_clicks'),
+             Input('label-clear-all-btn', 'n_clicks')],
+            [State('label-checklist', 'options')],
+            prevent_initial_call=True
+        )
+        def handle_label_select_clear(select_clicks, clear_clicks, options):
+            """Handle select all / clear all buttons."""
+            if ctx.triggered_id == 'label-select-all-btn':
+                # Select all
+                return [opt['value'] for opt in options]
+            elif ctx.triggered_id == 'label-clear-all-btn':
+                # Clear all
+                return []
+            raise dash.exceptions.PreventUpdate
+
+        # Update active labels in state when checklist changes
+        @app.callback(
+            Output('panel-grid-container', 'children', allow_duplicate=True),
+            [Input('label-checklist', 'value')],
+            [State('filtered-data-store', 'data'),
+             State('ncol-select', 'value'),
+             State('nrow-select', 'value')],
+            prevent_initial_call=True
+        )
+        def update_labels(selected_labels, filtered_data, ncol, nrow):
+            """Update labels and re-render grid."""
+            if selected_labels is None:
+                selected_labels = []
+
+            # Update state
+            self.state.active_labels = selected_labels
+
+            # Re-render grid with new labels
+            import pandas as pd
+            df = pd.DataFrame(filtered_data) if filtered_data else pd.DataFrame()
+
+            if df.empty:
+                return html.Div("No panels to display", className="text-center mt-5")
+
+            # Apply pagination
+            page_data = self.state.get_page_data(df)
+
+            return create_panel_grid(
+                page_data,
+                ncol or self.state.ncol,
+                nrow or self.state.nrow,
+                selected_labels,
+                self.display_info
+            )
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """
