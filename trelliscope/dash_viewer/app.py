@@ -18,6 +18,8 @@ from trelliscope.dash_viewer.components.filters import create_filter_panel
 from trelliscope.dash_viewer.components.sorts import create_sort_panel, update_sort_panel_state
 from trelliscope.dash_viewer.components.controls import create_control_bar, create_header
 from trelliscope.dash_viewer.components.layout import create_panel_grid
+from trelliscope.dash_viewer.components.views import create_views_panel, update_views_panel_state
+from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
 class DashViewer:
@@ -63,6 +65,9 @@ class DashViewer:
 
         # Initialize state
         self.state = DisplayState(display_info=self.display_info)
+
+        # Initialize views manager
+        self.views_manager = ViewsManager(self.display_path)
 
         # App instance
         self.app: Optional[dash.Dash] = None
@@ -135,12 +140,13 @@ class DashViewer:
                 # Main container
                 dbc.Row(
                     [
-                        # Left sidebar: Filters + Sorts
+                        # Left sidebar: Filters + Sorts + Views
                         dbc.Col(
                             html.Div(
                                 [
                                     create_filter_panel(filterable_metas, self.cog_data),
-                                    create_sort_panel(sortable_metas, self.state.active_sorts)
+                                    create_sort_panel(sortable_metas, self.state.active_sorts),
+                                    create_views_panel(self.views_manager.get_views())
                                 ],
                                 style={
                                     'height': '100vh',
