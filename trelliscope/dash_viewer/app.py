@@ -135,6 +135,7 @@ class DashViewer:
                 dcc.Store(id='filtered-data-store', data=filtered_data.to_dict('records')),
                 dcc.Store(id='current-page-store', data=self.state.current_page),
                 dcc.Store(id='active-sorts-store', data=self.state.active_sorts),
+                dcc.Store(id='current-panel-index', storage_type='memory'),
 
                 # Header
                 create_header(self.display_info),
@@ -541,6 +542,120 @@ class DashViewer:
             if n_clicks:
                 return ""
             raise dash.exceptions.PreventUpdate
+
+        # Callback: Open panel detail modal
+        @app.callback(
+            [
+                Output('panel-detail-modal', 'is_open'),
+                Output('panel-detail-title', 'children'),
+                Output('panel-detail-content', 'children'),
+                Output('panel-detail-metadata', 'children'),
+                Output('panel-detail-prev', 'disabled'),
+                Output('panel-detail-next', 'disabled'),
+                Output('current-panel-index', 'data')
+            ],
+            [
+                Input({'type': 'panel-item', 'index': ALL}, 'n_clicks'),
+                Input('panel-detail-close', 'n_clicks'),
+                Input('panel-detail-close-footer', 'n_clicks'),
+                Input('panel-detail-prev', 'n_clicks'),
+                Input('panel-detail-next', 'n_clicks')
+            ],
+            [
+                State('current-panel-index', 'data'),
+                State('filtered-data-store', 'data'),
+                State('panel-detail-modal', 'is_open')
+            ],
+            prevent_initial_call=True
+        )
+        def handle_panel_modal(
+            panel_clicks, close_clicks, close_footer_clicks, prev_clicks, next_clicks,
+            current_index, filtered_data, is_open
+        ):
+            """Handle panel detail modal interactions."""
+            from trelliscope.dash_viewer.components.panel_detail import (
+                format_panel_content,
+                format_metadata_table,
+                get_panel_navigation_info
+            )
+            import pandas as pd
+
+            if not ctx.triggered:
+                raise dash.exceptions.PreventUpdate
+
+            triggered_id = ctx.triggered_id
+
+            # Close modal
+            if triggered_id in ['panel-detail-close', 'panel-detail-close-footer']:
+                return False, "", "", "", True, True, None
+
+            # Convert filtered data to DataFrame
+            if not filtered_data:
+                raise dash.exceptions.PreventUpdate
+
+            df = pd.DataFrame(filtered_data)
+            total_panels = len(df)
+
+            if total_panels == 0:
+                raise dash.exceptions.PreventUpdate
+
+            # Determine panel index
+            panel_index = None
+
+            if isinstance(triggered_id, dict) and triggered_id.get('type') == 'panel-item':
+                # Panel was clicked
+                clicked_index = triggered_id['index']
+                # Find this index in filtered data
+                panel_index = df.index[df.index == clicked_index].tolist()
+                if panel_index:
+                    panel_index = df.index.get_loc(panel_index[0])
+                else:
+                    panel_index = 0
+
+            elif triggered_id == 'panel-detail-prev' and current_index is not None:
+                # Navigate to previous
+                panel_index = max(0, current_index - 1)
+
+            elif triggered_id == 'panel-detail-next' and current_index is not None:
+                # Navigate to next
+                panel_index = min(total_panels - 1, current_index + 1)
+
+            elif current_index is not None:
+                panel_index = current_index
+            else:
+                panel_index = 0
+
+            # Get panel data
+            panel_row = df.iloc[panel_index]
+
+            # Get panel path and type
+            panel_path = panel_row.get('_panel_full_path')
+            panel_type = panel_row.get('_panel_type', 'unknown')
+
+            if not panel_path:
+                return False, "", "Panel not available", "", True, True, None
+
+            # Format panel content
+            from pathlib import Path
+            panel_content = format_panel_content(Path(panel_path), panel_type)
+
+            # Format metadata
+            metadata_table = format_metadata_table(panel_row.to_dict(), self.display_info)
+
+            # Get navigation info
+            title, prev_disabled, next_disabled = get_panel_navigation_info(
+                panel_index, total_panels
+            )
+
+            return (
+                True,  # is_open
+                title,
+                panel_content,
+                metadata_table,
+                prev_disabled,
+                next_disabled,
+                panel_index  # Store current index
+            )
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """

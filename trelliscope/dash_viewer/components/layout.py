@@ -141,7 +141,7 @@ def create_panel_grid(
                 )
             )
 
-        # Create panel container
+        # Create panel container (clickable for modal)
         panel_container = html.Div(
             [
                 html.Div(
@@ -166,10 +166,14 @@ def create_panel_grid(
                     }
                 ) if label_elements else html.Div()
             ],
+            id={'type': 'panel-item', 'index': int(idx)},
             className='panel-container',
             style={
-                'marginBottom': '0'
-            }
+                'marginBottom': '0',
+                'cursor': 'pointer',
+                'transition': 'transform 0.2s, box-shadow 0.2s'
+            },
+            n_clicks=0
         )
 
         grid_items.append(panel_container)

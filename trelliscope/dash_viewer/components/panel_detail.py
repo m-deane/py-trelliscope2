@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 from dash import html, dcc
 import base64
 from pathlib import Path
+import pandas as pd
 
 
 def create_panel_detail_modal() -> dbc.Modal:
