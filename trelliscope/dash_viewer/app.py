@@ -20,6 +20,7 @@ from trelliscope.dash_viewer.components.controls import create_control_bar, crea
 from trelliscope.dash_viewer.components.layout import create_panel_grid
 from trelliscope.dash_viewer.components.views import create_views_panel, update_views_panel_state
 from trelliscope.dash_viewer.components.search import create_search_panel, search_dataframe, get_searchable_columns
+from trelliscope.dash_viewer.components.panel_detail import create_panel_detail_modal
 from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
@@ -192,7 +193,10 @@ class DashViewer:
                     ],
                     className='g-0',
                     style={'height': '100vh'}
-                )
+                ),
+
+                # Panel detail modal
+                create_panel_detail_modal()
             ],
             style={'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}
         )
