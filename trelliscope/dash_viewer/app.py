@@ -23,6 +23,10 @@ from trelliscope.dash_viewer.components.search import create_search_panel, searc
 from trelliscope.dash_viewer.components.panel_detail import create_panel_detail_modal
 from trelliscope.dash_viewer.components.layout_controls import create_layout_controls, get_layout_from_state
 from trelliscope.dash_viewer.components.label_config import create_label_config_panel, get_labelable_metas
+from trelliscope.dash_viewer.components.keyboard import create_keyboard_help_modal, create_keyboard_help_button
+from trelliscope.dash_viewer.components.export import create_export_panel, prepare_csv_export, prepare_view_export, generate_export_filename
+from trelliscope.dash_viewer.components.notifications import create_toast_container, create_success_toast, create_error_toast, create_info_toast
+from trelliscope.dash_viewer.components.help import create_help_modal, create_help_button
 from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
@@ -157,7 +161,8 @@ class DashViewer:
                                     ),
                                     create_filter_panel(filterable_metas, self.cog_data),
                                     create_sort_panel(sortable_metas, self.state.active_sorts),
-                                    create_views_panel(self.views_manager.get_views())
+                                    create_views_panel(self.views_manager.get_views()),
+                                    create_export_panel()
                                 ],
                                 style={
                                     'height': '100vh',
@@ -208,7 +213,16 @@ class DashViewer:
                 ),
 
                 # Panel detail modal
-                create_panel_detail_modal()
+                create_panel_detail_modal(),
+
+                # Help modal
+                create_help_modal(),
+
+                # Keyboard shortcuts modal
+                create_keyboard_help_modal(),
+
+                # Toast notifications container
+                create_toast_container()
             ],
             style={'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'}
         )
@@ -818,6 +832,127 @@ class DashViewer:
                 selected_labels,
                 self.display_info
             )
+
+        # Help Modal Callbacks
+
+        # Open/close help modal
+        @app.callback(
+            Output('help-modal', 'is_open'),
+            [Input('show-help-btn', 'n_clicks'),
+             Input('help-modal-close', 'n_clicks'),
+             Input('quick-start-help-btn', 'n_clicks')],
+            [State('help-modal', 'is_open')],
+            prevent_initial_call=True
+        )
+        def toggle_help_modal(show_clicks, close_clicks, quickstart_clicks, is_open):
+            """Toggle help modal."""
+            if ctx.triggered_id in ['show-help-btn', 'quick-start-help-btn']:
+                return True
+            elif ctx.triggered_id == 'help-modal-close':
+                return False
+            return is_open
+
+        # Open keyboard help from help modal
+        @app.callback(
+            [Output('keyboard-help-modal', 'is_open', allow_duplicate=True),
+             Output('help-modal', 'is_open', allow_duplicate=True)],
+            [Input('help-show-shortcuts-btn', 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def open_keyboard_help_from_help(n_clicks):
+            """Open keyboard help modal from help modal."""
+            if n_clicks:
+                return True, False  # Open keyboard modal, close help modal
+            raise dash.exceptions.PreventUpdate
+
+        # Keyboard Help Modal Callbacks
+
+        # Open/close keyboard help modal
+        @app.callback(
+            Output('keyboard-help-modal', 'is_open'),
+            [Input('show-keyboard-help-btn', 'n_clicks'),
+             Input('keyboard-help-close', 'n_clicks')],
+            [State('keyboard-help-modal', 'is_open')],
+            prevent_initial_call=True
+        )
+        def toggle_keyboard_help_modal(show_clicks, close_clicks, is_open):
+            """Toggle keyboard help modal."""
+            if ctx.triggered_id == 'show-keyboard-help-btn':
+                return True
+            elif ctx.triggered_id == 'keyboard-help-close':
+                return False
+            return is_open
+
+        # Export Callbacks
+
+        # Toggle export info collapse
+        @app.callback(
+            Output('export-info-collapse', 'is_open'),
+            [Input('export-info-btn', 'n_clicks')],
+            [State('export-info-collapse', 'is_open')],
+            prevent_initial_call=True
+        )
+        def toggle_export_info(n_clicks, is_open):
+            """Toggle export info collapse."""
+            if n_clicks:
+                return not is_open
+            raise dash.exceptions.PreventUpdate
+
+        # Export CSV
+        @app.callback(
+            Output('download-csv', 'data'),
+            [Input('export-csv-btn', 'n_clicks')],
+            [State('filtered-data-store', 'data')],
+            prevent_initial_call=True
+        )
+        def export_csv(n_clicks, filtered_data):
+            """Export filtered data as CSV."""
+            if n_clicks and filtered_data:
+                import pandas as pd
+                df = pd.DataFrame(filtered_data)
+                csv_content = prepare_csv_export(df, self.display_info, include_internal=False)
+                filename = generate_export_filename(self.display_name, 'data', 'csv')
+                return dict(content=csv_content, filename=filename)
+            raise dash.exceptions.PreventUpdate
+
+        # Export View
+        @app.callback(
+            Output('download-view', 'data'),
+            [Input('export-view-btn', 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def export_view(n_clicks):
+            """Export current view configuration as JSON."""
+            if n_clicks:
+                view_json = prepare_view_export(
+                    filters=self.state.active_filters,
+                    sorts=self.state.active_sorts,
+                    labels=self.state.active_labels,
+                    layout={
+                        'ncol': self.state.ncol,
+                        'nrow': self.state.nrow,
+                        'arrangement': self.state.arrangement
+                    },
+                    view_name=f"{self.display_name}_view"
+                )
+                filename = generate_export_filename(self.display_name, 'view', 'json')
+                return dict(content=view_json, filename=filename)
+            raise dash.exceptions.PreventUpdate
+
+        # Export Config
+        @app.callback(
+            Output('download-config', 'data'),
+            [Input('export-config-btn', 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def export_config(n_clicks):
+            """Export display configuration as JSON."""
+            if n_clicks:
+                from trelliscope.dash_viewer.components.export import prepare_config_export
+                config_json = prepare_config_export(self.display_info)
+                filename = generate_export_filename(self.display_name, 'config', 'json')
+                return dict(content=config_json, filename=filename)
+            raise dash.exceptions.PreventUpdate
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """

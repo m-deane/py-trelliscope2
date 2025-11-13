@@ -157,27 +157,41 @@ def create_header(display_info: dict) -> html.Div:
     html.Div
         Header container
     """
+    from trelliscope.dash_viewer.components.help import create_help_button
+    from trelliscope.dash_viewer.components.keyboard import create_keyboard_help_button
+    import dash_bootstrap_components as dbc
+
     name = display_info.get('name', 'Trelliscope Display')
     description = display_info.get('description', '')
 
     return html.Div(
         [
-            html.H3(
-                name,
-                style={
-                    'margin': 0,
-                    'fontWeight': 'bold',
-                    'color': '#212529'
-                }
-            ),
-            html.P(
-                description,
-                style={
-                    'margin': '5px 0 0 0',
-                    'color': '#6c757d',
-                    'fontSize': '14px'
-                }
-            ) if description else html.Div()
+            dbc.Row([
+                dbc.Col([
+                    html.H3(
+                        name,
+                        style={
+                            'margin': 0,
+                            'fontWeight': 'bold',
+                            'color': '#212529'
+                        }
+                    ),
+                    html.P(
+                        description,
+                        style={
+                            'margin': '5px 0 0 0',
+                            'color': '#6c757d',
+                            'fontSize': '14px'
+                        }
+                    ) if description else html.Div()
+                ], width=10),
+                dbc.Col([
+                    html.Div([
+                        create_keyboard_help_button(),
+                        create_help_button()
+                    ], className="d-flex gap-2 justify-content-end")
+                ], width=2)
+            ], align='center')
         ],
         style={
             'padding': '20px',
