@@ -109,7 +109,7 @@ def create_control_bar(
                                     html.Label("Columns:", className='me-2', style={'fontSize': '13px'}),
                                     dcc.Dropdown(
                                         id='ncol-select',
-                                        options=[{'label': str(i), 'value': i} for i in range(1, 7)],
+                                        options=[{'label': str(i), 'value': i} for i in range(1, 11)],
                                         value=ncol,
                                         clearable=False,
                                         style={'width': '70px', 'fontSize': '13px'},
@@ -118,7 +118,7 @@ def create_control_bar(
                                     html.Label("Rows:", className='me-2', style={'fontSize': '13px'}),
                                     dcc.Dropdown(
                                         id='nrow-select',
-                                        options=[{'label': str(i), 'value': i} for i in range(1, 7)],
+                                        options=[{'label': str(i), 'value': i} for i in range(1, 11)],
                                         value=nrow,
                                         clearable=False,
                                         style={'width': '70px', 'fontSize': '13px'},

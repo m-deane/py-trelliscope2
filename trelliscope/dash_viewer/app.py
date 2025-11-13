@@ -21,6 +21,7 @@ from trelliscope.dash_viewer.components.layout import create_panel_grid
 from trelliscope.dash_viewer.components.views import create_views_panel, update_views_panel_state
 from trelliscope.dash_viewer.components.search import create_search_panel, search_dataframe, get_searchable_columns
 from trelliscope.dash_viewer.components.panel_detail import create_panel_detail_modal
+from trelliscope.dash_viewer.components.layout_controls import create_layout_controls, get_layout_from_state
 from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
@@ -143,11 +144,12 @@ class DashViewer:
                 # Main container
                 dbc.Row(
                     [
-                        # Left sidebar: Search + Filters + Sorts + Views
+                        # Left sidebar: Search + Layout + Filters + Sorts + Views
                         dbc.Col(
                             html.Div(
                                 [
                                     create_search_panel(),
+                                    create_layout_controls(),
                                     create_filter_panel(filterable_metas, self.cog_data),
                                     create_sort_panel(sortable_metas, self.state.active_sorts),
                                     create_views_panel(self.views_manager.get_views())
@@ -656,6 +658,89 @@ class DashViewer:
                 next_disabled,
                 panel_index  # Store current index
             )
+
+        # Layout Controls Callbacks
+
+        # Sync ncol slider and input
+        @app.callback(
+            [Output('layout-ncol-slider', 'value'),
+             Output('layout-ncol-input', 'value')],
+            [Input('layout-ncol-slider', 'value'),
+             Input('layout-ncol-input', 'value')],
+            prevent_initial_call=True
+        )
+        def sync_ncol(slider_val, input_val):
+            """Sync ncol slider and input."""
+            if ctx.triggered_id == 'layout-ncol-slider':
+                return slider_val, slider_val
+            else:
+                # Constrain input value
+                val = max(1, min(10, input_val if input_val else 1))
+                return val, val
+
+        # Sync nrow slider and input
+        @app.callback(
+            [Output('layout-nrow-slider', 'value'),
+             Output('layout-nrow-input', 'value')],
+            [Input('layout-nrow-slider', 'value'),
+             Input('layout-nrow-input', 'value')],
+            prevent_initial_call=True
+        )
+        def sync_nrow(slider_val, input_val):
+            """Sync nrow slider and input."""
+            if ctx.triggered_id == 'layout-nrow-slider':
+                return slider_val, slider_val
+            else:
+                # Constrain input value
+                val = max(1, min(10, input_val if input_val else 1))
+                return val, val
+
+        # Update panels per page display
+        @app.callback(
+            Output('layout-panels-per-page', 'children'),
+            [Input('layout-ncol-slider', 'value'),
+             Input('layout-nrow-slider', 'value')]
+        )
+        def update_panels_per_page(ncol, nrow):
+            """Update panels per page display."""
+            panels_per_page = (ncol or 1) * (nrow or 1)
+            return f"Panels per page: {panels_per_page}"
+
+        # Reset layout to defaults
+        @app.callback(
+            [Output('layout-ncol-slider', 'value', allow_duplicate=True),
+             Output('layout-nrow-slider', 'value', allow_duplicate=True),
+             Output('layout-arrangement', 'value')],
+            [Input('reset-layout-btn', 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def reset_layout(n_clicks):
+            """Reset layout to default values."""
+            if n_clicks:
+                # Get defaults from display info
+                layout = get_layout_from_state(self.display_info)
+                return layout['ncol'], layout['nrow'], layout['arrangement']
+            raise dash.exceptions.PreventUpdate
+
+        # Apply layout changes to main controls
+        @app.callback(
+            [Output('ncol-select', 'value'),
+             Output('nrow-select', 'value')],
+            [Input('apply-layout-btn', 'n_clicks')],
+            [State('layout-ncol-slider', 'value'),
+             State('layout-nrow-slider', 'value'),
+             State('layout-arrangement', 'value')],
+            prevent_initial_call=True
+        )
+        def apply_layout(n_clicks, ncol, nrow, arrangement):
+            """Apply layout changes from sidebar to main display."""
+            if n_clicks:
+                # Update DisplayState arrangement if changed
+                if arrangement != self.state.arrangement:
+                    self.state.arrangement = arrangement
+                # Return new values to trigger main callback
+                return ncol, nrow
+            raise dash.exceptions.PreventUpdate
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """
