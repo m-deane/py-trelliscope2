@@ -19,6 +19,7 @@ from trelliscope.dash_viewer.components.sorts import create_sort_panel, update_s
 from trelliscope.dash_viewer.components.controls import create_control_bar, create_header
 from trelliscope.dash_viewer.components.layout import create_panel_grid
 from trelliscope.dash_viewer.components.views import create_views_panel, update_views_panel_state
+from trelliscope.dash_viewer.components.search import create_search_panel, search_dataframe, get_searchable_columns
 from trelliscope.dash_viewer.views_manager import ViewsManager
 
 
@@ -140,10 +141,11 @@ class DashViewer:
                 # Main container
                 dbc.Row(
                     [
-                        # Left sidebar: Filters + Sorts + Views
+                        # Left sidebar: Search + Filters + Sorts + Views
                         dbc.Col(
                             html.Div(
                                 [
+                                    create_search_panel(),
                                     create_filter_panel(filterable_metas, self.cog_data),
                                     create_sort_panel(sortable_metas, self.state.active_sorts),
                                     create_views_panel(self.views_manager.get_views())
@@ -198,7 +200,7 @@ class DashViewer:
     def _register_callbacks(self, app: dash.Dash):
         """Register all Dash callbacks."""
 
-        # Callback: Update filtered data and panel grid when filters or sorts change
+        # Callback: Update filtered data and panel grid when filters, search, or sorts change
         @app.callback(
             [
                 Output('filtered-data-store', 'data'),
@@ -208,11 +210,14 @@ class DashViewer:
                 Output('prev-page-btn', 'disabled'),
                 Output('next-page-btn', 'disabled'),
                 Output('active-sorts-list', 'children'),
-                Output('clear-sorts-btn', 'disabled')
+                Output('clear-sorts-btn', 'disabled'),
+                Output('search-results-summary', 'children')
             ],
             [
                 Input({'type': 'filter', 'varname': ALL}, 'value'),
                 Input('clear-filters-btn', 'n_clicks'),
+                Input('global-search-input', 'value'),
+                Input('clear-search-btn', 'n_clicks'),
                 Input('prev-page-btn', 'n_clicks'),
                 Input('next-page-btn', 'n_clicks'),
                 Input('ncol-select', 'value'),
@@ -233,7 +238,9 @@ class DashViewer:
             prevent_initial_call=False
         )
         def update_display(
-            filter_values, clear_filters_clicks, prev_clicks, next_clicks,
+            filter_values, clear_filters_clicks,
+            search_query, clear_search_clicks,
+            prev_clicks, next_clicks,
             ncol, nrow,
             add_sort_value,
             sort_asc_clicks, sort_desc_clicks, sort_remove_clicks,
@@ -265,6 +272,10 @@ class DashViewer:
                     varname = filter_id['varname']
                     self.state.set_filter(varname, value)
 
+            # Handle clear search
+            if triggered_id == 'clear-search-btn':
+                search_query = None
+
             # Handle sorting actions
             if triggered_id == 'add-sort-select' and add_sort_value:
                 # Add new sort (ascending by default)
@@ -281,15 +292,29 @@ class DashViewer:
                 elif triggered_id['type'] == 'sort-remove':
                     self.state.remove_sort(triggered_id['varname'])
 
-            # Apply filters and sorts
+            # Apply filters
             filtered_data = self.state.filter_data(self.cog_data)
-            sorted_data = self.state.sort_data(filtered_data)
+
+            # Apply search (on top of filters)
+            searchable_cols = get_searchable_columns(self.display_info)
+            searched_data, match_count, total_before_search = search_dataframe(
+                filtered_data,
+                search_query if search_query else "",
+                searchable_cols
+            )
+
+            # Format search summary
+            from trelliscope.dash_viewer.components.search import format_search_summary
+            search_summary = format_search_summary(match_count, total_before_search, search_query if search_query else "")
+
+            # Apply sorts
+            sorted_data = self.state.sort_data(searched_data)
 
             # Get page data
             page_data = self.state.get_page_data(sorted_data)
 
             # Calculate totals
-            total_panels = len(filtered_data)
+            total_panels = len(searched_data)
             total_pages = self.state.get_total_pages(total_panels)
 
             # Calculate panel range
@@ -324,14 +349,15 @@ class DashViewer:
             )
 
             return (
-                filtered_data.to_dict('records'),
+                searched_data.to_dict('records'),
                 panel_grid,
                 panel_count_text,
                 page_info_text,
                 prev_disabled,
                 next_disabled,
                 active_sorts_list,
-                clear_sorts_disabled
+                clear_sorts_disabled,
+                search_summary
             )
 
         # Callback: Save current view
@@ -486,6 +512,31 @@ class DashViewer:
                 return view_items, view_options
             else:
                 raise dash.exceptions.PreventUpdate
+
+        # Callback: Toggle search info
+        @app.callback(
+            Output('search-info-collapse', 'is_open'),
+            [Input('search-info-btn', 'n_clicks')],
+            [State('search-info-collapse', 'is_open')],
+            prevent_initial_call=True
+        )
+        def toggle_search_info(n_clicks, is_open):
+            """Toggle search info panel."""
+            if n_clicks:
+                return not is_open
+            return is_open
+
+        # Callback: Clear search on button click
+        @app.callback(
+            Output('global-search-input', 'value'),
+            [Input('clear-search-btn', 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def clear_search_input(n_clicks):
+            """Clear search input."""
+            if n_clicks:
+                return ""
+            raise dash.exceptions.PreventUpdate
 
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """
