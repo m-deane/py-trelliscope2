@@ -124,7 +124,9 @@ class TestMatplotlibAdapterConfiguration:
 
     def test_initialization_custom(self):
         """Test custom configuration."""
-        adapter = MatplotlibAdapter(output_format="svg", dpi=150, bbox_inches="standard")
+        adapter = MatplotlibAdapter(
+            output_format="svg", dpi=150, bbox_inches="standard"
+        )
         assert adapter.format == "svg"
         assert adapter.dpi == 150
         assert adapter.bbox_inches == "standard"
