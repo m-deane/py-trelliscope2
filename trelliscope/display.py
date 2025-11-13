@@ -178,7 +178,8 @@ class Display:
         }
 
         content = json.dumps(components, sort_keys=True, default=str)
-        return hashlib.md5(content.encode()).hexdigest()
+        # MD5 used for keysig generation, not security
+        return hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()
 
     def set_panel_column(self, column: str) -> "Display":
         """
