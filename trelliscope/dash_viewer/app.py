@@ -334,6 +334,159 @@ class DashViewer:
                 clear_sorts_disabled
             )
 
+        # Callback: Save current view
+        @app.callback(
+            [
+                Output('saved-views-list', 'children'),
+                Output('load-view-select', 'options'),
+                Output('save-view-name', 'value')
+            ],
+            [Input('save-view-btn', 'n_clicks')],
+            [
+                State('save-view-name', 'value'),
+                State('filtered-data-store', 'data'),
+                State('current-page-store', 'data')
+            ],
+            prevent_initial_call=True
+        )
+        def save_view(n_clicks, view_name, filtered_data, current_page):
+            """Save current display state as a named view."""
+            if not n_clicks or not view_name:
+                raise dash.exceptions.PreventUpdate
+
+            # Create view from current state
+            view = self.state.save_view(view_name)
+
+            # Save to disk
+            success = self.views_manager.save_view(view)
+
+            if success:
+                # Update views list
+                views = self.views_manager.get_views()
+                view_items, view_options = update_views_panel_state(views)
+                return view_items, view_options, ""  # Clear input
+            else:
+                raise dash.exceptions.PreventUpdate
+
+        # Callback: Load view from dropdown
+        @app.callback(
+            [
+                Output({'type': 'filter', 'varname': ALL}, 'value'),
+                Output('ncol-select', 'value'),
+                Output('nrow-select', 'value'),
+                Output('add-sort-select', 'value')
+            ],
+            [Input('load-view-select', 'value')],
+            [State({'type': 'filter', 'varname': ALL}, 'id')],
+            prevent_initial_call=True
+        )
+        def load_view_from_dropdown(view_index, filter_ids):
+            """Load a saved view from dropdown selection."""
+            if view_index is None:
+                raise dash.exceptions.PreventUpdate
+
+            # Get view
+            view = self.views_manager.get_view(int(view_index))
+            if not view:
+                raise dash.exceptions.PreventUpdate
+
+            # Load into state
+            self.state.load_view(view)
+
+            # Prepare filter values
+            filter_values = []
+            for filter_id in filter_ids:
+                varname = filter_id['varname']
+                filter_val = self.state.active_filters.get(varname)
+                filter_values.append(filter_val)
+
+            return (
+                filter_values,
+                self.state.ncol,
+                self.state.nrow,
+                None  # Clear sort selector
+            )
+
+        # Callback: Load view from button in list
+        @app.callback(
+            [
+                Output({'type': 'filter', 'varname': ALL}, 'value', allow_duplicate=True),
+                Output('ncol-select', 'value', allow_duplicate=True),
+                Output('nrow-select', 'value', allow_duplicate=True)
+            ],
+            [Input({'type': 'load-view-btn', 'index': ALL}, 'n_clicks')],
+            [State({'type': 'filter', 'varname': ALL}, 'id')],
+            prevent_initial_call=True
+        )
+        def load_view_from_button(n_clicks_list, filter_ids):
+            """Load view when clicking load button in views list."""
+            if not any(n_clicks_list) or not ctx.triggered:
+                raise dash.exceptions.PreventUpdate
+
+            # Get which button was clicked
+            triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            if not triggered_id:
+                raise dash.exceptions.PreventUpdate
+
+            import json
+            button_id = json.loads(triggered_id)
+            view_index = button_id['index']
+
+            # Get view
+            view = self.views_manager.get_view(view_index)
+            if not view:
+                raise dash.exceptions.PreventUpdate
+
+            # Load into state
+            self.state.load_view(view)
+
+            # Prepare filter values
+            filter_values = []
+            for filter_id in filter_ids:
+                varname = filter_id['varname']
+                filter_val = self.state.active_filters.get(varname)
+                filter_values.append(filter_val)
+
+            return (
+                filter_values,
+                self.state.ncol,
+                self.state.nrow
+            )
+
+        # Callback: Delete view
+        @app.callback(
+            [
+                Output('saved-views-list', 'children', allow_duplicate=True),
+                Output('load-view-select', 'options', allow_duplicate=True)
+            ],
+            [Input({'type': 'delete-view-btn', 'index': ALL}, 'n_clicks')],
+            prevent_initial_call=True
+        )
+        def delete_view(n_clicks_list):
+            """Delete a saved view."""
+            if not any(n_clicks_list) or not ctx.triggered:
+                raise dash.exceptions.PreventUpdate
+
+            # Get which button was clicked
+            triggered_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            if not triggered_id:
+                raise dash.exceptions.PreventUpdate
+
+            import json
+            button_id = json.loads(triggered_id)
+            view_index = button_id['index']
+
+            # Delete from disk
+            success = self.views_manager.delete_view(view_index)
+
+            if success:
+                # Update views list
+                views = self.views_manager.get_views()
+                view_items, view_options = update_views_panel_state(views)
+                return view_items, view_options
+            else:
+                raise dash.exceptions.PreventUpdate
+
     def run(self, port: int = 8050, debug: Optional[bool] = None):
         """
         Start Dash server.
