@@ -8,6 +8,7 @@ from dash import html, dcc
 import base64
 from pathlib import Path
 import pandas as pd
+import plotly.graph_objects as go
 
 
 def create_panel_detail_modal() -> dbc.Modal:
@@ -126,18 +127,43 @@ def format_panel_content(panel_path: Path, panel_type: str) -> html.Div:
             return html.Div(f"Error loading image: {e}", style={'color': 'red'})
 
     elif panel_type == 'plotly':
-        # Display plotly HTML in iframe
+        # Extract Plotly figure from HTML and render as dcc.Graph
         try:
-            return html.Iframe(
-                src=str(panel_path),
+            from trelliscope.dash_viewer.components.panels import PanelRenderer
+            
+            # Extract figure from HTML file
+            fig = PanelRenderer.extract_plotly_figure(panel_path)
+            
+            # Update figure size for modal display
+            fig.update_layout(
+                height=600,
+                width=None,  # Let it be responsive
+                margin=dict(l=50, r=50, t=50, b=50)
+            )
+            
+            return dcc.Graph(
+                figure=fig,
+                config={
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+                    'responsive': True
+                },
                 style={
                     'width': '100%',
                     'height': '60vh',
-                    'border': 'none'
+                    'minHeight': '500px'
                 }
             )
         except Exception as e:
-            return html.Div(f"Error loading panel: {e}", style={'color': 'red'})
+            return html.Div(
+                f"Error loading Plotly panel: {str(e)}",
+                style={
+                    'color': 'red',
+                    'padding': '20px',
+                    'textAlign': 'center'
+                }
+            )
 
     else:
         return html.Div("Unknown panel type", style={'color': 'gray'})

@@ -501,3 +501,55 @@ class GraphMeta(MetaVariable):
         if self.idvarname:
             result["idvarname"] = self.idvarname
         return result
+
+
+@attrs.define
+class StringMeta(MetaVariable):
+    """
+    String/text meta variable for categorical text data.
+
+    Parameters
+    ----------
+    varname : str
+        Column name.
+    label : str, optional
+        Display label.
+    desc : str, optional
+        Description.
+
+    Attributes
+    ----------
+    type : str
+        Always "string".
+    """
+
+    type: str = attrs.field(init=False, default="string")
+
+    @classmethod
+    def from_series(
+        cls,
+        series: pd.Series,
+        varname: Optional[str] = None,
+        **kwargs
+    ) -> "StringMeta":
+        """
+        Create StringMeta from string series.
+
+        Parameters
+        ----------
+        series : pd.Series
+            String/object series.
+        varname : str, optional
+            Column name.
+        **kwargs
+            Additional parameters.
+
+        Returns
+        -------
+        StringMeta
+            Meta variable for string data.
+        """
+        if varname is None:
+            varname = str(series.name)
+
+        return cls(varname=varname, **kwargs)

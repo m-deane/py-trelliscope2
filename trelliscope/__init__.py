@@ -19,6 +19,7 @@ from trelliscope.meta import (
     CurrencyMeta,
     HrefMeta,
     GraphMeta,
+    StringMeta,
 )
 from trelliscope.panel_interface import (
     PanelInterface,
@@ -55,6 +56,7 @@ __all__ = [
     "CurrencyMeta",
     "HrefMeta",
     "GraphMeta",
+    "StringMeta",
     "PanelInterface",
     "LocalPanelInterface",
     "RESTPanelInterface",

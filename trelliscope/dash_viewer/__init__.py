@@ -9,7 +9,7 @@ from pathlib import Path
 from trelliscope.dash_viewer.app import DashViewer
 
 
-def create_dash_app(display, mode='external', debug=False, force_write=False):
+def create_dash_app(display, mode='external', debug=False, force_write=True):
     """
     Create a Dash viewer app from a Display object.
 
@@ -25,7 +25,7 @@ def create_dash_app(display, mode='external', debug=False, force_write=False):
         Viewer mode: 'external' (opens browser) or 'inline' (for notebooks)
     debug : bool, default=False
         Enable Dash debug mode
-    force_write : bool, default=False
+    force_write : bool, default=True
         If True, force rewriting the display even if it already exists.
         Passed to display.write(force=force_write).
 
@@ -44,12 +44,12 @@ def create_dash_app(display, mode='external', debug=False, force_write=False):
     ...     .set_panel_column("plot")
     ...     .infer_metas())
     >>>
-    >>> # Create and run viewer
+    >>> # Create and run viewer (force_write=True by default)
     >>> app = create_dash_app(display)
     >>> app.run(port=8053)
     >>>
-    >>> # Force rewrite display if it already exists
-    >>> app = create_dash_app(display, force_write=True)
+    >>> # Skip rewriting if display already exists
+    >>> app = create_dash_app(display, force_write=False)
     >>> app.run(port=8053)
     """
     # Get the display path - check if already written

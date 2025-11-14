@@ -142,12 +142,10 @@ class DisplayState:
                         ]
 
             elif meta_type == 'string':
-                # Text search filter
-                if isinstance(filter_value, str) and filter_value:
+                # Multi-select filter (same as factor)
+                if isinstance(filter_value, list) and filter_value:
                     filtered = filtered[
-                        filtered[varname].astype(str).str.contains(
-                            filter_value, case=False, na=False
-                        )
+                        filtered[varname].astype(str).isin(filter_value)
                     ]
 
         return filtered

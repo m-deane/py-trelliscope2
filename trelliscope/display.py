@@ -486,7 +486,7 @@ class Display:
         self,
         varname: str,
         meta_type: str,
-        replace: bool = False,
+        replace: bool = True,
         **kwargs
     ) -> "Display":
         """
@@ -498,7 +498,7 @@ class Display:
             Column name for meta variable.
         meta_type : str
             Meta type: "factor", "number", "date", "time", "currency", "href", "graph".
-        replace : bool, default=False
+        replace : bool, default=True
             If True, replace existing meta with same varname.
         **kwargs
             Additional parameters for the meta type constructor.
@@ -526,6 +526,7 @@ class Display:
             CurrencyMeta,
             HrefMeta,
             GraphMeta,
+            StringMeta,
         )
 
         type_map = {
@@ -536,6 +537,7 @@ class Display:
             "currency": CurrencyMeta,
             "href": HrefMeta,
             "graph": GraphMeta,
+            "string": StringMeta,
         }
 
         if meta_type not in type_map:

@@ -212,42 +212,110 @@ class PanelRenderer:
             html_content = f.read()
 
         # Try method 1: Extract from Plotly.newPlot() call
-        # Pattern: Plotly.newPlot('div-id', data, layout, config)
-        pattern = r'Plotly\.newPlot\([\'"][\w-]+[\'"]\s*,\s*(\[.*?\])\s*,\s*(\{.*?\})\s*,\s*\{.*?\}\s*\)'
-
-        match = re.search(pattern, html_content, re.DOTALL)
-
-        if match:
+        # Plotly HTML files contain Plotly.newPlot(divId, data, layout, config)
+        # We need to extract the data and layout arrays/objects
+        # Handle multiline content and binary-encoded data (bdata)
+        
+        def find_balanced_brackets(text, start_pos, open_char='[', close_char=']'):
+            """Find balanced brackets starting from start_pos."""
+            if text[start_pos] != open_char:
+                return None
+            depth = 0
+            pos = start_pos
+            while pos < len(text):
+                if text[pos] == open_char:
+                    depth += 1
+                elif text[pos] == close_char:
+                    depth -= 1
+                    if depth == 0:
+                        return pos + 1
+                pos += 1
+            return None
+        
+        def find_balanced_braces(text, start_pos):
+            """Find balanced braces starting from start_pos."""
+            return find_balanced_brackets(text, start_pos, '{', '}')
+        
+        # Find Plotly.newPlot call
+        plotly_match = re.search(r'Plotly\.newPlot\(\s*["\']([^"\']+)["\']', html_content)
+        if plotly_match:
             try:
-                data_json = match.group(1)
-                layout_json = match.group(2)
-
-                # Parse JSON
-                data = json.loads(data_json)
-                layout = json.loads(layout_json)
-
-                return go.Figure(data=data, layout=layout)
-            except json.JSONDecodeError:
+                # Find the position after the div ID
+                start_pos = plotly_match.end()
+                
+                # Skip whitespace and comma
+                while start_pos < len(html_content) and html_content[start_pos] in ' \n\r\t,':
+                    start_pos += 1
+                
+                # Extract data array (starts with [)
+                if html_content[start_pos] == '[':
+                    data_end = find_balanced_brackets(html_content, start_pos, '[', ']')
+                    if data_end:
+                        data_str = html_content[start_pos:data_end]
+                        
+                        # Skip whitespace and comma after data
+                        layout_start = data_end
+                        while layout_start < len(html_content) and html_content[layout_start] in ' \n\r\t,':
+                            layout_start += 1
+                        
+                        # Extract layout object (starts with {)
+                        if html_content[layout_start] == '{':
+                            layout_end = find_balanced_braces(html_content, layout_start)
+                            if layout_end:
+                                layout_str = html_content[layout_start:layout_end]
+                                
+                                # Parse JSON
+                                data = json.loads(data_str)
+                                layout = json.loads(layout_str)
+                                
+                                # Create figure from extracted data
+                                return go.Figure(data=data, layout=layout)
+            except (json.JSONDecodeError, ValueError, IndexError):
+                # If parsing fails, try next method
                 pass
 
-        # Try method 2: Look for plotly_data div with JSON
-        pattern2 = r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>'
-        matches = re.findall(pattern2, html_content, re.DOTALL)
-
+        # Try method 2: Look for script tags with JSON data
+        # This handles both application/json and text/javascript with embedded JSON
+        pattern2a = r'<script[^>]*type=["\']application/json["\'][^>]*id=["\']([^"\']+)["\'][^>]*>(.*?)</script>'
+        pattern2b = r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>'
+        
+        # Try pattern with id first (more specific)
+        matches = re.findall(pattern2a, html_content, re.DOTALL)
+        for script_id, match_content in matches:
+            try:
+                fig_dict = json.loads(match_content.strip())
+                if 'data' in fig_dict or 'layout' in fig_dict:
+                    return go.Figure(fig_dict)
+            except (json.JSONDecodeError, ValueError):
+                continue
+        
+        # Try pattern without id
+        matches = re.findall(pattern2b, html_content, re.DOTALL)
         for match_content in matches:
             try:
-                fig_dict = json.loads(match_content)
+                fig_dict = json.loads(match_content.strip())
+                if 'data' in fig_dict or 'layout' in fig_dict:
+                    return go.Figure(fig_dict)
+            except (json.JSONDecodeError, ValueError):
+                continue
+
+        # Method 3: Try to extract from window.PlotlyData (if present)
+        pattern3 = r'window\.PlotlyData\s*=\s*(\{.*?\});'
+        match3 = re.search(pattern3, html_content, re.DOTALL)
+        if match3:
+            try:
+                fig_dict = json.loads(match3.group(1))
                 if 'data' in fig_dict or 'layout' in fig_dict:
                     return go.Figure(fig_dict)
             except json.JSONDecodeError:
-                continue
-
-        # Try method 3: Use plotly.io.from_html (fallback)
-        try:
-            import plotly.io as pio
-            return pio.from_html(html_content)
-        except Exception as e:
-            raise ValueError(f"Could not extract Plotly figure from HTML: {e}")
+                pass
+        
+        # If all methods fail, raise informative error
+        raise ValueError(
+            "Could not extract Plotly figure from HTML. "
+            "The HTML file may not contain a valid Plotly figure, or the format is not supported. "
+            "Please ensure the HTML was generated using plotly.io.to_html() or plotly.offline.plot()."
+        )
 
     @staticmethod
     def create_panel_container(

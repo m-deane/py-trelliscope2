@@ -1,0 +1,1 @@
+1. metadata - create string/factor baed filter dropdowns that support multi-select filtering
