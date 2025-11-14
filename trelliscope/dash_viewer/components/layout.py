@@ -67,11 +67,22 @@ def create_panel_grid(
         for meta in display_info.get('metas', [])
     }
 
-    for idx, row in panel_data.iterrows():
+    for position, (idx, row) in enumerate(panel_data.iterrows()):
         # Get panel path and type
         panel_path = row.get('_panel_full_path')
         panel_type = row.get('_panel_type', 'unknown')
-        panel_key = str(row.get('panelKey', idx))
+        
+        # Generate unique panel key
+        # Always combine panelKey (if available) with index/position to ensure uniqueness
+        # Multiple panels can have the same panelKey, so we need the DataFrame index to make it unique
+        if 'panelKey' in row and pd.notna(row.get('panelKey')):
+            # Combine panelKey with index to ensure uniqueness
+            # Format: "key-{panelKey}-{idx}" ensures uniqueness even if panelKey duplicates
+            panel_key = f"key-{row.get('panelKey')}-{idx}"
+        else:
+            # Use index with position as fallback to ensure absolute uniqueness
+            # Format: "idx-position" ensures uniqueness across all scenarios
+            panel_key = f"{idx}-{position}"
 
         if panel_path is None or not Path(panel_path).exists():
             panel_component = html.Div(

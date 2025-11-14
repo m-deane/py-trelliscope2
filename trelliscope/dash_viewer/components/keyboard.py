@@ -97,44 +97,77 @@ def create_keyboard_listener() -> html.Div:
         Container with keyboard event listeners
     """
     return html.Div([
-        # Keyboard event store
-        dcc.Store(id='keyboard-event-store', storage_type='memory'),
+        # Keyboard event store - updated by clientside callback
+        dcc.Store(id='keyboard-event-store', storage_type='memory', data=None),
 
-        # JavaScript clientside callback for keyboard events
+        # Hidden input to capture keyboard events (triggers Dash callbacks)
+        dcc.Input(
+            id='keyboard-input',
+            type='text',
+            style={'display': 'none'},
+            value='',
+            debounce=False
+        ),
+
+        # JavaScript to capture keyboard events
         html.Script("""
-            document.addEventListener('keydown', function(e) {
-                // Don't capture if typing in an input
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    // Allow Esc to blur inputs
-                    if (e.key === 'Escape') {
-                        e.target.blur();
+            (function() {
+                function initKeyboardListener() {
+                    var input = document.getElementById('keyboard-input');
+                    
+                    if (!input) {
+                        setTimeout(initKeyboardListener, 100);
+                        return;
                     }
-                    return;
-                }
 
-                // Capture keyboard events
-                var event_data = {
-                    key: e.key,
-                    ctrlKey: e.ctrlKey,
-                    shiftKey: e.shiftKey,
-                    altKey: e.altKey,
-                    timestamp: Date.now()
-                };
+                    // Add keyboard event listener to document
+                    document.addEventListener('keydown', function(e) {
+                        // Don't capture if typing in an input (except Esc)
+                        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                            if (e.target.id === 'keyboard-input') {
+                                // Allow our hidden input to work
+                                return;
+                            }
+                            // Allow Esc to blur inputs
+                            if (e.key === 'Escape') {
+                                e.target.blur();
+                            }
+                            return;
+                        }
 
-                // Store event (this will trigger Dash callbacks)
-                var store = document.getElementById('keyboard-event-store');
-                if (store) {
-                    store.dispatchEvent(new CustomEvent('input', {
-                        detail: event_data
-                    }));
-                }
+                        // Capture keyboard events
+                        var event_data = {
+                            key: e.key,
+                            ctrlKey: e.ctrlKey,
+                            shiftKey: e.shiftKey,
+                            altKey: e.altKey,
+                            timestamp: Date.now()
+                        };
 
-                // Prevent default for our shortcuts
-                var preventKeys = ['ArrowLeft', 'ArrowRight', 'Home', 'End', '/', '?', '+', '-'];
-                if (preventKeys.includes(e.key) || (e.ctrlKey && ['s', 'r'].includes(e.key.toLowerCase()))) {
-                    e.preventDefault();
+                        // Update hidden input value to trigger Dash callback
+                        // Use JSON string as value
+                        var jsonStr = JSON.stringify(event_data);
+                        input.value = jsonStr;
+                        
+                        // Trigger input event to notify Dash
+                        var event = new Event('input', { bubbles: true });
+                        input.dispatchEvent(event);
+
+                        // Prevent default for our shortcuts
+                        var preventKeys = ['ArrowLeft', 'ArrowRight', 'Home', 'End', '/', '?', '+', '-'];
+                        if (preventKeys.includes(e.key) || (e.ctrlKey && ['s', 'r'].includes(e.key.toLowerCase()))) {
+                            e.preventDefault();
+                        }
+                    });
                 }
-            });
+                
+                // Initialize when page loads
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initKeyboardListener);
+                } else {
+                    setTimeout(initKeyboardListener, 100);
+                }
+            })();
         """)
     ])
 

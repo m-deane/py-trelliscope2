@@ -23,11 +23,39 @@ from trelliscope.dash_viewer.components.search import create_search_panel, searc
 from trelliscope.dash_viewer.components.panel_detail import create_panel_detail_modal
 from trelliscope.dash_viewer.components.layout_controls import create_layout_controls, get_layout_from_state
 from trelliscope.dash_viewer.components.label_config import create_label_config_panel, get_labelable_metas
-from trelliscope.dash_viewer.components.keyboard import create_keyboard_help_modal, create_keyboard_help_button
+from trelliscope.dash_viewer.components.keyboard import (
+    create_keyboard_help_modal, 
+    create_keyboard_help_button,
+    create_keyboard_listener,
+    get_keyboard_action
+)
 from trelliscope.dash_viewer.components.export import create_export_panel, prepare_csv_export, prepare_view_export, generate_export_filename
 from trelliscope.dash_viewer.components.notifications import create_toast_container, create_success_toast, create_error_toast, create_info_toast
 from trelliscope.dash_viewer.components.help import create_help_modal, create_help_button
 from trelliscope.dash_viewer.views_manager import ViewsManager
+
+
+def _convert_paths_to_strings(data_dict):
+    """
+    Convert any Path objects in a dictionary to strings for JSON serialization.
+    
+    Parameters
+    ----------
+    data_dict : list of dict
+        List of dictionaries (records from DataFrame.to_dict('records'))
+    
+    Returns
+    -------
+    list of dict
+        Same structure with Path objects converted to strings
+    """
+    if isinstance(data_dict, list):
+        for record in data_dict:
+            if isinstance(record, dict):
+                for key, value in record.items():
+                    if isinstance(value, Path):
+                        record[key] = str(value)
+    return data_dict
 
 
 class DashViewer:
@@ -113,11 +141,12 @@ class DashViewer:
                 suppress_callback_exceptions=True
             )
 
-        # Create layout
-        app.layout = self._create_layout()
-
-        # Register callbacks
+        # Register callbacks FIRST (before setting layout)
+        # This ensures callbacks are available when layout is validated
         self._register_callbacks(app)
+        
+        # Create layout AFTER callbacks are registered
+        app.layout = self._create_layout()
 
         return app
 
@@ -135,10 +164,13 @@ class DashViewer:
         total_panels = len(filtered_data)
         total_pages = self.state.get_total_pages(total_panels)
 
+        # Convert DataFrame to dict, ensuring Path objects are converted to strings
+        filtered_data_dict = _convert_paths_to_strings(filtered_data.to_dict('records'))
+        
         return html.Div(
             [
                 # Store components for state
-                dcc.Store(id='filtered-data-store', data=filtered_data.to_dict('records')),
+                dcc.Store(id='filtered-data-store', data=filtered_data_dict),
                 dcc.Store(id='current-page-store', data=self.state.current_page),
                 dcc.Store(id='active-sorts-store', data=self.state.active_sorts),
                 dcc.Store(id='current-panel-index', storage_type='memory'),
@@ -221,6 +253,9 @@ class DashViewer:
                 # Keyboard shortcuts modal
                 create_keyboard_help_modal(),
 
+                # Keyboard event listener
+                create_keyboard_listener(),
+
                 # Toast notifications container
                 create_toast_container()
             ],
@@ -241,7 +276,8 @@ class DashViewer:
                 Output('next-page-btn', 'disabled'),
                 Output('active-sorts-list', 'children'),
                 Output('clear-sorts-btn', 'disabled'),
-                Output('search-results-summary', 'children')
+                Output('search-results-summary', 'children'),
+                Output('current-page-store', 'data')
             ],
             [
                 Input({'type': 'filter', 'varname': ALL}, 'value'),
@@ -279,25 +315,48 @@ class DashViewer:
             current_page
         ):
             # Determine what triggered the callback
-            triggered_id = ctx.triggered_id
+            triggered_id = ctx.triggered_id if ctx.triggered_id else None
+            
+            # Debug logging
+            if self.debug:
+                print(f"[DEBUG] ===== Callback triggered =====")
+                print(f"[DEBUG] Triggered ID: {triggered_id}")
+                print(f"[DEBUG] Triggered prop: {ctx.triggered[0]['prop_id'] if ctx.triggered else 'None'}")
+                print(f"[DEBUG] Current page from state: {self.state.current_page}, from store: {current_page}")
+                print(f"[DEBUG] Input values - prev_clicks: {prev_clicks}, next_clicks: {next_clicks}")
+
+            # Handle pagination FIRST (before syncing from store)
+            # This ensures pagination updates take precedence
+            if triggered_id == 'prev-page-btn':
+                self.state.prev_page()
+                if self.debug:
+                    print(f"[DEBUG] Previous page clicked. New page: {self.state.current_page}")
+            elif triggered_id == 'next-page-btn':
+                # Calculate total pages before updating (need filtered data)
+                filtered_data_temp = self.state.filter_data(self.cog_data)
+                total_pages = self.state.get_total_pages(len(filtered_data_temp))
+                self.state.next_page(total_pages)
+                if self.debug:
+                    print(f"[DEBUG] Next page clicked. New page: {self.state.current_page}, Total pages: {total_pages}")
+            
+            # Sync current_page from store if it's different (handles initial load)
+            # BUT: Don't sync if we just handled pagination (we want to use the updated state value)
+            if current_page is not None and current_page != self.state.current_page:
+                if triggered_id not in ['prev-page-btn', 'next-page-btn']:
+                    self.state.current_page = current_page
+                    if self.debug:
+                        print(f"[DEBUG] Synced page from store: {current_page}")
 
             # Update layout if changed
             if ncol != self.state.ncol or nrow != self.state.nrow:
                 self.state.set_layout(ncol=ncol, nrow=nrow)
 
-            # Handle pagination
-            if triggered_id == 'prev-page-btn':
-                self.state.prev_page()
-            elif triggered_id == 'next-page-btn':
-                filtered_data = self.state.filter_data(self.cog_data)
-                total_pages = self.state.get_total_pages(len(filtered_data))
-                self.state.next_page(total_pages)
-
             # Handle clear filters
             if triggered_id == 'clear-filters-btn':
                 self.state.clear_filters()
-            else:
-                # Update filters from inputs
+            elif triggered_id not in ['prev-page-btn', 'next-page-btn']:
+                # Update filters from inputs (but NOT if pagination was triggered)
+                # set_filter() resets page to 1, which would override pagination
                 for filter_id, value in zip(filter_ids, filter_values):
                     varname = filter_id['varname']
                     self.state.set_filter(varname, value)
@@ -352,6 +411,16 @@ class DashViewer:
             start_panel = (self.state.current_page - 1) * panels_per_page + 1
             end_panel = min(self.state.current_page * panels_per_page, total_panels)
 
+            # Debug pagination
+            if self.debug:
+                print(f"[DEBUG] Pagination state:")
+                print(f"  Current page: {self.state.current_page}")
+                print(f"  Total pages: {total_pages}")
+                print(f"  Total panels: {total_panels}")
+                print(f"  Panels per page: {panels_per_page}")
+                print(f"  Page data length: {len(page_data)}")
+                print(f"  Panel range: {start_panel}-{end_panel}")
+
             # Create panel grid
             panel_grid = create_panel_grid(
                 panel_data=page_data,
@@ -379,7 +448,7 @@ class DashViewer:
             )
 
             return (
-                searched_data.to_dict('records'),
+                _convert_paths_to_strings(searched_data.to_dict('records')),
                 panel_grid,
                 panel_count_text,
                 page_info_text,
@@ -387,7 +456,8 @@ class DashViewer:
                 next_disabled,
                 active_sorts_list,
                 clear_sorts_disabled,
-                search_summary
+                search_summary,
+                self.state.current_page  # Update current page store
             )
 
         # Callback: Save current view
@@ -428,8 +498,8 @@ class DashViewer:
         @app.callback(
             [
                 Output({'type': 'filter', 'varname': ALL}, 'value'),
-                Output('ncol-select', 'value'),
-                Output('nrow-select', 'value'),
+                Output('ncol-select', 'value', allow_duplicate=True),
+                Output('nrow-select', 'value', allow_duplicate=True),
                 Output('add-sort-select', 'value')
             ],
             [Input('load-view-select', 'value')],
@@ -628,14 +698,24 @@ class DashViewer:
             panel_index = None
 
             if isinstance(triggered_id, dict) and triggered_id.get('type') == 'panel-item':
-                # Panel was clicked
+                # Panel was clicked - verify an actual click occurred
+                # panel_clicks is a list matching ALL panel items in order
+                # Check if any panel actually has n_clicks > 0
+                if not panel_clicks or not any(clicks and clicks > 0 for clicks in panel_clicks):
+                    # No actual click detected - this might be a layout update
+                    raise dash.exceptions.PreventUpdate
+                
+                # Find which panel was clicked
                 clicked_index = triggered_id['index']
                 # Find this index in filtered data
-                panel_index = df.index[df.index == clicked_index].tolist()
-                if panel_index:
-                    panel_index = df.index.get_loc(panel_index[0])
+                panel_indices = df.index.tolist()
+                if clicked_index in panel_indices:
+                    panel_index = df.index.get_loc(clicked_index)
                 else:
-                    panel_index = 0
+                    # Index not found, try to find by position
+                    # The triggered_id['index'] should match a DataFrame index
+                    # If not found, prevent update
+                    raise dash.exceptions.PreventUpdate
 
             elif triggered_id == 'panel-detail-prev' and current_index is not None:
                 # Navigate to previous
@@ -747,8 +827,8 @@ class DashViewer:
 
         # Apply layout changes to main controls
         @app.callback(
-            [Output('ncol-select', 'value'),
-             Output('nrow-select', 'value')],
+            [Output('ncol-select', 'value', allow_duplicate=True),
+             Output('nrow-select', 'value', allow_duplicate=True)],
             [Input('apply-layout-btn', 'n_clicks')],
             [State('layout-ncol-slider', 'value'),
              State('layout-nrow-slider', 'value'),
@@ -871,17 +951,170 @@ class DashViewer:
         @app.callback(
             Output('keyboard-help-modal', 'is_open'),
             [Input('show-keyboard-help-btn', 'n_clicks'),
-             Input('keyboard-help-close', 'n_clicks')],
+             Input('keyboard-help-close', 'n_clicks'),
+             Input('keyboard-event-store', 'data')],
             [State('keyboard-help-modal', 'is_open')],
             prevent_initial_call=True
         )
-        def toggle_keyboard_help_modal(show_clicks, close_clicks, is_open):
+        def toggle_keyboard_help_modal(show_clicks, close_clicks, keyboard_event, is_open):
             """Toggle keyboard help modal."""
-            if ctx.triggered_id == 'show-keyboard-help-btn':
+            triggered_id = ctx.triggered_id
+            
+            if triggered_id == 'show-keyboard-help-btn':
                 return True
-            elif ctx.triggered_id == 'keyboard-help-close':
+            elif triggered_id == 'keyboard-help-close':
                 return False
+            elif triggered_id == 'keyboard-event-store' and keyboard_event:
+                # Handle keyboard shortcut for help
+                action = get_keyboard_action(
+                    keyboard_event.get('key', ''),
+                    keyboard_event.get('ctrlKey', False),
+                    keyboard_event.get('shiftKey', False),
+                    keyboard_event.get('altKey', False)
+                )
+                if action == 'toggle_help':
+                    return not is_open
+            
             return is_open
+
+        # Handle keyboard shortcuts - parse from hidden input
+        @app.callback(
+            Output('keyboard-event-store', 'data'),
+            [Input('keyboard-input', 'value')],
+            prevent_initial_call=True
+        )
+        def parse_keyboard_input(input_value):
+            """Parse keyboard input and store event data."""
+            if not input_value:
+                raise dash.exceptions.PreventUpdate
+            
+            try:
+                import json
+                event_data = json.loads(input_value)
+                return event_data
+            except (json.JSONDecodeError, TypeError):
+                raise dash.exceptions.PreventUpdate
+
+        # Handle keyboard shortcuts
+        @app.callback(
+            [
+                Output('prev-page-btn', 'n_clicks', allow_duplicate=True),
+                Output('next-page-btn', 'n_clicks', allow_duplicate=True),
+                Output('global-search-input', 'value', allow_duplicate=True),
+                Output('keyboard-input', 'value', allow_duplicate=True),
+                Output('keyboard-help-modal', 'is_open', allow_duplicate=True),
+                Output('current-page-store', 'data', allow_duplicate=True)
+            ],
+            [Input('keyboard-event-store', 'data')],
+            [
+                State('prev-page-btn', 'n_clicks'),
+                State('next-page-btn', 'n_clicks'),
+                State('global-search-input', 'value'),
+                State('current-page-store', 'data'),
+                State('filtered-data-store', 'data'),
+                State('keyboard-help-modal', 'is_open')
+            ],
+            prevent_initial_call=True
+        )
+        def handle_keyboard_shortcuts(
+            keyboard_event,
+            prev_clicks, next_clicks, search_value,
+            current_page, filtered_data, help_modal_open
+        ):
+            """Handle keyboard shortcuts."""
+            if not keyboard_event:
+                raise dash.exceptions.PreventUpdate
+            
+            key = keyboard_event.get('key', '')
+            ctrl = keyboard_event.get('ctrlKey', False)
+            shift = keyboard_event.get('shiftKey', False)
+            alt = keyboard_event.get('altKey', False)
+            
+            action = get_keyboard_action(key, ctrl, shift, alt)
+            
+            if self.debug:
+                print(f"[DEBUG] Keyboard shortcut: {key} -> {action}")
+            
+            # Handle actions
+            if action == 'prev_page':
+                # Trigger previous page click
+                return (
+                    (prev_clicks or 0) + 1,
+                    dash.no_update,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    dash.no_update  # current-page-store
+                )
+            elif action == 'next_page':
+                # Trigger next page click
+                return (
+                    dash.no_update,
+                    (next_clicks or 0) + 1,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    dash.no_update  # current-page-store
+                )
+            elif action == 'first_page':
+                # Go to first page - update state and trigger refresh
+                self.state.current_page = 1
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    1  # Update current-page-store to trigger main callback
+                )
+            elif action == 'last_page':
+                # Go to last page
+                import pandas as pd
+                df = pd.DataFrame(filtered_data) if filtered_data else pd.DataFrame()
+                total_pages = self.state.get_total_pages(len(df))
+                new_page = total_pages if total_pages > 0 else 1
+                self.state.current_page = new_page
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    new_page  # Update current-page-store to trigger main callback
+                )
+            elif action == 'focus_search':
+                # Focus search input - will be handled by clientside callback
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    dash.no_update
+                )
+            elif action == 'clear_search':
+                # Clear search
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    "",
+                    '',  # Clear keyboard input
+                    dash.no_update,
+                    dash.no_update
+                )
+            elif action == 'toggle_help':
+                # Toggle keyboard help modal
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    dash.no_update,
+                    '',  # Clear keyboard input
+                    not help_modal_open,
+                    dash.no_update
+                )
+            
+            # Unknown action or no action
+            raise dash.exceptions.PreventUpdate
 
         # Export Callbacks
 
@@ -954,7 +1187,7 @@ class DashViewer:
                 return dict(content=config_json, filename=filename)
             raise dash.exceptions.PreventUpdate
 
-    def run(self, port: int = 8050, debug: Optional[bool] = None):
+    def run(self, port: int = 8050, debug: Optional[bool] = None, host: str = '127.0.0.1'):
         """
         Start Dash server.
 
@@ -964,6 +1197,8 @@ class DashViewer:
             Port number (default: 8050)
         debug : bool, optional
             Enable debug mode (default: use instance setting)
+        host : str
+            Host address to bind to (default: '127.0.0.1')
         """
         if debug is None:
             debug = self.debug
@@ -975,24 +1210,24 @@ class DashViewer:
         # Run based on mode
         if self.mode == "inline":
             try:
-                self.app.run_server(mode="inline", port=port, debug=debug)
+                self.app.run_server(mode="inline", port=port, debug=debug, host=host)
             except AttributeError:
                 print("Error: jupyter-dash not available. Falling back to external mode.")
-                self._run_external(port, debug)
+                self._run_external(port, debug, host)
 
         elif self.mode == "jupyterlab":
             try:
-                self.app.run_server(mode="jupyterlab", port=port, debug=debug)
+                self.app.run_server(mode="jupyterlab", port=port, debug=debug, host=host)
             except AttributeError:
                 print("Error: jupyter-dash not available. Falling back to external mode.")
-                self._run_external(port, debug)
+                self._run_external(port, debug, host)
 
         else:  # external
-            self._run_external(port, debug)
+            self._run_external(port, debug, host)
 
-    def _run_external(self, port: int, debug: bool):
+    def _run_external(self, port: int, debug: bool, host: str = '127.0.0.1'):
         """Run in external browser mode."""
-        url = f"http://localhost:{port}"
+        url = f"http://{host}:{port}"
 
         def open_browser():
             time.sleep(1.5)
@@ -1006,7 +1241,21 @@ class DashViewer:
         print(f"📈 Panels: {len(self.cog_data)}")
         print(f"\n✨ Opening browser...")
 
-        self.app.run(port=port, debug=debug)
+        # Use Flask's run method directly to avoid Dash's enable_dev_tools issue
+        # Dash's run() tries to register error handlers after first request, causing AssertionError
+        # By using Flask's run() directly, we bypass this issue
+        # Disable reloader in Jupyter notebooks (it conflicts with IPython kernel)
+        try:
+            # Check if we're in a Jupyter/IPython environment
+            from IPython import get_ipython
+            in_jupyter = get_ipython() is not None
+        except ImportError:
+            in_jupyter = False
+        
+        # Disable reloader if in Jupyter or if debug is False
+        use_reloader = debug and not in_jupyter
+        
+        self.app.server.run(port=port, debug=debug, host=host, use_reloader=use_reloader)
 
     def show(self, port: int = 8050):
         """
