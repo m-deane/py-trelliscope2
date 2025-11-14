@@ -171,9 +171,9 @@ class DisplayLoader:
         if panel_col not in self._cog_data.columns:
             return
 
-        # Add full paths
+        # Add full paths (convert to strings for JSON serialization)
         self._cog_data['_panel_full_path'] = self._cog_data[panel_col].apply(
-            lambda p: panel_base_path / Path(p).name if pd.notna(p) else None
+            lambda p: str(panel_base_path / Path(p).name) if pd.notna(p) else None
         )
 
         # Detect panel type from file extension
@@ -182,14 +182,14 @@ class DisplayLoader:
         )
 
     @staticmethod
-    def _detect_panel_type(panel_path: Path) -> str:
+    def _detect_panel_type(panel_path) -> str:
         """
         Detect panel type from file extension.
 
         Parameters
         ----------
-        panel_path : Path
-            Path to panel file
+        panel_path : str or Path
+            Path to panel file (string or Path object)
 
         Returns
         -------
@@ -198,6 +198,10 @@ class DisplayLoader:
         """
         if panel_path is None:
             return "unknown"
+
+        # Convert to Path if it's a string
+        if isinstance(panel_path, str):
+            panel_path = Path(panel_path)
 
         ext = panel_path.suffix.lower()
 
