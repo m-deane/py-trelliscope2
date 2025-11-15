@@ -21,23 +21,18 @@
     <div id="trelliscope-root" class="trelliscope-not-spa"></div>
 
     <script type="module">
-        // Load module with esm.sh bundling (includes all dependencies)
-        const module = await import('https://esm.sh/trelliscopejs-lib@0.7.16?bundle');
+        try {
+            const module = await import('https://unpkg.com/trelliscopejs-lib@0.7.16/dist/assets/index.js');
+            const initFunc = window.trelliscopeApp || module.trelliscopeApp;
 
-        // Get the initialization function - try multiple possibilities
-        // The library creates window.trelliscopeApp which is the main entry point
-        let initFunc = window.trelliscopeApp || module.trelliscopeApp;
-
-        if (typeof initFunc === 'function') {
-            console.log('Initializing Trelliscope viewer...');
-            // R API pattern: trelliscopeApp(id, config_path)
-            // Note: Pass path to displayInfo.json, not the config object
-            initFunc('trelliscope-root', './basic_viewer_demo/displayInfo.json');
-        } else {
-            console.error('trelliscopeApp function not found!');
-            console.error('window.trelliscopeApp:', typeof window.trelliscopeApp);
-            console.error('module.trelliscopeApp:', typeof module.trelliscopeApp);
-            console.error('Available module exports:', Object.keys(module));
+            if (typeof initFunc === 'function') {
+                console.log('Initializing Trelliscope viewer...');
+                initFunc('trelliscope-root', './config.json');
+            } else {
+                console.error('trelliscopeApp function not found!');
+            }
+        } catch (error) {
+            console.error('Error loading viewer:', error);
         }
     </script>
 </body>
