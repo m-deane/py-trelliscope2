@@ -75,6 +75,12 @@ pip install -e .
 # Install with visualization extras
 pip install -e ".[viz]"  # matplotlib, plotly
 
+# Install with Dash viewer
+pip install -e ".[dash]"  # dash, dash-bootstrap-components
+
+# Install Jupyter integration
+pip install -e ".[jupyter]"  # jupyter-dash
+
 # Install all extras
 pip install -e ".[all]"
 ```
@@ -92,12 +98,16 @@ pytest --cov=trelliscope --cov-report=html
 pytest tests/unit/test_display.py
 pytest tests/unit/test_meta.py
 
+# Run Dash viewer tests
+pytest tests/dash_viewer/
+
 # Run single test
 pytest tests/unit/test_display.py::test_display_creation -v
 ```
 
 ### Viewer Testing
 
+**Static HTML Viewer** (trelliscopejs-lib):
 ```bash
 # Start HTTP server for examples
 cd examples/output
@@ -106,6 +116,15 @@ python3 -m http.server 8000
 # View displays at:
 # http://localhost:8000/
 # http://localhost:8000/{display_name}/
+```
+
+**Interactive Dash Viewer**:
+```bash
+# Run Dash viewer demo
+python examples/phase3_complete_demo.py
+
+# Access at:
+# http://localhost:8053
 ```
 
 ### Panel Server (REST API)
@@ -146,6 +165,29 @@ trelliscope/
 │   ├── matplotlib_adapter.py
 │   ├── plotly_adapter.py
 │   └── manager.py
+├── dash_viewer/             # Interactive Dash viewer
+│   ├── __init__.py
+│   ├── app.py               # Main Dash application
+│   ├── state.py             # State management
+│   ├── loader.py            # Display loading utilities
+│   ├── performance.py       # Performance monitoring
+│   ├── views_manager.py     # Views persistence
+│   ├── assets/
+│   │   └── style.css        # Responsive CSS
+│   └── components/          # UI components
+│       ├── filters.py       # Filter controls
+│       ├── sorts.py         # Sort controls
+│       ├── controls.py      # Control bar
+│       ├── layout.py        # Panel grid
+│       ├── views.py         # Views management
+│       ├── search.py        # Global search
+│       ├── panel_detail.py  # Detail modal
+│       ├── layout_controls.py # Layout configuration
+│       ├── label_config.py  # Label configuration
+│       ├── keyboard.py      # Keyboard shortcuts
+│       ├── export.py        # Export functionality
+│       ├── notifications.py # Toast notifications
+│       └── help.py          # Help documentation
 └── utils/                   # Utility functions
     ├── __init__.py
     └── validation.py
@@ -172,6 +214,22 @@ trelliscope/
 - Delegates to visualization library adapters (matplotlib, plotly)
 - Handles figure object conversion to files
 - Error-resilient rendering
+
+**DashViewer** (`dash_viewer/app.py`): Interactive Plotly Dash viewer application
+- Complete web-based interface for exploring displays
+- Features: filters, sorting, search, views, panel details, keyboard shortcuts
+- Responsive design (mobile/tablet/desktop)
+- 15+ modular components with 20+ callbacks
+
+**DisplayState** (`dash_viewer/state.py`): State management for Dash viewer
+- Centralized state (filters, sorts, layout, labels, views)
+- State serialization/deserialization
+- Validation and type checking
+
+**ViewsManager** (`dash_viewer/views_manager.py`): Views persistence layer
+- Save/load/delete named views
+- JSON-based storage
+- View metadata tracking
 
 ## displayInfo.json Required Fields
 
@@ -263,6 +321,55 @@ R examples in `examples/output/r_example_static/` use this:
 - htmlwidgets framework
 - Incompatible with modern viewer
 
+## Dash Viewer Architecture
+
+### Component Organization
+
+The Dash viewer follows a modular component architecture with clear separation of concerns:
+
+**State Layer** (`state.py`, `loader.py`):
+- `DisplayState`: Centralized state management (filters, sorts, layout, labels, views)
+- `DisplayLoader`: Load display data from JSON files
+- Immutable state updates with validation
+
+**Component Layer** (`components/`):
+- Each component is self-contained (layout, callbacks, styling)
+- Components communicate through Dash callbacks
+- No direct component-to-component dependencies
+
+**Callback Pattern**:
+```python
+@callback(
+    Output('component-id', 'property'),
+    Input('trigger-id', 'property'),
+    State('state-id', 'property')
+)
+def update_component(trigger_value, current_state):
+    # Update logic here
+    return updated_value
+```
+
+### Adding New Components
+
+1. Create new file in `components/` (e.g., `my_component.py`)
+2. Define layout function returning dash components
+3. Define callback functions decorated with `@callback`
+4. Import and integrate in `app.py`
+5. Add tests in `tests/dash_viewer/`
+
+### State Management Pattern
+
+```python
+# Get current state
+state = DisplayState.from_dict(state_dict)
+
+# Update state immutably
+new_state = state.apply_filter(filter_spec)
+
+# Serialize for storage
+state_json = state.to_dict()
+```
+
 ## Common Development Tasks
 
 ### Creating a Display
@@ -285,6 +392,20 @@ display = (
 )
 ```
 
+### Running the Dash Viewer
+
+```python
+from trelliscope.dash_viewer import create_app
+
+# Load display and create app
+app = create_app(display_path="path/to/my_display")
+
+# Run server
+app.run(debug=True, port=8053)
+
+# Access at: http://localhost:8053
+```
+
 ### Testing File-Based Panels
 
 1. Generate display with panel files
@@ -298,7 +419,7 @@ display = (
 
 ### Debugging Panel Loading Issues
 
-If viewer shows "0 of 0":
+**HTML Viewer** (if viewer shows "0 of 0"):
 1. Check `displayInfo.json` has all required fields
 2. Verify `metaData.js` exists and is accessible
 3. Confirm `metaData.json` exists
@@ -307,6 +428,34 @@ If viewer shows "0 of 0":
 6. **Check factor indices are 1-based** (not 0-based)
 7. Check browser DevTools Console for JavaScript errors
 8. Check Network tab for 404 errors
+
+**Dash Viewer** (if panels don't display):
+1. Check display path is correct in `create_app()`
+2. Verify `displayInfo.json` exists and is valid JSON
+3. Check console for Python exceptions
+4. Verify all required meta variables are defined
+5. Check filter/sort state for conflicts
+6. Look for toast notifications showing errors
+7. Test with `debug=True` for detailed error messages
+8. Verify port is not already in use (try different port)
+
+### Debugging Dash Callback Issues
+
+**Circular dependencies**:
+- Dash will raise `CircularDependency` error
+- Solution: Use `dash.no_update` or restructure callbacks
+- Check that Input/Output pairs don't create cycles
+
+**Missing IDs**:
+- Error: "A component that doesn't exist was used in a callback"
+- Solution: Ensure component ID exists in layout before callback registration
+- Check for typos in component IDs
+
+**State updates not reflecting**:
+- Verify callback is registered (check console on startup)
+- Ensure Output targets the correct component property
+- Use browser DevTools to inspect component state
+- Check if `prevent_initial_call=True` is blocking updates
 
 ## File Organization
 
@@ -364,13 +513,28 @@ If viewer shows "0 of 0":
 
 ## Common Pitfalls
 
+### HTML Viewer Issues
 1. **Missing metaData.js**: Viewer requires this even with embedded cogData
 2. **Wrong panel naming**: Use `0.png` not `panel_0.png`
 3. **Full URLs in metaData**: Use relative paths `panels/0.png`
 4. **Missing required fields**: displayInfo.json needs all fields listed above
 5. **Using R examples**: Old JSONP format is incompatible
-6. **Port conflicts**: macOS AirPlay uses port 5000, use 5001 or 8000+
-7. **0-based factor indices**: Factors must be 1-based in JSON (automatic conversion in serialization.py)
+6. **0-based factor indices**: Factors must be 1-based in JSON (automatic conversion in serialization.py)
+
+### Dash Viewer Issues
+7. **Port conflicts**: macOS AirPlay uses port 5000, use 5001 or 8000+
+8. **Missing Dash dependencies**: Install with `pip install -e ".[dash]"`
+9. **Circular callbacks**: Use `dash.no_update` to break cycles
+10. **State initialization**: DisplayState handles None values, don't assume all fields are populated
+11. **Component ID conflicts**: Each component needs unique ID across entire app
+12. **Callback order**: Dash executes callbacks in dependency order, not definition order
+13. **DataFrame modifications**: Always work with copies to avoid modifying original data
+
+### Development Workflow Issues
+14. **Virtual environment**: Always activate `py-trelliscope` before development
+15. **Package installation**: Use `pip install -e .` for development mode
+16. **Test data**: Don't commit test outputs to git (add to .gitignore)
+17. **Browser caching**: Hard refresh (Cmd+Shift+R) when CSS/JS doesn't update
 
 ## Key Reference Files
 
@@ -383,6 +547,60 @@ If viewer shows "0 of 0":
 **Technical references**:
 - `.claude_research/TRELLISCOPE_TECHNICAL_ANALYSIS.md` - Architecture details
 - R source in `/reference/` - Behavior reference only
+
+## Viewer Options
+
+### 1. Static HTML Viewer (trelliscopejs-lib v0.7.16)
+
+**Use when**: Deploying static displays without a server
+**How to use**:
+```python
+display = Display(df, name="my_display").write()
+# Generates: displayInfo.json, metaData.json, metaData.js, panels/
+# Serve via: python3 -m http.server 8000
+```
+
+**Features**:
+- Self-contained HTML + JavaScript
+- No server required after generation
+- React/Redux frontend
+- Fast initial load
+
+**Limitations**:
+- Static files only
+- No server-side filtering
+- Limited to file-based panels
+
+### 2. Interactive Dash Viewer (Recommended)
+
+**Use when**: Need interactive exploration with live updates
+**How to use**:
+```python
+from trelliscope.dash_viewer import create_app
+
+app = create_app(display_path="path/to/display")
+app.run(debug=True, port=8053)
+```
+
+**Features**:
+- Full interactivity (filters, sorts, search, views)
+- Responsive design (mobile/tablet/desktop)
+- Keyboard shortcuts
+- Export functionality (CSV, JSON)
+- Panel details modal
+- Help documentation
+- Toast notifications
+- Performance monitoring
+
+**Enhancements over HTML viewer**:
+1. Dynamic layout controls (ncol, nrow, arrangement)
+2. Label configuration UI
+3. Performance optimization with loading states
+4. Comprehensive keyboard navigation
+5. Enhanced export (CSV + JSON)
+6. User-friendly error handling
+7. Mobile-responsive design
+8. In-app help documentation
 
 ## Current Implementation Status
 
@@ -400,11 +618,24 @@ If viewer shows "0 of 0":
 - PanelManager with error resilience
 
 **Phase 3**: Viewer integration - ✅ COMPLETE
-- HTML viewer generation
+- HTML viewer generation (trelliscopejs-lib)
+- Dash viewer with full feature set
 - Multiple display support
 - Static export utilities
 
-**Phase 4**: Advanced features - PLANNED
+**Phase 4**: Dash viewer enhancements - ✅ COMPLETE
+- Dynamic layout controls
+- Label configuration
+- Performance optimization
+- Keyboard navigation
+- Export & share
+- Error handling & notifications
+- Responsive design
+- Help documentation
+
+**Future Enhancements** (Planned):
 - Parallel panel rendering
 - Panel caching
 - Large dataset optimization (100k+ panels)
+- Virtual scrolling for massive displays
+- Real-time collaboration
